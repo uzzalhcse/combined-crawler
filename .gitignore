@@ -1,0 +1,14 @@
+.env
+*.csv
+*.txt
+*.hcl
+*.html
+*.tfstate
+*.log
+.DS_Store
+
+data/
+logs/
+.terraform/
+.idea/
+.vscode/
