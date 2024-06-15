@@ -77,7 +77,7 @@ func handleProducts(crawler *ninjacrawler.Crawler, document *goquery.Document, c
 				crawler.Logger.Html(page, "Failed to close modal")
 			}
 
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(300 * time.Millisecond)
 		} else {
 			crawler.Logger.Error("Modal close button not found.")
 		}

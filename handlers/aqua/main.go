@@ -9,7 +9,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       false,
 			BoostCrawling:   true,
-			ConcurrentLimit: 5,
+			ConcurrentLimit: 20,
 			DevCrawlLimit:   1,
 			BlockResources:  true,
 		},
