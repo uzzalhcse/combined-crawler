@@ -2,7 +2,7 @@ package kyocera
 
 import (
 	"combined-crawler/constant"
-	"github.com/lazuli-inc/ninjacrawler"
+	"combined-crawler/pkg/ninjacrawler"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"

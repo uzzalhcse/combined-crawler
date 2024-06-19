@@ -5,7 +5,7 @@ import (
 	"combined-crawler/handlers/kyocera"
 	"combined-crawler/handlers/markt"
 	"combined-crawler/handlers/sandvik"
-	"github.com/lazuli-inc/ninjacrawler"
+	"combined-crawler/pkg/ninjacrawler"
 )
 
 func main() {

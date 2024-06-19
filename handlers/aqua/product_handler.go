@@ -2,8 +2,7 @@ package aqua
 
 import (
 	"combined-crawler/constant"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/lazuli-inc/ninjacrawler"
+	"combined-crawler/pkg/ninjacrawler"
 )
 
 func ProductHandler(crawler *ninjacrawler.Crawler) {
@@ -16,9 +15,11 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 		Images: &ninjacrawler.MultiSelectors{
 			Selectors: []ninjacrawler.Selector{
 				{Query: ".details .intro .image img", Attr: "src"},
+				{Query: ".details .intro .image img", Attr: "data-src"},
+				{Query: ".details .intro .image a", Attr: "href"},
 			},
 		},
-		ProductCodes: func(app ninjacrawler.Crawler, document *goquery.Document, urlCollection ninjacrawler.UrlCollection) []string {
+		ProductCodes: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
 		},
 		Maker:       "",
@@ -26,16 +27,16 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 		ProductName: productNameHandler,
 		Category:    getProductCategory,
 		Description: getProductDescription,
-		Reviews: func(app ninjacrawler.Crawler, document *goquery.Document, urlCollection ninjacrawler.UrlCollection) []string {
+		Reviews: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
 		},
-		ItemTypes: func(app ninjacrawler.Crawler, document *goquery.Document, urlCollection ninjacrawler.UrlCollection) []string {
+		ItemTypes: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
 		},
-		ItemSizes: func(app ninjacrawler.Crawler, document *goquery.Document, urlCollection ninjacrawler.UrlCollection) []string {
+		ItemSizes: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
 		},
-		ItemWeights: func(app ninjacrawler.Crawler, document *goquery.Document, urlCollection ninjacrawler.UrlCollection) []string {
+		ItemWeights: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
 		},
 		SingleItemSize:   "",

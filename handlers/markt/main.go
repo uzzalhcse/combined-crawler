@@ -1,7 +1,7 @@
 package markt
 
 import (
-	"github.com/lazuli-inc/ninjacrawler"
+	"combined-crawler/pkg/ninjacrawler"
 )
 
 func Crawler() ninjacrawler.CrawlerConfig {
@@ -9,10 +9,9 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "markt",
 		URL:  "https://markt-mall.jp/",
 		Engine: ninjacrawler.Engine{
-			IsDynamic:       true,
-			BoostCrawling:   true,
-			ConcurrentLimit: 20,
 			DevCrawlLimit:   1,
+			ConcurrentLimit: 5,
+			IsDynamic:       true,
 			BlockResources:  true,
 		},
 		Handler: ninjacrawler.Handler{

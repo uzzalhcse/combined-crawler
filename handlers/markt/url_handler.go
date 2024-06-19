@@ -2,95 +2,124 @@ package markt
 
 import (
 	"combined-crawler/constant"
-	"github.com/PuerkitoBio/goquery"
-	"github.com/lazuli-inc/ninjacrawler"
+	"combined-crawler/pkg/ninjacrawler"
+	"fmt"
 	"github.com/playwright-community/playwright-go"
 	"time"
 )
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
 	crawler.Collection(constant.Categories).CrawlUrls(crawler.GetBaseCollection(), ninjacrawler.UrlSelector{
-		Selector:       ".l-category-button-list__in",
-		SingleResult:   false,
-		FindSelector:   "a.c-category-button",
-		Attr:           "href",
-		ToCollection:   constant.Categories,
-		FromCollection: crawler.GetBaseCollection(),
+		Selector:     ".l-category-button-list__in",
+		SingleResult: false,
+		FindSelector: "a.c-category-button",
+		Attr:         "href",
 	})
-	crawler.Collection(constant.Products).CrawlUrls(constant.Categories, func(document *goquery.Document, collection *ninjacrawler.UrlCollection, page playwright.Page) []ninjacrawler.UrlCollection {
-		return handleProducts(crawler, document, collection, page)
-	})
+	crawler.Collection(constant.Products).CrawlUrls(constant.Categories, handleProducts)
 }
 
-func handleProducts(crawler *ninjacrawler.Crawler, document *goquery.Document, collection *ninjacrawler.UrlCollection, page playwright.Page) []ninjacrawler.UrlCollection {
+func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
 	var urls []ninjacrawler.UrlCollection
 	productLinkSelector := "a.c-text-link.u-color-text--link.c-text-link--underline"
-	clickAndWaitButton(crawler, ".u-hidden-sp li button", page)
-
-	items, err := page.Locator("ul.p-card-list-no-scroll li.p-product-card.p-product-card--large").All()
+	clickAndWaitButton(ctx.App, ".u-hidden-sp li button", ctx.Page)
+	const maxRetries = 2
+	const retryInterval = 10 * time.Second
+	items, err := ctx.Page.Locator("ul.p-card-list-no-scroll li.p-product-card.p-product-card--large").All()
 	if err != nil {
-		crawler.Logger.Info("Error fetching items:", err)
+		ctx.App.Logger.Info("Error fetching items:", err)
 		return urls
 	}
 
 	for i, item := range items {
-		//time.Sleep(time.Second)
-		err := item.Click()
-		if err != nil {
-			crawler.Logger.Error("Failed to click on Product Card: %v", err)
-			continue
-		}
-
-		// Wait for the modal to open and the link to be available
-		_, err = page.WaitForSelector(productLinkSelector)
-		if err != nil {
-			crawler.Logger.Html(page, "WaitForSelector Open Modal Timeout")
-			continue
-		}
-
-		doc, err := crawler.GetPageDom(page)
-		if err != nil {
-			crawler.Logger.Error("Error getting page DOM:", err)
-			continue
-		}
-
-		productLink, exist := doc.Find(productLinkSelector).First().Attr("href")
-
-		fullUrl := crawler.GetFullUrl(productLink)
-		if !exist {
-			crawler.Logger.Error("Failed to find product link")
-		} else {
-			crawler.Logger.Info("Saving Product Link: %s", fullUrl)
-			urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl})
-		}
-
-		// Close the modal
-
-		_, err = page.WaitForSelector("#__next > div.l-background__wrap > div.l-background__in > div > button")
-		if err != nil {
-			crawler.Logger.Error("Timeout to Close Modal")
-		}
-		closeModal := page.Locator("#__next > div.l-background__wrap > div.l-background__in > div > button")
-		if closeModal != nil {
-			err = closeModal.Click(playwright.LocatorClickOptions{Timeout: playwright.Float(10000)})
+		err = retryWithSleep(maxRetries, retryInterval, func(attempt int) error {
+			if attempt > 1 {
+				ctx.App.Logger.Info("Attempt #%d, waiting %v before retrying item index %d of %d", attempt, retryInterval, i, len(items))
+			}
+			err := item.Click()
 			if err != nil {
-				crawler.Logger.Html(page, "Failed to close modal")
+				ctx.App.Logger.Error("Failed to click on Product Card: %v", err)
+				return err
 			}
 
-			time.Sleep(300 * time.Millisecond)
-		} else {
-			crawler.Logger.Error("Modal close button not found.")
+			// Wait for the modal to open and the link to be available
+			_, err = ctx.Page.WaitForSelector(productLinkSelector)
+			if err != nil {
+				closeModal(ctx)
+				ctx.App.Logger.Html(ctx.Page, "Failed To Open Modal : "+err.Error())
+				return err
+			}
+
+			doc, err := ctx.App.GetPageDom(ctx.Page)
+			if err != nil {
+				ctx.App.Logger.Error("Error getting page DOM:", err)
+				return err
+			}
+
+			productLink, exist := doc.Find(productLinkSelector).First().Attr("href")
+			fullUrl := ctx.App.GetFullUrl(productLink)
+			if !exist {
+				ctx.App.Logger.Error("Failed to find product link")
+				return fmt.Errorf("product link not found")
+			}
+
+			ctx.App.Logger.Info("Saving Product Link: %s", fullUrl)
+			urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl})
+
+			return nil
+		})
+
+		if err != nil {
+			ctx.App.Logger.Error("Error processing item: %v", err)
+			closeModal(ctx)
+			continue
 		}
+
+		closeModal(ctx)
 
 		// Add a delay after every 50 items
 		if (i+1)%50 == 0 {
-			crawler.Logger.Info("Sleeping for 5 seconds...")
+			ctx.App.Logger.Info("Sleeping for 5 seconds...")
 			time.Sleep(5 * time.Second)
 		}
-
 	}
-
 	return urls
+}
+
+// retryWithSleep retries the given function fn up to maxRetries times with the specified sleep interval between retries.
+func retryWithSleep(maxRetries int, sleepInterval time.Duration, fn func(attempt int) error) error {
+	var err error
+	for i := 0; i < maxRetries; i++ {
+		err = fn(i + 1)
+		if err == nil {
+			return nil
+		}
+		time.Sleep(sleepInterval)
+	}
+	return err
+}
+func closeModal(ctx ninjacrawler.CrawlerContext) {
+	// Close the modal
+
+	_, err := ctx.Page.WaitForSelector("#__next > div.l-background__wrap > div.l-background__in > div > button")
+	if err != nil {
+		ctx.App.Logger.Error("WaitFor Close Modal %v", err)
+	}
+	closeModal := ctx.Page.Locator("#__next > div.l-background__wrap > div.l-background__in > div > button")
+	if closeModal != nil {
+		err = closeModal.Click(playwright.LocatorClickOptions{Timeout: playwright.Float(10000)})
+		if err != nil {
+			ctx.App.Logger.Html(ctx.Page, "Failed to close modal")
+		}
+
+	} else {
+		ctx.App.Logger.Error("Modal close button not found.")
+	}
+	_, err = ctx.Page.WaitForSelector("l-background__wrap", playwright.PageWaitForSelectorOptions{
+		State: playwright.WaitForSelectorStateDetached,
+	})
+	if err != nil {
+		ctx.App.Logger.Error("WaitForSelectorStateDetached %v", err)
+	}
 }
 func clickAndWaitButton(crawler *ninjacrawler.Crawler, selector string, page playwright.Page) {
 	for {

@@ -2,7 +2,7 @@ package aqua
 
 import (
 	"combined-crawler/constant"
-	"github.com/lazuli-inc/ninjacrawler"
+	"combined-crawler/pkg/ninjacrawler"
 )
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {

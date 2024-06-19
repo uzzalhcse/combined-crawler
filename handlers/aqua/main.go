@@ -1,6 +1,6 @@
 package aqua
 
-import "github.com/lazuli-inc/ninjacrawler"
+import "combined-crawler/pkg/ninjacrawler"
 
 func Crawler() ninjacrawler.CrawlerConfig {
 	return ninjacrawler.CrawlerConfig{
@@ -8,9 +8,8 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		URL:  "https://aqua-has.com",
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       false,
-			BoostCrawling:   true,
-			ConcurrentLimit: 20,
 			DevCrawlLimit:   1,
+			ConcurrentLimit: 1,
 			BlockResources:  true,
 		},
 		Handler: ninjacrawler.Handler{
