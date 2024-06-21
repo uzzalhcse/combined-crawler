@@ -3,29 +3,37 @@ package sandvik
 import (
 	"combined-crawler/constant"
 	"combined-crawler/pkg/ninjacrawler"
+	"time"
 )
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
-	categorySelector := ninjacrawler.UrlSelector{
-		Selector:     ".row.mb-6.ng-star-inserted .col-md-6.col-lg-3.mb-3.mb-md-4.ng-star-inserted",
-		SingleResult: false,
-		FindSelector: "a",
-		Attr:         "href",
-	}
-	subCategorySelector := ninjacrawler.UrlSelector{
-		Selector:     ".col-md-6.col-lg-3.mb-2.mb-md-4.ng-star-inserted",
-		SingleResult: false,
-		FindSelector: "a",
-		Attr:         "href",
-	}
-	seriesSelector := ninjacrawler.UrlSelector{
-		Selector:     ".row.mb-6.ng-star-inserted .col-md-6.col-lg-3.mb-2.mb-md-4 .ng-star-inserted",
-		SingleResult: false,
-		FindSelector: "a",
-		Attr:         "href",
-	}
-	crawler.Collection(constant.Categories).CrawlUrls(crawler.GetBaseCollection(), categorySelector)
-	crawler.Collection(constant.SubCategories).CrawlUrls(constant.Categories, subCategorySelector)
-	crawler.Collection(constant.Series).CrawlUrls(constant.SubCategories, seriesSelector)
 
+	crawler.Collection(constant.Categories).SetBrowserType("firefox").CrawlUrls(crawler.GetBaseCollection(), handleCategory)
+
+}
+
+func handleCategory(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
+	var urls []ninjacrawler.UrlCollection
+	items, err := ctx.Page.Locator(".position-relative.search-push-wrapper.ng-star-inserted").All()
+	if err != nil {
+		ctx.App.Logger.Info("Error fetching items:", err)
+		return urls
+	}
+	ctx.App.Logger.Info("Total Items: ", len(items))
+	ctx.App.Logger.Html(ctx.Page, "hudai")
+
+	for _, item := range items {
+		time.Sleep(time.Second * 5)
+		err := item.Click()
+		if err != nil {
+			ctx.App.Logger.Error("Failed to click on Product Card: %v", err)
+		}
+
+		time.Sleep(time.Second * 5)
+		_, err = ctx.Page.GoBack()
+		if err != nil {
+			ctx.App.Logger.Error("Failed to goback: %v", err)
+		}
+	}
+	return urls
 }

@@ -9,36 +9,51 @@ import (
 func ProductHandler(crawler *ninjacrawler.Crawler) {
 
 	crawler.ProductDetailSelector = ninjacrawler.ProductDetailSelector{
-		Jan: "",
+		Jan: func(ctx ninjacrawler.CrawlerContext) string {
+			res := ctx.Document.Find("div.p-product-detail > div.p-product-detail__code > dl:nth-child(1) > span").Text()
+			if res == "" {
+				ctx.App.Logger.Html(ctx.Page, "Empty product Jan.")
+			}
+			return res
+		},
 		PageTitle: &ninjacrawler.SingleSelector{
 			Selector: "title",
 		},
-		Url: getUrlHandler,
+		Url: func(ctx ninjacrawler.CrawlerContext) string { return ctx.UrlCollection.Url },
 		Images: &ninjacrawler.MultiSelectors{
 			Selectors: []ninjacrawler.Selector{
-				{Query: "img#image-item", Attr: "src"},
-				{Query: "section.ProductDetail_Section_Function a", Attr: "href"},
-				{Query: "section.ProductDetail_Section_Spec img", Attr: "src"},
+				{Query: ".u-image-watcher.u-image-watcher__select span img", Attr: "src"},
 			},
 		},
-		ProductCodes: productCodeHandler,
-		Maker:        "",
-		Brand:        "",
-		ProductName:  productNameHandler,
-		Category:     "",
-		Description:  "",
+		ProductCodes: func(ctx ninjacrawler.CrawlerContext) []string { return []string{} },
+		Maker:        &ninjacrawler.SingleSelector{Selector: ".p-product-detail__maker span"},
+		Brand:        &ninjacrawler.SingleSelector{Selector: "div.u-hidden-sp > ul > li:nth-child(2) > a"},
+		ProductName:  &ninjacrawler.SingleSelector{Selector: "div.p-product-detail > div.p-product-detail__maker > p"},
+		Category:     &ninjacrawler.SingleSelector{Selector: "div.u-hidden-sp > ul > li:nth-child(1) > a"},
+		Description: func(ctx ninjacrawler.CrawlerContext) string {
+			res := strings.TrimSpace(ctx.Document.Find("div.p-product-detail > div.p-product-detail__description > p").Text())
+			return res
+		},
+		Reviews: func(ctx ninjacrawler.CrawlerContext) []string {
+			return []string{}
+		},
+		ItemTypes: func(ctx ninjacrawler.CrawlerContext) []string {
+			return []string{}
+		},
+		ItemSizes: func(ctx ninjacrawler.CrawlerContext) []string {
+			return []string{}
+		},
+		ItemWeights: func(ctx ninjacrawler.CrawlerContext) []string {
+			return []string{}
+		},
+		SingleItemSize:   "",
+		SingleItemWeight: "",
+		NumOfItems:       "",
+		ListPrice:        "",
+		SellingPrice:     &ninjacrawler.SingleSelector{Selector: "div.p-product-detail > div.p-product-detail__price > div.p-product-detail__price__main span.c-text-text.c-text-text--en.c-text-text--bold"},
+		Attributes: func(ctx ninjacrawler.CrawlerContext) []ninjacrawler.AttributeItem {
+			return []ninjacrawler.AttributeItem{}
+		},
 	}
-	crawler.Collection(constant.ProductDetails).CrawlPageDetail(constant.Products)
-}
-func productCodeHandler(ctx ninjacrawler.CrawlerContext) []string {
-	urlParts := strings.Split(strings.Trim(ctx.UrlCollection.Url, "/"), "/")
-	return []string{urlParts[len(urlParts)-1]}
-}
-
-func productNameHandler(ctx ninjacrawler.CrawlerContext) string {
-	return strings.Trim(ctx.Document.Find("h2.ProductInfo_Head_Main_ProductName").Text(), " \n")
-}
-
-func getUrlHandler(ctx ninjacrawler.CrawlerContext) string {
-	return ctx.UrlCollection.Url
+	crawler.Collection(constant.ProductDetails).DisableRendering().IsDynamicPage(false).CrawlPageDetail(constant.Products)
 }

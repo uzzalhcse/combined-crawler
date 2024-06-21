@@ -20,9 +20,9 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 
 func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
 	var urls []ninjacrawler.UrlCollection
-	productLinkSelector := "a.c-text-link.u-color-text--link.c-text-link--underline"
+	productLinkSelector := ".p-product-detail__review a.c-text-link.u-color-text--link.c-text-link--underline"
 	clickAndWaitButton(ctx.App, ".u-hidden-sp li button", ctx.Page)
-	const maxRetries = 2
+	const maxRetries = 1
 	const retryInterval = 10 * time.Second
 	items, err := ctx.Page.Locator("ul.p-card-list-no-scroll li.p-product-card.p-product-card--large").All()
 	if err != nil {
@@ -33,7 +33,7 @@ func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 	for i, item := range items {
 		err = retryWithSleep(maxRetries, retryInterval, func(attempt int) error {
 			if attempt > 1 {
-				ctx.App.Logger.Info("Attempt #%d, waiting %v before retrying item index %d of %d", attempt, retryInterval, i, len(items))
+				ctx.App.Logger.Info("Attempt #%d, waiting %v before retrying item index %d of %d & URL %s", attempt, retryInterval, i, len(items), ctx.UrlCollection.Url)
 			}
 			err := item.Click()
 			if err != nil {
@@ -45,7 +45,7 @@ func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 			_, err = ctx.Page.WaitForSelector(productLinkSelector)
 			if err != nil {
 				closeModal(ctx)
-				ctx.App.Logger.Html(ctx.Page, "Failed To Open Modal : "+err.Error())
+				ctx.App.Logger.Warn("Failed To Open Modal, item index %d of %d %s %v", i, len(items), ctx.UrlCollection.Url, err.Error())
 				return err
 			}
 
@@ -61,9 +61,7 @@ func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 				ctx.App.Logger.Error("Failed to find product link")
 				return fmt.Errorf("product link not found")
 			}
-
-			ctx.App.Logger.Info("Saving Product Link: %s", fullUrl)
-			urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl})
+			urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl, Parent: ctx.UrlCollection.Url})
 
 			return nil
 		})
@@ -100,6 +98,7 @@ func retryWithSleep(maxRetries int, sleepInterval time.Duration, fn func(attempt
 func closeModal(ctx ninjacrawler.CrawlerContext) {
 	// Close the modal
 
+	//ctx.Page.Locator("l-modal-content l-modal-content--frame-low")
 	_, err := ctx.Page.WaitForSelector("#__next > div.l-background__wrap > div.l-background__in > div > button")
 	if err != nil {
 		ctx.App.Logger.Error("WaitFor Close Modal %v", err)
@@ -108,7 +107,7 @@ func closeModal(ctx ninjacrawler.CrawlerContext) {
 	if closeModal != nil {
 		err = closeModal.Click(playwright.LocatorClickOptions{Timeout: playwright.Float(10000)})
 		if err != nil {
-			ctx.App.Logger.Html(ctx.Page, "Failed to close modal")
+			ctx.App.Logger.Warn("Failed To Close Modal %s %v", ctx.UrlCollection.Url, err.Error())
 		}
 
 	} else {
