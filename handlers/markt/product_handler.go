@@ -55,5 +55,5 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			return []ninjacrawler.AttributeItem{}
 		},
 	}
-	crawler.Collection(constant.ProductDetails).DisableRendering().IsDynamicPage(false).CrawlPageDetail(constant.Products)
+	crawler.Collection(constant.ProductDetails).SetConcurrentLimit(50).DisableRendering().IsDynamicPage(false).CrawlPageDetail(constant.Products)
 }

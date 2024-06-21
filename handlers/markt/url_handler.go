@@ -29,34 +29,48 @@ func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 	}
 
 	for i, item := range items {
-		if err := item.Click(); err != nil {
-			ctx.App.Logger.Warn("Failed to click on Product Card: %v", err)
-			continue
-		}
+		links, _ := item.Locator("a.p-product-card__wrap").Count()
+		modals, _ := item.Locator("div.p-product-card__wrap").Count()
+		if links > 0 {
+			attribute, err := item.Locator("a.p-product-card__wrap").GetAttribute("href")
+			if err != nil {
+				ctx.App.Logger.Warn("Failed to Get Attribute", err)
+				continue
+			}
 
-		if _, err := ctx.Page.WaitForSelector(productLinkSelector); err != nil {
-			ctx.App.Logger.Warn("Failed to open modal, item index %d of %d %s %v", i, len(items), ctx.UrlCollection.Url, err)
+			fullUrl := ctx.App.GetFullUrl(attribute)
+			urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl, Parent: ctx.UrlCollection.Url})
+		} else if modals > 0 {
+			if err := item.Click(); err != nil {
+				ctx.App.Logger.Warn("Failed to click on Product Card: %v", err)
+				continue
+			}
+
+			if _, err := ctx.Page.WaitForSelector(productLinkSelector); err != nil {
+				ctx.App.Logger.Warn("Failed to open modal, item index %d of %d %s %v", i, len(items), ctx.UrlCollection.Url, err)
+				closeModal(ctx)
+				continue
+			}
+
+			doc, err := ctx.App.GetPageDom(ctx.Page)
+			if err != nil {
+				ctx.App.Logger.Warn("Error getting page DOM:", err)
+				closeModal(ctx)
+				continue
+			}
+
+			productLink, exist := doc.Find(productLinkSelector).First().Attr("href")
+			if !exist {
+				ctx.App.Logger.Warn("Failed to find product link")
+				closeModal(ctx)
+				continue
+			}
+
+			fullUrl := ctx.App.GetFullUrl(productLink)
+			urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl, Parent: ctx.UrlCollection.Url})
 			closeModal(ctx)
-			continue
 		}
 
-		doc, err := ctx.App.GetPageDom(ctx.Page)
-		if err != nil {
-			ctx.App.Logger.Warn("Error getting page DOM:", err)
-			closeModal(ctx)
-			continue
-		}
-
-		productLink, exist := doc.Find(productLinkSelector).First().Attr("href")
-		if !exist {
-			ctx.App.Logger.Warn("Failed to find product link")
-			closeModal(ctx)
-			continue
-		}
-
-		fullUrl := ctx.App.GetFullUrl(productLink)
-		urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl, Parent: ctx.UrlCollection.Url})
-		closeModal(ctx)
 	}
 
 	return urls
