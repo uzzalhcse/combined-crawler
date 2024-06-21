@@ -37,7 +37,7 @@ func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 			}
 			err := item.Click()
 			if err != nil {
-				ctx.App.Logger.Error("Failed to click on Product Card: %v", err)
+				ctx.App.Logger.Warn("Failed to click on Product Card: %v", err)
 				return err
 			}
 
@@ -51,14 +51,14 @@ func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 
 			doc, err := ctx.App.GetPageDom(ctx.Page)
 			if err != nil {
-				ctx.App.Logger.Error("Error getting page DOM:", err)
+				ctx.App.Logger.Warn("Error getting page DOM:", err)
 				return err
 			}
 
 			productLink, exist := doc.Find(productLinkSelector).First().Attr("href")
 			fullUrl := ctx.App.GetFullUrl(productLink)
 			if !exist {
-				ctx.App.Logger.Error("Failed to find product link")
+				ctx.App.Logger.Warn("Failed to find product link")
 				return fmt.Errorf("product link not found")
 			}
 			urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl, Parent: ctx.UrlCollection.Url})
@@ -67,7 +67,7 @@ func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 		})
 
 		if err != nil {
-			ctx.App.Logger.Error("Error processing item: %v", err)
+			ctx.App.Logger.Warn("Error processing item: %v", err)
 			closeModal(ctx)
 			continue
 		}
@@ -101,7 +101,7 @@ func closeModal(ctx ninjacrawler.CrawlerContext) {
 	//ctx.Page.Locator("l-modal-content l-modal-content--frame-low")
 	_, err := ctx.Page.WaitForSelector("#__next > div.l-background__wrap > div.l-background__in > div > button")
 	if err != nil {
-		ctx.App.Logger.Error("WaitFor Close Modal %v", err)
+		ctx.App.Logger.Warn("WaitFor Close Modal %v", err)
 	}
 	closeModal := ctx.Page.Locator("#__next > div.l-background__wrap > div.l-background__in > div > button")
 	if closeModal != nil {
@@ -111,13 +111,13 @@ func closeModal(ctx ninjacrawler.CrawlerContext) {
 		}
 
 	} else {
-		ctx.App.Logger.Error("Modal close button not found.")
+		ctx.App.Logger.Warn("Modal close button not found.")
 	}
 	_, err = ctx.Page.WaitForSelector("l-background__wrap", playwright.PageWaitForSelectorOptions{
 		State: playwright.WaitForSelectorStateDetached,
 	})
 	if err != nil {
-		ctx.App.Logger.Error("WaitForSelectorStateDetached %v", err)
+		ctx.App.Logger.Warn("WaitForSelectorStateDetached %v", err)
 	}
 }
 func clickAndWaitButton(crawler *ninjacrawler.Crawler, selector string, page playwright.Page) {
