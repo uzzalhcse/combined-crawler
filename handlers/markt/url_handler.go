@@ -20,7 +20,7 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
 	var urls []ninjacrawler.UrlCollection
 	productLinkSelector := ".p-product-detail__review a.c-text-link.u-color-text--link.c-text-link--underline"
-	//clickAndWaitButton(ctx.App, ".u-hidden-sp li button", ctx.Page)
+	clickAndWaitButton(ctx.App, ".u-hidden-sp li button", ctx.Page)
 
 	items, err := ctx.Page.Locator("ul.p-card-list-no-scroll li.p-product-card.p-product-card--large").All()
 	if err != nil {
