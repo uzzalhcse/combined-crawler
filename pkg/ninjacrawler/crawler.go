@@ -10,6 +10,9 @@ import (
 	"sync/atomic"
 )
 
+//Todo: check why Preference not working
+// Todo check why multiple dev crawl limit msg showing ex: DevCrawlLimit:10,ConcurrentLimit:10,
+
 // Struct to hold both results and the UrlCollection
 type CrawlResult struct {
 	Results       interface{}
@@ -116,9 +119,10 @@ type Preference struct {
 }
 
 func (app *Crawler) CrawlUrls(collection string, processor interface{}, preferences ...Preference) {
-	app.crawlUrlsRecursive(collection, processor, 0, preferences...)
+	processedUrls := make(map[string]bool) // Track processed URLs
+	app.crawlUrlsRecursive(collection, processor, 0, processedUrls, preferences...)
 }
-func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{}, counter int32, preferences ...Preference) {
+func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{}, counter int32, processedUrls map[string]bool, preferences ...Preference) {
 	var items []UrlCollection
 	var preference Preference
 	preference.MarkAsComplete = true
@@ -128,19 +132,31 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 
 	urlCollections := app.getUrlCollections(collection)
 
+	newUrlCollections := []UrlCollection{}
+	for _, urlCollection := range urlCollections {
+		if !processedUrls[urlCollection.Url] {
+			newUrlCollections = append(newUrlCollections, urlCollection)
+		}
+	}
+
+	if len(newUrlCollections) == 0 {
+		return
+	}
 	var wg sync.WaitGroup
 	urlChan := make(chan UrlCollection, len(urlCollections))
 	resultChan := make(chan interface{}, len(urlCollections))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	for _, urlCollection := range urlCollections {
+
+	for _, urlCollection := range newUrlCollections {
 		urlChan <- urlCollection
+		processedUrls[urlCollection.Url] = true // Mark URL as processed
 	}
 	close(urlChan)
 
 	proxyCount := len(app.engine.ProxyServers)
 	batchSize := app.engine.ConcurrentLimit
-	totalUrls := len(urlCollections)
+	totalUrls := len(newUrlCollections)
 	goroutineCount := min(max(proxyCount, 1)*batchSize, totalUrls)
 
 	for i := 0; i < goroutineCount; i++ {
@@ -189,8 +205,8 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 		cancel()
 		return
 	}
-	if len(urlCollections) > 0 {
-		app.crawlUrlsRecursive(collection, processor, counter, preference)
+	if len(newUrlCollections) > 0 {
+		app.crawlUrlsRecursive(collection, processor, counter, processedUrls, preference)
 	}
 	if len(items) > 0 {
 		app.Logger.Info("Total :%s: = (%d)", app.collection, len(items))
