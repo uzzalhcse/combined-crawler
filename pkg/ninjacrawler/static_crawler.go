@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"golang.org/x/net/html/charset"
 	"golang.org/x/net/proxy"
 	"io"
 	"log"
@@ -68,37 +67,20 @@ func (app *Crawler) NavigateToStaticURL(client *http.Client, urlString string, p
 	}
 	defer resp.Body.Close()
 
-	// Read the body of the response
-	bodyBytes, err := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		app.Logger.Warn("Failed to read response body: %v", err)
+		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	_, encoding, _ := charset.DetermineEncoding(bodyBytes, resp.Header.Get("Content-Type"))
-	reader := strings.NewReader(string(bodyBytes))
-	html, err := charset.NewReaderLabel(encoding, reader)
-	if err != nil {
-		app.Logger.Error("Body reading error: ", err, urlString)
-		return nil, err
-	}
-	// Convert the htmlReader to a string
-	htmlBytes, err := io.ReadAll(html)
-	if err != nil {
-		app.Logger.Error("Failed to read from htmlReader: ", err, urlString)
-		return nil, err
-	}
-	htmlString := string(htmlBytes)
-	// Check the response status
 	if resp.StatusCode != http.StatusOK {
-		msg := fmt.Sprintf("Failed to fetch page: %v", resp.Status)
-		app.Logger.Html(htmlString, urlString, msg)
+		msg := fmt.Sprintf("failed to fetch page: %v", resp.Status)
+		app.Logger.Html(string(body), urlString, msg)
 		return nil, fmt.Errorf(msg)
 	}
 
-	document, err := goquery.NewDocumentFromReader(html)
+	document, err := goquery.NewDocumentFromReader(strings.NewReader(string(body)))
 	if err != nil {
 		return nil, err
 	}
-	app.Logger.Html(htmlString, urlString, "msg")
 	return document, nil
 }
