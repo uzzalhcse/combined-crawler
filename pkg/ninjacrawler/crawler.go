@@ -84,6 +84,10 @@ func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlCha
 
 			select {
 			case resultChan <- crawlResult:
+				if isLocalEnv && atomic.LoadInt32(counter) >= int32(app.engine.DevCrawlLimit) {
+					app.Logger.Warn("Dev Crawl limit reached!")
+					return
+				}
 				atomic.AddInt32(counter, 1)
 			default:
 				app.Logger.Info("Channel is full, dropping Item")
@@ -97,6 +101,9 @@ type Preference struct {
 }
 
 func (app *Crawler) CrawlUrls(collection string, processor interface{}, preferences ...Preference) {
+	app.crawlUrlsRecursive(collection, processor, 0, preferences...)
+}
+func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{}, counter int32, preferences ...Preference) {
 	var items []UrlCollection
 	var preference Preference
 	preference.MarkAsComplete = true
@@ -104,91 +111,72 @@ func (app *Crawler) CrawlUrls(collection string, processor interface{}, preferen
 		preference = preferences[0]
 	}
 
-	processedUrls := make(map[string]bool) // Track processed URLs
+	urlCollections := app.getUrlCollections(collection)
 
-	for {
-		urlCollections := app.getUrlCollections(collection)
+	var wg sync.WaitGroup
+	urlChan := make(chan UrlCollection, len(urlCollections))
+	resultChan := make(chan interface{}, len(urlCollections))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	for _, urlCollection := range urlCollections {
+		urlChan <- urlCollection
+	}
+	close(urlChan)
 
-		// Filter out already processed URLs
-		newUrlCollections := []UrlCollection{}
-		for _, urlCollection := range urlCollections {
-			if !processedUrls[urlCollection.Url] {
-				newUrlCollections = append(newUrlCollections, urlCollection)
-			}
+	proxyCount := len(app.engine.ProxyServers)
+	batchSize := app.engine.ConcurrentLimit
+	totalUrls := len(urlCollections)
+	goroutineCount := min(max(proxyCount, 1)*batchSize, totalUrls)
+
+	for i := 0; i < goroutineCount; i++ {
+		proxy := Proxy{}
+		if proxyCount > 0 {
+			proxy = app.engine.ProxyServers[i%proxyCount]
 		}
-
-		if len(newUrlCollections) == 0 {
-			break
-		}
-
-		var wg sync.WaitGroup
-		urlChan := make(chan UrlCollection, len(newUrlCollections))
-		resultChan := make(chan interface{}, len(newUrlCollections))
-		ctx, cancel := context.WithCancel(context.Background())
-
-		counter := int32(0)
-
-		for _, urlCollection := range newUrlCollections {
-			urlChan <- urlCollection
-			processedUrls[urlCollection.Url] = true // Mark URL as processed
-		}
-		close(urlChan)
-
-		proxyCount := len(app.engine.ProxyServers)
-		batchSize := app.engine.ConcurrentLimit
-		totalUrls := len(newUrlCollections)
-		goroutineCount := min(max(proxyCount, 1)*batchSize, totalUrls)
-
-		for i := 0; i < goroutineCount; i++ {
-			proxy := Proxy{}
-			if proxyCount > 0 {
-				proxy = app.engine.ProxyServers[i%proxyCount]
-			}
-			wg.Add(1)
-			go func(proxy Proxy) {
-				defer wg.Done()
-				app.crawlWorker(ctx, collection, urlChan, resultChan, proxy, processor, isLocalEnv(app.Config.GetString("APP_ENV")), &counter)
-			}(proxy)
-		}
-
-		go func() {
-			wg.Wait()
-			close(resultChan)
-		}()
-
-		for results := range resultChan {
-			switch v := results.(type) {
-			case CrawlResult:
-				switch res := v.Results.(type) {
-				case []UrlCollection:
-					items = append(items, res...)
-					for _, item := range res {
-						if item.Parent == "" && collection != baseCollection {
-							app.Logger.Fatal("Missing Parent Url, Invalid UrlCollection: %v", item)
-							continue
-						}
-					}
-					app.insert(res, v.UrlCollection.Url)
-					if preference.MarkAsComplete {
-						err := app.markAsComplete(v.UrlCollection.Url, collection)
-						if err != nil {
-							app.Logger.Error(err.Error())
-							continue
-						}
-					}
-					app.Logger.Info("(%d) :%s: Found From [%s => %s]", len(res), app.collection, collection, v.UrlCollection.Url)
-				}
-			}
-
-			if isLocalEnv(app.Config.GetString("APP_ENV")) && atomic.LoadInt32(&counter) >= int32(app.engine.DevCrawlLimit) {
-				cancel()
-				break
-			}
-		}
-
-		cancel() // Ensure context is canceled after processing
+		wg.Add(1)
+		go func(proxy Proxy) {
+			defer wg.Done()
+			app.crawlWorker(ctx, collection, urlChan, resultChan, proxy, processor, isLocalEnv(app.Config.GetString("APP_ENV")), &counter)
+		}(proxy)
 	}
 
+	go func() {
+		wg.Wait()
+		close(resultChan)
+	}()
+
+	for results := range resultChan {
+		switch v := results.(type) {
+		case CrawlResult:
+			switch res := v.Results.(type) {
+			case []UrlCollection:
+				items = append(items, res...)
+				for _, item := range res {
+					if item.Parent == "" && collection != baseCollection {
+						app.Logger.Fatal("Missing Parent Url, Invalid UrlCollection: %v", item)
+						continue
+					}
+				}
+				app.insert(res, v.UrlCollection.Url)
+				if preference.MarkAsComplete {
+					err := app.markAsComplete(v.UrlCollection.Url, collection)
+					if err != nil {
+						app.Logger.Error(err.Error())
+						continue
+					}
+				}
+				app.Logger.Info("(%d) :%s: Found From [%s => %s]", len(res), app.collection, collection, v.UrlCollection.Url)
+			}
+		}
+	}
+
+	if isLocalEnv(app.Config.GetString("APP_ENV")) && atomic.LoadInt32(&counter) >= int32(app.engine.DevCrawlLimit) {
+		cancel()
+		return
+	}
+	if len(urlCollections) > 0 {
+		app.crawlUrlsRecursive(collection, processor, counter, preference)
+	}
 	if len(items) > 0 {
 		app.Logger.Info("Total :%s: = (%d)", app.collection, len(items))
 	}
@@ -197,16 +185,18 @@ func (app *Crawler) CrawlUrls(collection string, processor interface{}, preferen
 // CrawlPageDetail initiates the crawling process for detailed page information from the specified collection.
 // It distributes the work among multiple goroutines and uses proxies if available.
 func (app *Crawler) CrawlPageDetail(collection string, mustRequiredFields ...string) {
-	urlCollections := app.getUrlCollections(collection)
+	app.CrawlPageDetailRecursive(collection, 0, 0, mustRequiredFields...)
+	exportProductDetailsToCSV(app, app.collection, 1)
+}
 
+func (app *Crawler) CrawlPageDetailRecursive(collection string, total int, counter int32, mustRequiredFields ...string) {
+	urlCollections := app.getUrlCollections(collection)
 	var wg sync.WaitGroup
 	urlChan := make(chan UrlCollection, len(urlCollections))
 	resultChan := make(chan interface{}, len(urlCollections))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	counter := int32(0)
 	for _, urlCollection := range urlCollections {
 		urlChan <- urlCollection
 	}
@@ -234,7 +224,6 @@ func (app *Crawler) CrawlPageDetail(collection string, mustRequiredFields ...str
 		close(resultChan)
 	}()
 
-	total := 0
 	for results := range resultChan {
 		switch v := results.(type) {
 		case CrawlResult:
@@ -247,6 +236,11 @@ func (app *Crawler) CrawlPageDetail(collection string, mustRequiredFields ...str
 				}
 				if len(invalidFields) > 0 {
 					app.Logger.Html(v.Page, fmt.Sprintf("Validation failed from URL: %v. Missing value for required fields: %v", v.UrlCollection.Url, invalidFields))
+					err := app.markAsError(v.UrlCollection.Url, collection)
+					if err != nil {
+						app.Logger.Info(err.Error())
+						return
+					}
 					continue
 				}
 
@@ -269,14 +263,17 @@ func (app *Crawler) CrawlPageDetail(collection string, mustRequiredFields ...str
 					continue
 				}
 				total++
-				if isLocalEnv(app.Config.GetString("APP_ENV")) && total >= app.engine.DevCrawlLimit {
-					break
-				}
 			}
 		}
 	}
-	exportProductDetailsToCSV(app, app.collection, 1)
-	app.Logger.Info("Total %v %v Inserted ", total, app.collection)
+	if isLocalEnv(app.Config.GetString("APP_ENV")) && atomic.LoadInt32(&counter) >= int32(app.engine.DevCrawlLimit) {
+		app.Logger.Info("Total %v %v Inserted ", total, app.collection)
+		cancel()
+		return
+	}
+	if len(urlCollections) > 0 {
+		app.CrawlPageDetailRecursive(collection, total, counter, mustRequiredFields...)
+	}
 }
 
 // validateRequiredFields checks if the required fields are non-empty in the ProductDetail struct.
