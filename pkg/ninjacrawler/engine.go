@@ -75,6 +75,10 @@ func (app *Crawler) DisableRendering() *Crawler {
 	app.engine.DisableRendering = true
 	return app
 }
+func (app *Crawler) WaitForDynamicRendering() *Crawler {
+	app.engine.WaitForDynamicRendering = true
+	return app
+}
 
 // Todo: getProxyList should be generate dynamically in future
 func (e *Engine) getProxyList() []Proxy {
