@@ -3,6 +3,7 @@ package ninjacrawler
 import (
 	"github.com/playwright-community/playwright-go"
 	"go.mongodb.org/mongo-driver/mongo"
+	"net/http"
 	"time"
 )
 
@@ -24,6 +25,7 @@ type Crawler struct {
 	ProductDetailSelector ProductDetailSelector
 	engine                *Engine
 	Logger                *defaultLogger
+	httpClient            *http.Client
 }
 
 func NewCrawler(name, url string, engines ...Engine) *Crawler {
@@ -60,12 +62,16 @@ func (app *Crawler) Start() {
 	startTime = time.Now()
 	app.Logger.Info("Crawler Started! 🚀")
 	app.newSite()
-	pw, err := GetPlaywright()
-	if err != nil {
-		app.Logger.Fatal("failed to initialize playwright: %v\n", err)
-		return // exit if playwright initialization fails
+	if app.engine.IsDynamic {
+		pw, err := GetPlaywright()
+		if err != nil {
+			app.Logger.Fatal("failed to initialize playwright: %v\n", err)
+			return // exit if playwright initialization fails
+		}
+		app.pw = pw
+	} else {
+		app.httpClient = app.getHttpClient()
 	}
-	app.pw = pw
 }
 
 func (app *Crawler) Stop() {

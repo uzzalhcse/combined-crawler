@@ -3,6 +3,7 @@ package ninjacrawler
 import (
 	"context"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/playwright-community/playwright-go"
 	"reflect"
 	"sync"
@@ -14,15 +15,23 @@ type CrawlResult struct {
 	Results       interface{}
 	UrlCollection UrlCollection
 	Page          playwright.Page
+	Document      *goquery.Document
 }
 
 func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlChan <-chan UrlCollection, resultChan chan<- interface{}, proxy Proxy, processor interface{}, isLocalEnv bool, counter *int32) {
-	browser, page, err := app.GetBrowserPage(app.pw, app.engine.BrowserType, proxy)
-	if err != nil {
-		app.Logger.Fatal("failed to initialize browser with Proxy: %v\n", err)
+	var page playwright.Page
+	var browser playwright.Browser
+	var err error
+	var doc *goquery.Document
+
+	if app.engine.IsDynamic {
+		browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, proxy)
+		if err != nil {
+			app.Logger.Fatal("failed to initialize browser with Proxy: %v\n", err)
+		}
+		defer browser.Close()
+		defer page.Close()
 	}
-	defer browser.Close()
-	defer page.Close()
 
 	for {
 		select {
@@ -34,7 +43,7 @@ func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlCha
 			}
 
 			if isLocalEnv && atomic.LoadInt32(counter) >= int32(app.engine.DevCrawlLimit) {
-				app.Logger.Warn("Dev Crawl limit reached!")
+				app.Logger.Warn("Dev Crawl limit reached")
 				return
 			}
 
@@ -43,14 +52,19 @@ func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlCha
 			} else {
 				app.Logger.Info("Crawling :%s: %s", dbCollection, urlCollection.Url)
 			}
+			if app.engine.IsDynamic {
+				doc, err = app.NavigateToURL(page, urlCollection.Url)
+			} else {
+				doc, err = app.NavigateToStaticURL(app.httpClient, urlCollection.Url, proxy)
+			}
 
-			doc, err := app.NavigateToURL(page, urlCollection.Url)
 			if err != nil {
-				err := app.markAsError(urlCollection.Url, dbCollection)
-				if err != nil {
-					app.Logger.Info(err.Error())
+				markAsError := app.markAsError(urlCollection.Url, dbCollection)
+				if markAsError != nil {
+					app.Logger.Info(markAsError.Error())
 					return
 				}
+				app.Logger.Info(err.Error())
 				continue
 			}
 
@@ -80,6 +94,7 @@ func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlCha
 				Results:       results,
 				UrlCollection: urlCollection,
 				Page:          page,
+				Document:      doc,
 			}
 
 			select {
@@ -185,11 +200,13 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 // CrawlPageDetail initiates the crawling process for detailed page information from the specified collection.
 // It distributes the work among multiple goroutines and uses proxies if available.
 func (app *Crawler) CrawlPageDetail(collection string, mustRequiredFields ...string) {
-	app.CrawlPageDetailRecursive(collection, 0, 0, mustRequiredFields...)
+	total := int32(0)
+	app.CrawlPageDetailRecursive(collection, &total, 0, mustRequiredFields...)
+	app.Logger.Info("Total %v %v Inserted ", atomic.LoadInt32(&total), app.collection)
 	exportProductDetailsToCSV(app, app.collection, 1)
 }
 
-func (app *Crawler) CrawlPageDetailRecursive(collection string, total int, counter int32, mustRequiredFields ...string) {
+func (app *Crawler) CrawlPageDetailRecursive(collection string, total *int32, counter int32, mustRequiredFields ...string) {
 	urlCollections := app.getUrlCollections(collection)
 	var wg sync.WaitGroup
 	urlChan := make(chan UrlCollection, len(urlCollections))
@@ -235,7 +252,11 @@ func (app *Crawler) CrawlPageDetailRecursive(collection string, total int, count
 					continue
 				}
 				if len(invalidFields) > 0 {
-					app.Logger.Html(v.Page, fmt.Sprintf("Validation failed from URL: %v. Missing value for required fields: %v", v.UrlCollection.Url, invalidFields))
+					html, _ := v.Document.Html()
+					if app.engine.IsDynamic {
+						html = app.getHtmlFromPage(v.Page)
+					}
+					app.Logger.Html(html, v.UrlCollection.Url, fmt.Sprintf("Validation failed from URL: %v. Missing value for required fields: %v", v.UrlCollection.Url, invalidFields))
 					err := app.markAsError(v.UrlCollection.Url, collection)
 					if err != nil {
 						app.Logger.Info(err.Error())
@@ -262,12 +283,11 @@ func (app *Crawler) CrawlPageDetailRecursive(collection string, total int, count
 					app.Logger.Error(err.Error())
 					continue
 				}
-				total++
+				atomic.AddInt32(total, 1)
 			}
 		}
 	}
 	if isLocalEnv(app.Config.GetString("APP_ENV")) && atomic.LoadInt32(&counter) >= int32(app.engine.DevCrawlLimit) {
-		app.Logger.Info("Total %v %v Inserted ", total, app.collection)
 		cancel()
 		return
 	}
