@@ -137,14 +137,14 @@ func (app *Crawler) NavigateToURL(page playwright.Page, url string) (*goquery.Do
 		Timeout:   playwright.Float(float64(app.engine.Timeout)),
 	})
 	if err != nil {
-		app.Logger.Html(page, err.Error())
+		app.Logger.Html(app.getHtmlFromPage(page), url, err.Error())
 		return nil, err
 	}
 
 	// Handle cookie consent
 	err = app.HandleCookieConsent(page)
 	if err != nil {
-		app.Logger.Html(page, err.Error())
+		app.Logger.Html(app.getHtmlFromPage(page), url, err.Error())
 		return nil, err
 	}
 	return app.GetPageDom(page)
