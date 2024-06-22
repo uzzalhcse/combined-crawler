@@ -8,11 +8,9 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		URL:  "https://www.kyocera.co.jp/prdct/tool/category/product",
 		Engine: ninjacrawler.Engine{
 			BoostCrawling:   true,
-			BlockResources:  true,
 			IsDynamic:       false,
 			DevCrawlLimit:   300,
 			ConcurrentLimit: 15,
-			BlockedURLs:     []string{"syncsearch.jp"},
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,

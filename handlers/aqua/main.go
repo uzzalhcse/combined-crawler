@@ -8,9 +8,9 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		URL:  "https://aqua-has.com",
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       false,
-			DevCrawlLimit:   1,
-			ConcurrentLimit: 1,
-			BlockResources:  true,
+			BoostCrawling:   true,
+			DevCrawlLimit:   300,
+			ConcurrentLimit: 10,
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
