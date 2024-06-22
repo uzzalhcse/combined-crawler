@@ -9,12 +9,8 @@ import (
 func ProductHandler(crawler *ninjacrawler.Crawler) {
 
 	crawler.ProductDetailSelector = ninjacrawler.ProductDetailSelector{
-		Jan: func(ctx ninjacrawler.CrawlerContext) string {
-			res := ctx.Document.Find("div.p-product-detail > div.p-product-detail__code > dl:nth-child(1) > span").Text()
-			if res == "" {
-				ctx.App.Logger.Html(ctx.Page, "Empty product Jan.")
-			}
-			return res
+		Jan: &ninjacrawler.SingleSelector{
+			Selector: "div.p-product-detail > div.p-product-detail__code > dl:nth-child(1) > span\"",
 		},
 		PageTitle: &ninjacrawler.SingleSelector{
 			Selector: "title",
@@ -55,5 +51,5 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			return []ninjacrawler.AttributeItem{}
 		},
 	}
-	crawler.Collection(constant.ProductDetails).SetConcurrentLimit(50).DisableRendering().IsDynamicPage(false).CrawlPageDetail(constant.Products)
+	crawler.Collection(constant.ProductDetails).SetConcurrentLimit(50).DisableRendering().IsDynamicPage(false).CrawlPageDetail(constant.Products, "PageTitle")
 }
