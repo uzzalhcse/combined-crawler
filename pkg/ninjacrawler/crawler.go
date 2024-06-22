@@ -10,7 +10,6 @@ import (
 	"sync/atomic"
 )
 
-//Todo: check why Preference not working
 // Todo check why multiple dev crawl limit msg showing ex: DevCrawlLimit:10,ConcurrentLimit:10,
 
 // Struct to hold both results and the UrlCollection
@@ -120,10 +119,11 @@ type Preference struct {
 
 func (app *Crawler) CrawlUrls(collection string, processor interface{}, preferences ...Preference) {
 	processedUrls := make(map[string]bool) // Track processed URLs
-	app.crawlUrlsRecursive(collection, processor, 0, processedUrls, preferences...)
+	total := int32(0)
+	app.crawlUrlsRecursive(collection, processor, &total, 0, processedUrls, preferences...)
+	app.Logger.Info("Total :%s: = (%d)", app.collection, atomic.LoadInt32(&total))
 }
-func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{}, counter int32, processedUrls map[string]bool, preferences ...Preference) {
-	var items []UrlCollection
+func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{}, total *int32, counter int32, processedUrls map[string]bool, preferences ...Preference) {
 	var preference Preference
 	preference.MarkAsComplete = true
 	if len(preferences) > 0 {
@@ -143,8 +143,8 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 		return
 	}
 	var wg sync.WaitGroup
-	urlChan := make(chan UrlCollection, len(urlCollections))
-	resultChan := make(chan interface{}, len(urlCollections))
+	urlChan := make(chan UrlCollection, len(newUrlCollections))
+	resultChan := make(chan interface{}, len(newUrlCollections))
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -181,7 +181,6 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 		case CrawlResult:
 			switch res := v.Results.(type) {
 			case []UrlCollection:
-				items = append(items, res...)
 				for _, item := range res {
 					if item.Parent == "" && collection != baseCollection {
 						app.Logger.Fatal("Missing Parent Url, Invalid UrlCollection: %v", item)
@@ -196,6 +195,7 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 						continue
 					}
 				}
+				atomic.AddInt32(total, int32(len(res)))
 				app.Logger.Info("(%d) :%s: Found From [%s => %s]", len(res), app.collection, collection, v.UrlCollection.Url)
 			}
 		}
@@ -205,12 +205,8 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 		cancel()
 		return
 	}
-	if len(newUrlCollections) > 0 {
-		app.crawlUrlsRecursive(collection, processor, counter, processedUrls, preference)
-	}
-	if len(items) > 0 {
-		app.Logger.Info("Total :%s: = (%d)", app.collection, len(items))
-	}
+
+	app.crawlUrlsRecursive(collection, processor, total, counter, processedUrls, preference)
 }
 
 // CrawlPageDetail initiates the crawling process for detailed page information from the specified collection.
