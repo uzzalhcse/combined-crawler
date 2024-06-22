@@ -16,8 +16,8 @@ import (
 
 func (app *Crawler) getHttpClient() *http.Client {
 	client := &http.Client{
-		Timeout: 30 * time.Second,
-		//Timeout: (app.engine.Timeout / 1000) * time.Second,
+		//Timeout: 30 * time.Second,
+		Timeout: (app.engine.Timeout / 1000) * time.Second,
 	}
 	return client
 }
@@ -99,5 +99,6 @@ func (app *Crawler) NavigateToStaticURL(client *http.Client, urlString string, p
 	if err != nil {
 		return nil, err
 	}
+	app.Logger.Html(htmlString, urlString, "msg")
 	return document, nil
 }
