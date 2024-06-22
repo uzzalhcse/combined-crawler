@@ -3,9 +3,8 @@ package kyocera
 import (
 	"combined-crawler/constant"
 	"combined-crawler/pkg/ninjacrawler"
-	"strings"
-
 	"github.com/PuerkitoBio/goquery"
+	"strings"
 )
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
@@ -24,15 +23,19 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 		}
 	}
 	productSelector := ninjacrawler.UrlSelector{
-		Selector:     "ul.product-list li.product-item,ul.heightLineParent.clearfix li",
-		SingleResult: false,
-		FindSelector: "a,div dl dt a",
+		Selector:     "ul.heightLineParent.clearfix li",
+		FindSelector: "dl dt a",
+		Attr:         "href",
+	}
+	productOtherSelector := ninjacrawler.UrlSelector{
+		Selector:     "ul.product-list li.product-item",
+		FindSelector: "a",
 		Attr:         "href",
 	}
 	crawler.Collection(constant.Categories).CrawlUrls(crawler.GetBaseCollection(), handleCategory("/prdct/tool/category/product"), ninjacrawler.Preference{MarkAsComplete: false})
 	crawler.Collection(constant.Other).CrawlUrls(crawler.GetBaseCollection(), handleCategory("/prdct/tool/sgs/"), ninjacrawler.Preference{MarkAsComplete: false})
 	crawler.Collection(constant.Products).CrawlUrls(crawler.GetBaseCollection(), handleCategory("/prdct/tool/product/"))
 
-	crawler.Collection(constant.Products).CrawlUrls(constant.Other, productSelector)
 	crawler.Collection(constant.Products).CrawlUrls(constant.Categories, productSelector)
+	crawler.Collection(constant.Products).CrawlUrls(constant.Other, productOtherSelector)
 }
