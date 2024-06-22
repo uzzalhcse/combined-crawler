@@ -2,6 +2,9 @@ package ninjacrawler
 
 import (
 	"context"
+	"fmt"
+	"github.com/playwright-community/playwright-go"
+	"reflect"
 	"sync"
 	"sync/atomic"
 )
@@ -10,6 +13,7 @@ import (
 type CrawlResult struct {
 	Results       interface{}
 	UrlCollection UrlCollection
+	Page          playwright.Page
 }
 
 func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlChan <-chan UrlCollection, resultChan chan<- interface{}, proxy Proxy, processor interface{}, isLocalEnv bool, counter *int32) {
@@ -75,6 +79,7 @@ func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlCha
 			crawlResult := CrawlResult{
 				Results:       results,
 				UrlCollection: urlCollection,
+				Page:          page,
 			}
 
 			select {
@@ -191,7 +196,7 @@ func (app *Crawler) CrawlUrls(collection string, processor interface{}, preferen
 
 // CrawlPageDetail initiates the crawling process for detailed page information from the specified collection.
 // It distributes the work among multiple goroutines and uses proxies if available.
-func (app *Crawler) CrawlPageDetail(collection string) {
+func (app *Crawler) CrawlPageDetail(collection string, mustRequiredFields ...string) {
 	urlCollections := app.getUrlCollections(collection)
 
 	var wg sync.WaitGroup
@@ -235,11 +240,21 @@ func (app *Crawler) CrawlPageDetail(collection string) {
 		case CrawlResult:
 			switch res := v.Results.(type) {
 			case *ProductDetail:
+				invalidFields, unknownFields := validateRequiredFields(res, mustRequiredFields)
+				if len(unknownFields) > 0 {
+					app.Logger.Error("Unknown fields provided: %v", unknownFields)
+					continue
+				}
+				if len(invalidFields) > 0 {
+					app.Logger.Html(v.Page, fmt.Sprintf("Validation failed from URL: %v. Missing value for required fields: %v", v.UrlCollection.Url, invalidFields))
+					continue
+				}
+
 				app.saveProductDetail(res)
 				if !isLocalEnv(app.Config.GetString("APP_ENV")) {
 					err := app.submitProductData(res)
 					if err != nil {
-						app.Logger.Fatal("failed to submit product data to API Server: %v", err)
+						app.Logger.Fatal("Failed to submit product data to API Server: %v", err)
 						err := app.markAsError(v.UrlCollection.Url, collection)
 						if err != nil {
 							app.Logger.Info(err.Error())
@@ -262,6 +277,29 @@ func (app *Crawler) CrawlPageDetail(collection string) {
 	}
 	exportProductDetailsToCSV(app, app.collection, 1)
 	app.Logger.Info("Total %v %v Inserted ", total, app.collection)
+}
+
+// validateRequiredFields checks if the required fields are non-empty in the ProductDetail struct.
+// Returns two slices: one for invalid fields and one for unknown fields.
+func validateRequiredFields(product *ProductDetail, requiredFields []string) ([]string, []string) {
+	var invalidFields []string
+	var unknownFields []string
+
+	v := reflect.ValueOf(*product)
+	t := v.Type()
+
+	for _, field := range requiredFields {
+		f, ok := t.FieldByName(field)
+		if !ok {
+			unknownFields = append(unknownFields, field)
+			continue
+		}
+		fieldValue := v.FieldByName(field)
+		if fieldValue.Kind() == reflect.String && fieldValue.String() == "" {
+			invalidFields = append(invalidFields, f.Name)
+		}
+	}
+	return invalidFields, unknownFields
 }
 
 // PageSelector adds a new URL selector to the crawler.
