@@ -28,21 +28,18 @@ func (app *Crawler) NavigateToStaticURL(client *http.Client, urlString string, p
 		if err != nil {
 			log.Fatalf("Failed to parse proxy URL: %v", err)
 		}
-
+		// Create an HTTP client and set the transport to use the proxy dialer
+		httpTransport := &http.Transport{}
 		// Set the username and password in the proxy URL
 		if proxyServer.Username != "" && proxyServer.Password != "" {
-			proxyURL.User = url.UserPassword(proxyServer.Username, proxyServer.Password)
-		}
-
-		// Create a proxy dialer
-		dialer, err := proxy.FromURL(proxyURL, proxy.Direct)
-		if err != nil {
-			log.Fatalf("Failed to obtain proxy dialer: %v", err)
-		}
-
-		// Create an HTTP client and set the transport to use the proxy dialer
-		httpTransport := &http.Transport{
-			Dial: dialer.Dial,
+			proxyURL.User = url.UserPassword(proxyServer.Username, proxyServer.Password) // Create a proxy dialer
+			dialer, err := proxy.FromURL(proxyURL, proxy.Direct)
+			if err != nil {
+				log.Fatalf("Failed to obtain proxy dialer: %v", err)
+			}
+			httpTransport.Dial = dialer.Dial
+		} else {
+			httpTransport.Proxy = http.ProxyURL(proxyURL)
 		}
 
 		// Add TLS configuration for HTTPS proxy if needed
