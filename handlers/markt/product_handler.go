@@ -10,7 +10,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 
 	crawler.ProductDetailSelector = ninjacrawler.ProductDetailSelector{
 		Jan: &ninjacrawler.SingleSelector{
-			Selector: "div.p-product-detail > div.p-product-detail__code > dl:nth-child(1) > span\"",
+			Selector: "div.p-product-detail > div.p-product-detail__code > dl:nth-child(1) > span",
 		},
 		PageTitle: &ninjacrawler.SingleSelector{
 			Selector: "title",
