@@ -117,12 +117,13 @@ func (app *Crawler) Handle(handler Handler) {
 
 func getDefaultEngine() Engine {
 	return Engine{
-		BrowserType:      "chromium",
-		ConcurrentLimit:  1,
-		IsDynamic:        false,
-		DevCrawlLimit:    50,
-		BlockResources:   false,
-		DisableRendering: false,
+		BrowserType:             "chromium",
+		ConcurrentLimit:         1,
+		IsDynamic:               false,
+		WaitForDynamicRendering: false,
+		DevCrawlLimit:           50,
+		BlockResources:          false,
+		DisableRendering:        false,
 		BlockedURLs: []string{
 			"www.googletagmanager.com",
 			"google.com",
@@ -145,6 +146,9 @@ func overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	}
 	if eng.IsDynamic {
 		defaultEngine.IsDynamic = eng.IsDynamic
+	}
+	if eng.WaitForDynamicRendering {
+		defaultEngine.WaitForDynamicRendering = eng.WaitForDynamicRendering
 	}
 	if eng.DevCrawlLimit > 0 {
 		defaultEngine.DevCrawlLimit = eng.DevCrawlLimit

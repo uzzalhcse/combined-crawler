@@ -9,18 +9,20 @@ type Proxy struct {
 	Username string
 	Password string
 }
+
 type Engine struct {
-	BrowserType      string
-	ConcurrentLimit  int
-	IsDynamic        bool
-	DevCrawlLimit    int
-	BlockResources   bool
-	DisableRendering bool
-	BlockedURLs      []string
-	BoostCrawling    bool
-	ProxyServers     []Proxy
-	CookieConsent    *CookieAction
-	Timeout          time.Duration
+	BrowserType             string
+	ConcurrentLimit         int
+	IsDynamic               bool
+	DevCrawlLimit           int
+	BlockResources          bool
+	DisableRendering        bool
+	BlockedURLs             []string
+	BoostCrawling           bool
+	ProxyServers            []Proxy
+	CookieConsent           *CookieAction
+	Timeout                 time.Duration
+	WaitForDynamicRendering bool
 }
 type FormInput struct {
 	Key string

@@ -128,7 +128,7 @@ func (app *Crawler) HandleCookieConsent(page playwright.Page) error {
 // If navigation or handling consent fails, it logs the page content to a file and returns an error.
 func (app *Crawler) NavigateToURL(page playwright.Page, url string) (*goquery.Document, error) {
 	waitUntil := playwright.WaitUntilStateDomcontentloaded
-	if app.engine.IsDynamic {
+	if app.engine.WaitForDynamicRendering {
 		waitUntil = playwright.WaitUntilStateNetworkidle
 	}
 
