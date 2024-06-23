@@ -131,7 +131,7 @@ func getDefaultEngine() Engine {
 		WaitForDynamicRendering: false,
 		DevCrawlLimit:           50,
 		BlockResources:          false,
-		DisableRendering:        false,
+		JavaScriptEnabled:       true,
 		BlockedURLs: []string{
 			"www.googletagmanager.com",
 			"google.com",
@@ -164,8 +164,8 @@ func overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	if eng.BlockResources {
 		defaultEngine.BlockResources = eng.BlockResources
 	}
-	if eng.DisableRendering {
-		defaultEngine.DisableRendering = eng.DisableRendering
+	if eng.JavaScriptEnabled {
+		defaultEngine.JavaScriptEnabled = eng.JavaScriptEnabled
 	}
 	if eng.BoostCrawling {
 		defaultEngine.BoostCrawling = eng.BoostCrawling

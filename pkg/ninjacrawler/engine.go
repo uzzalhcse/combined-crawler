@@ -16,7 +16,7 @@ type Engine struct {
 	IsDynamic               bool
 	DevCrawlLimit           int
 	BlockResources          bool
-	DisableRendering        bool
+	JavaScriptEnabled       bool
 	BlockedURLs             []string
 	BoostCrawling           bool
 	ProxyServers            []Proxy
@@ -71,8 +71,8 @@ func (app *Crawler) SetTimeout(timeout time.Duration) *Crawler {
 	app.engine.Timeout = timeout * time.Second
 	return app
 }
-func (app *Crawler) DisableRendering() *Crawler {
-	app.engine.DisableRendering = true
+func (app *Crawler) DisableJavaScript() *Crawler {
+	app.engine.JavaScriptEnabled = false
 	return app
 }
 func (app *Crawler) WaitForDynamicRendering() *Crawler {

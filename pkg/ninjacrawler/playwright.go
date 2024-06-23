@@ -52,7 +52,7 @@ func (app *Crawler) GetBrowserPage(pw *playwright.Playwright, browserType string
 
 	page, err := browser.NewPage(playwright.BrowserNewPageOptions{
 		UserAgent:         playwright.String(app.Config.GetString("USER_AGENT")),
-		JavaScriptEnabled: playwright.Bool(!app.engine.DisableRendering),
+		JavaScriptEnabled: playwright.Bool(app.engine.JavaScriptEnabled),
 	})
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create page: %w", err)
