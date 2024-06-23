@@ -146,7 +146,7 @@ func getDefaultEngine() Engine {
 		ProxyServers:  []Proxy{},
 		CookieConsent: nil,
 		Timeout:       30 * 1000, // 30 sec
-		SleepAfter:    30,
+		SleepAfter:    1000,
 	}
 }
 
