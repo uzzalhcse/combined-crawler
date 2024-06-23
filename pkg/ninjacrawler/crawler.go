@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 // Todo check why multiple dev crawl limit msg showing ex: DevCrawlLimit:10,ConcurrentLimit:10,
@@ -34,6 +35,8 @@ func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlCha
 		defer browser.Close()
 		defer page.Close()
 	}
+
+	operationCount := 0 // Initialize operation count
 
 	for {
 		select {
@@ -105,6 +108,11 @@ func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlCha
 				return
 			}
 
+			operationCount++                               // Increment the operation count
+			if operationCount%app.engine.SleepAfter == 0 { // Check if 10 operations have been performed
+				app.Logger.Info("Sleeping 10 Second after %d Operations", app.engine.SleepAfter)
+				time.Sleep(10 * time.Second) // Sleep for 10 seconds
+			}
 		}
 	}
 }
