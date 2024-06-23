@@ -6,7 +6,7 @@ import (
 )
 
 func ProductHandler(crawler *ninjacrawler.Crawler) {
-	crawler.ProductDetailSelector = ninjacrawler.ProductDetailSelector{
+	productDetailSelector := ninjacrawler.ProductDetailSelector{
 		Jan: "",
 		PageTitle: &ninjacrawler.SingleSelector{
 			Selector: "title",
@@ -44,5 +44,5 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 		SellingPrice:     "",
 		Attributes:       GetProductAttribute,
 	}
-	crawler.Collection(constant.ProductDetails).CrawlPageDetail(constant.Products)
+	crawler.Collection(constant.ProductDetails).CrawlPageDetail(constant.Products, productDetailSelector)
 }

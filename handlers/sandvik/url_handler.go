@@ -20,7 +20,6 @@ func handleCategory(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 		return urls
 	}
 	ctx.App.Logger.Info("Total Items: ", len(items))
-	ctx.App.Logger.Html(ctx.Page, "hudai")
 
 	for _, item := range items {
 		time.Sleep(time.Second * 5)

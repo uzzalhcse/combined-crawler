@@ -9,11 +9,12 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			BoostCrawling:   true,
 			IsDynamic:       false,
-			DevCrawlLimit:   300,
-			ConcurrentLimit: 15,
+			DevCrawlLimit:   20,
+			ConcurrentLimit: 2,
+			SleepAfter:      30,
 		},
 		Handler: ninjacrawler.Handler{
-			UrlHandler:     UrlHandler,
+			//UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
 		},
 	}
