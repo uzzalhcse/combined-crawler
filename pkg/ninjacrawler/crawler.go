@@ -44,11 +44,6 @@ func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlCha
 				return
 			}
 
-			if isLocalEnv && atomic.LoadInt32(counter) >= int32(app.engine.DevCrawlLimit) {
-				app.Logger.Warn("Dev Crawl limit reached")
-				return
-			}
-
 			if proxy.Server != "" {
 				app.Logger.Info("Crawling :%s: %s using Proxy %s", dbCollection, urlCollection.Url, proxy.Server)
 			} else {
@@ -101,14 +96,15 @@ func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlCha
 
 			select {
 			case resultChan <- crawlResult:
-				if isLocalEnv && atomic.LoadInt32(counter) >= int32(app.engine.DevCrawlLimit) {
-					app.Logger.Warn("Dev Crawl limit reached!")
-					return
-				}
 				atomic.AddInt32(counter, 1)
 			default:
 				app.Logger.Info("Channel is full, dropping Item")
 			}
+			if isLocalEnv && atomic.LoadInt32(counter) >= int32(app.engine.DevCrawlLimit) {
+				app.Logger.Warn("Dev Crawl limit reached!")
+				return
+			}
+
 		}
 	}
 }
@@ -121,7 +117,9 @@ func (app *Crawler) CrawlUrls(collection string, processor interface{}, preferen
 	processedUrls := make(map[string]bool) // Track processed URLs
 	total := int32(0)
 	app.crawlUrlsRecursive(collection, processor, &total, 0, processedUrls, preferences...)
-	app.Logger.Info("Total :%s: = (%d)", app.collection, atomic.LoadInt32(&total))
+	if atomic.LoadInt32(&total) > 0 {
+		app.Logger.Info("[Total (%d) :%s: found from :%s:]", atomic.LoadInt32(&total), app.collection, collection)
+	}
 }
 func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{}, total *int32, counter int32, processedUrls map[string]bool, preferences ...Preference) {
 	var preference Preference
@@ -133,15 +131,15 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 	urlCollections := app.getUrlCollections(collection)
 
 	newUrlCollections := []UrlCollection{}
-	for _, urlCollection := range urlCollections {
+	for i, urlCollection := range urlCollections {
+		if app.isLocalEnv && i >= app.engine.DevCrawlLimit {
+			break
+		}
 		if !processedUrls[urlCollection.Url] {
 			newUrlCollections = append(newUrlCollections, urlCollection)
 		}
 	}
 
-	if len(newUrlCollections) == 0 {
-		return
-	}
 	var wg sync.WaitGroup
 	urlChan := make(chan UrlCollection, len(newUrlCollections))
 	resultChan := make(chan interface{}, len(newUrlCollections))
@@ -167,7 +165,7 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 		wg.Add(1)
 		go func(proxy Proxy) {
 			defer wg.Done()
-			app.crawlWorker(ctx, collection, urlChan, resultChan, proxy, processor, isLocalEnv(app.Config.GetString("APP_ENV")), &counter)
+			app.crawlWorker(ctx, collection, urlChan, resultChan, proxy, processor, app.isLocalEnv, &counter)
 		}(proxy)
 	}
 
@@ -201,12 +199,13 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 		}
 	}
 
-	if isLocalEnv(app.Config.GetString("APP_ENV")) && atomic.LoadInt32(&counter) >= int32(app.engine.DevCrawlLimit) {
+	if app.isLocalEnv && atomic.LoadInt32(&counter) >= int32(app.engine.DevCrawlLimit) {
 		cancel()
 		return
 	}
-
-	app.crawlUrlsRecursive(collection, processor, total, counter, processedUrls, preference)
+	if len(newUrlCollections) > 0 && (app.isLocalEnv && atomic.LoadInt32(&counter) < int32(app.engine.DevCrawlLimit)) {
+		app.crawlUrlsRecursive(collection, processor, total, counter, processedUrls, preference)
+	}
 }
 
 // CrawlPageDetail initiates the crawling process for detailed page information from the specified collection.
@@ -226,7 +225,10 @@ func (app *Crawler) CrawlPageDetailRecursive(collection string, total *int32, co
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	for _, urlCollection := range urlCollections {
+	for i, urlCollection := range urlCollections {
+		if app.isLocalEnv && i >= app.engine.DevCrawlLimit {
+			break
+		}
 		urlChan <- urlCollection
 	}
 	close(urlChan)
@@ -244,7 +246,7 @@ func (app *Crawler) CrawlPageDetailRecursive(collection string, total *int32, co
 		wg.Add(1)
 		go func(proxy Proxy) {
 			defer wg.Done()
-			app.crawlWorker(ctx, collection, urlChan, resultChan, proxy, app.ProductDetailSelector, isLocalEnv(app.Config.GetString("APP_ENV")), &counter)
+			app.crawlWorker(ctx, collection, urlChan, resultChan, proxy, app.ProductDetailSelector, app.isLocalEnv, &counter)
 		}(proxy)
 	}
 
@@ -278,7 +280,7 @@ func (app *Crawler) CrawlPageDetailRecursive(collection string, total *int32, co
 				}
 
 				app.saveProductDetail(res)
-				if !isLocalEnv(app.Config.GetString("APP_ENV")) {
+				if !app.isLocalEnv {
 					err := app.submitProductData(res)
 					if err != nil {
 						app.Logger.Fatal("Failed to submit product data to API Server: %v", err)
@@ -299,11 +301,11 @@ func (app *Crawler) CrawlPageDetailRecursive(collection string, total *int32, co
 			}
 		}
 	}
-	if isLocalEnv(app.Config.GetString("APP_ENV")) && atomic.LoadInt32(&counter) >= int32(app.engine.DevCrawlLimit) {
+	if app.isLocalEnv && atomic.LoadInt32(&counter) >= int32(app.engine.DevCrawlLimit) {
 		cancel()
 		return
 	}
-	if len(urlCollections) > 0 {
+	if len(urlCollections) > 0 && (app.isLocalEnv && atomic.LoadInt32(&counter) < int32(app.engine.DevCrawlLimit)) {
 		app.CrawlPageDetailRecursive(collection, total, counter, mustRequiredFields...)
 	}
 }
