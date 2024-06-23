@@ -24,8 +24,8 @@ func (app *Crawler) GetBrowserPage(pw *playwright.Playwright, browserType string
 	var err error
 
 	var browserTypeLaunchOptions playwright.BrowserTypeLaunchOptions
-	browserTypeLaunchOptions.Headless = playwright.Bool(!isLocalEnv(app.Config.GetString("APP_ENV")))
-	browserTypeLaunchOptions.Devtools = playwright.Bool(isLocalEnv(app.Config.GetString("APP_ENV")))
+	browserTypeLaunchOptions.Headless = playwright.Bool(!app.isLocalEnv)
+	browserTypeLaunchOptions.Devtools = playwright.Bool(app.isLocalEnv)
 
 	if len(app.engine.ProxyServers) > 0 {
 		// Set Proxy options
