@@ -211,31 +211,40 @@ func (app *Crawler) crawlUrlsRecursive(collection string, processor interface{},
 // CrawlPageDetail initiates the crawling process for detailed page information from the specified collection.
 // It distributes the work among multiple goroutines and uses proxies if available.
 func (app *Crawler) CrawlPageDetail(collection string, mustRequiredFields ...string) {
+	processedUrls := make(map[string]bool) // Track processed URLs
 	total := int32(0)
-	app.CrawlPageDetailRecursive(collection, &total, 0, mustRequiredFields...)
+	app.CrawlPageDetailRecursive(collection, &total, 0, processedUrls, mustRequiredFields...)
 	app.Logger.Info("Total %v %v Inserted ", atomic.LoadInt32(&total), app.collection)
 	exportProductDetailsToCSV(app, app.collection, 1)
 }
 
-func (app *Crawler) CrawlPageDetailRecursive(collection string, total *int32, counter int32, mustRequiredFields ...string) {
+func (app *Crawler) CrawlPageDetailRecursive(collection string, total *int32, counter int32, processedUrls map[string]bool, mustRequiredFields ...string) {
 	urlCollections := app.getUrlCollections(collection)
-	var wg sync.WaitGroup
-	urlChan := make(chan UrlCollection, len(urlCollections))
-	resultChan := make(chan interface{}, len(urlCollections))
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	newUrlCollections := []UrlCollection{}
 	for i, urlCollection := range urlCollections {
 		if app.isLocalEnv && i >= app.engine.DevCrawlLimit {
 			break
 		}
+		if !processedUrls[urlCollection.Url] {
+			newUrlCollections = append(newUrlCollections, urlCollection)
+		}
+	}
+	var wg sync.WaitGroup
+	urlChan := make(chan UrlCollection, len(newUrlCollections))
+	resultChan := make(chan interface{}, len(newUrlCollections))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	for _, urlCollection := range newUrlCollections {
 		urlChan <- urlCollection
+		processedUrls[urlCollection.Url] = true // Mark URL as processed
 	}
 	close(urlChan)
 
 	proxyCount := len(app.engine.ProxyServers)
 	batchSize := app.engine.ConcurrentLimit
-	totalUrls := len(urlCollections)
+	totalUrls := len(newUrlCollections)
 	goroutineCount := min(max(proxyCount, 1)*batchSize, totalUrls) // Determine the required number of goroutines
 
 	for i := 0; i < goroutineCount; i++ {
@@ -305,8 +314,8 @@ func (app *Crawler) CrawlPageDetailRecursive(collection string, total *int32, co
 		cancel()
 		return
 	}
-	if len(urlCollections) > 0 && (app.isLocalEnv && atomic.LoadInt32(&counter) < int32(app.engine.DevCrawlLimit)) {
-		app.CrawlPageDetailRecursive(collection, total, counter, mustRequiredFields...)
+	if len(newUrlCollections) > 0 && (app.isLocalEnv && atomic.LoadInt32(&counter) < int32(app.engine.DevCrawlLimit)) {
+		app.CrawlPageDetailRecursive(collection, total, counter, processedUrls, mustRequiredFields...)
 	}
 }
 
