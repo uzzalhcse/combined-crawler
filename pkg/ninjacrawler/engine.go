@@ -47,6 +47,7 @@ func (app *Crawler) SetConcurrentLimit(concurrentLimit int) *Crawler {
 
 func (app *Crawler) IsDynamicPage(isDynamic bool) *Crawler {
 	app.engine.IsDynamic = isDynamic
+	app.toggleClient()
 	return app
 }
 

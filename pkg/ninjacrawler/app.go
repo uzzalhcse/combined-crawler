@@ -64,6 +64,10 @@ func (app *Crawler) Start() {
 	startTime = time.Now()
 	app.Logger.Info("Crawler Started! 🚀")
 	app.newSite()
+	app.toggleClient()
+}
+
+func (app *Crawler) toggleClient() {
 	if app.engine.IsDynamic {
 		pw, err := GetPlaywright()
 		if err != nil {
