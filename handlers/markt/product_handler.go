@@ -108,6 +108,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			OriginCollection: constant.Products,
 			Processor:        productDetailSelector,
 			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle", "Jan"}},
+			Engine:           ninjacrawler.Engine{IsDynamic: false},
 		},
 	})
 }
