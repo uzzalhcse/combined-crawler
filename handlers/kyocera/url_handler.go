@@ -37,13 +37,13 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),
 			Processor:        handleCategory("/prdct/tool/category/product/"),
-			Preference:       ninjacrawler.Preference{DoNotMarkAsComplete: false},
+			Preference:       ninjacrawler.Preference{DoNotMarkAsComplete: true},
 		},
 		{
 			Entity:           constant.Other,
 			OriginCollection: crawler.GetBaseCollection(),
 			Processor:        handleCategory("/prdct/tool/sgs/"),
-			Preference:       ninjacrawler.Preference{DoNotMarkAsComplete: false},
+			Preference:       ninjacrawler.Preference{DoNotMarkAsComplete: true},
 		},
 		{
 			Entity:           constant.Products,
