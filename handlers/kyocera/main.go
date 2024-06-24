@@ -7,14 +7,15 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "kyocera",
 		URL:  "https://www.kyocera.co.jp/prdct/tool/category/product",
 		Engine: ninjacrawler.Engine{
-			BoostCrawling:   true,
-			IsDynamic:       false,
-			DevCrawlLimit:   20,
-			ConcurrentLimit: 2,
-			SleepAfter:      30,
+			BoostCrawling:           true,
+			IsDynamic:               false,
+			DevCrawlLimit:           20,
+			ConcurrentLimit:         2,
+			SleepAfter:              30,
+			WaitForDynamicRendering: true,
 		},
 		Handler: ninjacrawler.Handler{
-			//UrlHandler:     UrlHandler,
+			UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
 		},
 	}

@@ -32,10 +32,33 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 		FindSelector: "a",
 		Attr:         "href",
 	}
-	crawler.Collection(constant.Categories).CrawlUrls(crawler.GetBaseCollection(), handleCategory("/prdct/tool/category/product"), ninjacrawler.Preference{MarkAsComplete: false})
-	crawler.Collection(constant.Other).CrawlUrls(crawler.GetBaseCollection(), handleCategory("/prdct/tool/sgs/"), ninjacrawler.Preference{MarkAsComplete: false})
-	crawler.Collection(constant.Products).CrawlUrls(crawler.GetBaseCollection(), handleCategory("/prdct/tool/product/"))
-
-	crawler.Collection(constant.Products).CrawlUrls(constant.Categories, productSelector)
-	crawler.Collection(constant.Products).CrawlUrls(constant.Other, productOtherSelector)
+	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
+		{
+			Entity:           constant.Categories,
+			OriginCollection: crawler.GetBaseCollection(),
+			Processor:        handleCategory("/prdct/tool/category/product/"),
+			Preference:       ninjacrawler.Preference{DoNotMarkAsComplete: false},
+		},
+		{
+			Entity:           constant.Other,
+			OriginCollection: crawler.GetBaseCollection(),
+			Processor:        handleCategory("/prdct/tool/sgs/"),
+			Preference:       ninjacrawler.Preference{DoNotMarkAsComplete: false},
+		},
+		{
+			Entity:           constant.Products,
+			OriginCollection: crawler.GetBaseCollection(),
+			Processor:        handleCategory("/prdct/tool/product/"),
+		},
+		{
+			Entity:           constant.Products,
+			OriginCollection: constant.Categories,
+			Processor:        productSelector,
+		},
+		{
+			Entity:           constant.Products,
+			OriginCollection: constant.Other,
+			Processor:        productOtherSelector,
+		},
+	})
 }

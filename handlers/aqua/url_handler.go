@@ -18,7 +18,18 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 		FindSelector: "a",
 		Attr:         "href",
 	}
-	crawler.Collection(constant.Categories).CrawlUrls(crawler.GetBaseCollection(), categorySelector)
-	crawler.Collection(constant.Products).CrawlUrls(constant.Categories, productSelector)
+
+	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
+		{
+			Entity:           constant.Categories,
+			OriginCollection: crawler.GetBaseCollection(),
+			Processor:        categorySelector,
+		},
+		{
+			Entity:           constant.Products,
+			OriginCollection: constant.Categories,
+			Processor:        productSelector,
+		},
+	})
 
 }

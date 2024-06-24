@@ -46,5 +46,12 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 		SellingPrice:     "",
 		Attributes:       getProductAttribute,
 	}
-	crawler.Collection(constant.ProductDetails).CrawlPageDetail(constant.Products, productDetailSelector)
+	crawler.CrawlPageDetail([]ninjacrawler.ProcessorConfig{
+		{
+			Entity:           constant.ProductDetails,
+			OriginCollection: constant.Products,
+			Processor:        productDetailSelector,
+			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle"}},
+		},
+	})
 }

@@ -14,7 +14,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 	//		title := fmt.Sprintf("%v-%v【マルクト】-%v 【マルクト】", ctx.ApiResponse.Get("name"), ctx.ApiResponse.Get("shop.name"), ctx.ApiResponse.Get("shop.name"))
 	//		return title
 	//	},
-	//	Url: func(ctx ninjacrawler.CrawlerContext) string { return ctx.UrlCollection.Url },
+	//	Url: func(ctx ninjacrawler.CrawlerContext) string { return ctx.OriginCollection.Url },
 	//	Images: func(ctx ninjacrawler.CrawlerContext) []string {
 	//		images, ok := ctx.ApiResponse["product_images"].([]interface{})
 	//		if !ok {
@@ -102,5 +102,12 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			return []ninjacrawler.AttributeItem{}
 		},
 	}
-	crawler.Collection(constant.ProductDetails).IsDynamicPage(false).CrawlPageDetail(constant.Products, productDetailSelector, "PageTitle")
+	crawler.CrawlPageDetail([]ninjacrawler.ProcessorConfig{
+		{
+			Entity:           constant.ProductDetails,
+			OriginCollection: constant.Products,
+			Processor:        productDetailSelector,
+			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle", "Jan"}},
+		},
+	})
 }

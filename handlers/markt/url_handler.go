@@ -8,13 +8,23 @@ import (
 )
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
-	crawler.Collection(constant.Categories).CrawlUrls(crawler.GetBaseCollection(), ninjacrawler.UrlSelector{
-		Selector:     ".l-category-button-list__in",
-		SingleResult: false,
-		FindSelector: "a.c-category-button",
-		Attr:         "href",
+	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
+		{
+			Entity:           constant.Categories,
+			OriginCollection: crawler.GetBaseCollection(),
+			Processor: ninjacrawler.UrlSelector{
+				Selector:     ".l-category-button-list__in",
+				SingleResult: false,
+				FindSelector: "a.c-category-button",
+				Attr:         "href",
+			},
+		},
+		{
+			Entity:           constant.Products,
+			OriginCollection: constant.Categories,
+			Processor:        handleProducts,
+		},
 	})
-	crawler.Collection(constant.Products).CrawlUrls(constant.Categories, handleProducts)
 }
 
 func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {

@@ -7,12 +7,13 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "sandvik",
 		URL:  "https://www.sandvik.coromant.com/ja-jp/tools",
 		Engine: ninjacrawler.Engine{
-			IsDynamic:       true,
-			DevCrawlLimit:   1,
-			ConcurrentLimit: 1,
+			BoostCrawling:  true,
+			BlockResources: true,
+			//DevCrawlLimit:  100,
+			IsDynamic: true,
 			CookieConsent: &ninjacrawler.CookieAction{
 				ButtonText:                  "Accept Cookies",
-				MustHaveSelectorAfterAction: ".position-relative.search-push-wrapper.ng-star-inserted",
+				MustHaveSelectorAfterAction: "body .column.grid_12.col-12",
 			},
 		},
 		Handler: ninjacrawler.Handler{
