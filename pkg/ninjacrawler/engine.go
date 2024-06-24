@@ -4,12 +4,6 @@ import (
 	"time"
 )
 
-type Proxy struct {
-	Server   string
-	Username string
-	Password string
-}
-
 type Engine struct {
 	BrowserType             string
 	ConcurrentLimit         int
@@ -24,15 +18,6 @@ type Engine struct {
 	Timeout                 time.Duration
 	WaitForDynamicRendering bool
 	SleepAfter              int
-}
-type FormInput struct {
-	Key string
-	Val string
-}
-type CookieAction struct {
-	ButtonText                  string
-	MustHaveSelectorAfterAction string
-	Fields                      []FormInput
 }
 
 func (app *Crawler) SetBrowserType(browserType string) *Crawler {

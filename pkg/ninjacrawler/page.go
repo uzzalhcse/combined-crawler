@@ -2,7 +2,6 @@ package ninjacrawler
 
 import (
 	"github.com/PuerkitoBio/goquery"
-	"github.com/playwright-community/playwright-go"
 	"reflect"
 	"strconv"
 	"strings"
@@ -43,14 +42,6 @@ func parseKeys(path string) []string {
 		keys[i] = part
 	}
 	return keys
-}
-
-type CrawlerContext struct {
-	App           *Crawler
-	Document      *goquery.Document
-	UrlCollection UrlCollection
-	Page          playwright.Page
-	ApiResponse   Map
 }
 
 func (ctx *CrawlerContext) handleProductDetail(processor interface{}) *ProductDetail {

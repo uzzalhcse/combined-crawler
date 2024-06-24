@@ -14,7 +14,7 @@ NinjaCrawler offers a robust set of features to make web crawling more efficient
 -   **Enhanced Developer Experience**: Focus on writing CSS selectors and custom logic. Common implementations like goroutines, logging, and bot detection are managed by this PKG.
 -   **Generate Sample Data**: Create numerous sample data sets without any coding changes in the development environment.
 -   **Concurrency Limiting**: Control the number of concurrent operations both globally and on a per-collection basis.
--   **On Demand Dynamic/Static Crawling**: Page wise handle dynamic/static crawling.
+-   **On Demand Dynamic/Static/Ajax Crawling**: Page wise handle dynamic/static crawling.
 -   **Boost Crawling**: Enhance the speed of the crawling process.
 -   **Resource Blocking**: Block some common and specific resources, including images, fonts, and common URLs like "www.googletagmanager.com", "google.com", "googleapis.com", and "gstatic.com" to optimize crawling.
 -   **Custom Proxy Support**: Use custom proxy servers to route your requests.
@@ -23,6 +23,7 @@ NinjaCrawler offers a robust set of features to make web crawling more efficient
 -   **CSV Generation and API Submission**: Generate CSV files and submit product data to an API server.
 -   **Visual Monitoring Panel**: An upcoming feature to monitor crawling progress, logs, and sample data through a visual interface.
 -   **Early Site Structure Changed Detection**: An upcoming feature to Detect if Any website changed their exising structure .
+
 
 ## Installation
 
