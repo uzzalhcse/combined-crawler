@@ -213,13 +213,13 @@ func (app *Crawler) CrawlPageDetail(processorConfigs []ProcessorConfig) {
 	for _, processorConfig := range processorConfigs {
 		processedUrls := make(map[string]bool) // Track processed URLs
 		total := int32(0)
-		app.CrawlPageDetailRecursive(processorConfig, processedUrls, &total, 0)
+		app.crawlPageDetailRecursive(processorConfig, processedUrls, &total, 0)
 		app.Logger.Info("Total %v %v Inserted ", atomic.LoadInt32(&total), processorConfig.OriginCollection)
 		exportProductDetailsToCSV(app, processorConfig.OriginCollection, 1)
 	}
 }
 
-func (app *Crawler) CrawlPageDetailRecursive(processorConfig ProcessorConfig, processedUrls map[string]bool, total *int32, counter int32) {
+func (app *Crawler) crawlPageDetailRecursive(processorConfig ProcessorConfig, processedUrls map[string]bool, total *int32, counter int32) {
 	urlCollections := app.getUrlCollections(processorConfig.OriginCollection)
 	newUrlCollections := []UrlCollection{}
 	for i, urlCollection := range urlCollections {
@@ -318,7 +318,7 @@ func (app *Crawler) CrawlPageDetailRecursive(processorConfig ProcessorConfig, pr
 		return
 	}
 	if len(newUrlCollections) > 0 && (app.isLocalEnv && atomic.LoadInt32(&counter) < int32(app.engine.DevCrawlLimit)) {
-		app.CrawlPageDetailRecursive(processorConfig, processedUrls, total, counter)
+		app.crawlPageDetailRecursive(processorConfig, processedUrls, total, counter)
 	}
 }
 
