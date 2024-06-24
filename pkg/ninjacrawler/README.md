@@ -30,7 +30,7 @@ NinjaCrawler offers a robust set of features to make web crawling more efficient
 To install the package, you need to have Go and Playwright set up. You can install the package via `go get`:
 
 
-    go get github.com/uzzalhcse/ninjacrawler
+    go get github.com/lazuli-inc/ninjacrawler
 
 
 ## Usage
