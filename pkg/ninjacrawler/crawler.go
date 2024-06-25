@@ -76,6 +76,21 @@ func (app *Crawler) crawlWorker(ctx context.Context, dbCollection string, urlCha
 			switch v := processor.(type) {
 			case func(CrawlerContext) []UrlCollection:
 				results = v(crawlerCtx)
+			case func(CrawlerContext, func([]UrlCollection)):
+				v(crawlerCtx, func(collections []UrlCollection) {
+					singleResult := CrawlResult{
+						Results:       collections,
+						UrlCollection: urlCollection,
+						Page:          page,
+						Document:      doc,
+					}
+					select {
+					case resultChan <- singleResult:
+						atomic.AddInt32(counter, 1)
+					default:
+						app.Logger.Info("Channel is full, dropping Item")
+					}
+				})
 
 			case UrlSelector:
 				results = app.processDocument(doc, v, urlCollection)
