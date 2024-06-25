@@ -18,6 +18,9 @@ type ProcessorType struct {
 	Handle      *Handle     `json:"handle"`
 	UrlSelector UrlSelector `json:"url_selector"`
 }
+type AppPreference struct {
+	ExcludeUniqueUrlEntities []string
+}
 type Preference struct {
 	DoNotMarkAsComplete bool
 	ValidationRules     []string

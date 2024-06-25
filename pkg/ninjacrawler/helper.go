@@ -230,3 +230,11 @@ func loadHandler(pluginPath, funcName string) (plugin.Symbol, error) {
 
 	return fnSymbol, nil
 }
+func contains(slice []string, item string) bool {
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}
