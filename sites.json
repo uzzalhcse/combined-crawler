@@ -17,7 +17,7 @@
         },
         "processor_type": {
           "handle": {
-            "namespace": "handlers/abc",
+            "namespace": "plugins/abc",
             "filename": "HandleCategoryUrl.go",
             "function_name": "HandleCategoryUrl"
           }
@@ -36,7 +36,7 @@
             "single_result": false,
             "attr": "href",
             "handle": {
-              "namespace": "handlers/abc",
+              "namespace": "plugins/abc",
               "filename": "ProductListHandler.go",
               "function_name": "ProductListHandler"
             }
