@@ -11,8 +11,13 @@ type ProcessorConfig struct {
 	Processor        interface{}
 	Preference       Preference
 	Engine           Engine
-}
 
+	ProcessorType ProcessorType `json:"processor_type"`
+}
+type ProcessorType struct {
+	Handle      *Handle     `json:"handle"`
+	UrlSelector UrlSelector `json:"url_selector"`
+}
 type Preference struct {
 	DoNotMarkAsComplete bool
 	ValidationRules     []string

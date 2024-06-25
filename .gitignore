@@ -6,6 +6,7 @@
 *.tfstate
 *.log
 .DS_Store
+*.so
 
 data/
 logs/

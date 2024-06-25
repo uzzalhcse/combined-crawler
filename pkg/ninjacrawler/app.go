@@ -110,6 +110,12 @@ func (app *Crawler) Handle(handler Handler) {
 		handler.ProductHandler(app)
 	}
 }
+func (app *Crawler) AutoHandle(configs []ProcessorConfig) {
+	defer app.Stop() // Ensure Stop is called after handlers
+	app.Start()
+
+	app.CrawlUrls(configs)
+}
 
 func getDefaultEngine() Engine {
 	return Engine{
