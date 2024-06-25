@@ -14,6 +14,9 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			SleepAfter:              30,
 			WaitForDynamicRendering: true,
 		},
+		Preference: ninjacrawler.AppPreference{
+			ExcludeUniqueUrlEntities: []string{"sites"},
+		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
