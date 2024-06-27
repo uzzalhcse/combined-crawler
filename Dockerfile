@@ -13,11 +13,6 @@ RUN wget https://golang.org/dl/go1.22.3.linux-amd64.tar.gz && \
 # Set Go environment variables
 ENV PATH="/usr/local/go/bin:${PATH}"
 
-# Argument to specify which subdirectory to build
-ARG PROJECT_DIR
-
-# Set environment variable for project directory
-ENV PROJECT_DIR=${PROJECT_DIR}
 # Set the working directory inside the container
 WORKDIR /app
 
@@ -33,4 +28,4 @@ RUN go run github.com/playwright-community/playwright-go/cmd/playwright@latest i
 
 
 # Build and run the Go application based on the argument
-CMD ["sh", "-c", "cd /app/apps/${PROJECT_DIR} && go mod tidy && go run main.go"]
+CMD ["sh", "-c", "go mod tidy && go run main.go"]
