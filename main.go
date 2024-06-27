@@ -4,7 +4,7 @@ import (
 	"combined-crawler/api/app/exceptions"
 	"combined-crawler/api/bootstrap"
 	"combined-crawler/api/routes"
-	"combined-crawler/handlers/kyocera"
+	"combined-crawler/handlers/yamaya"
 	"combined-crawler/pkg/ninjacrawler"
 	"fmt"
 )
@@ -14,8 +14,9 @@ func main() {
 
 	// register all sites configs to run the crawlers
 	ninjacrawler.NewNinjaCrawler().
-		AddSite(kyocera.Crawler()).
+		//AddSite(kyocera.Crawler()).
 		//AddSite(aqua.Crawler()).
+		AddSite(yamaya.Crawler()).
 		Start()
 	//startServer()
 }
