@@ -13,6 +13,9 @@ func NewCollectionService(repo *repositories.Repository) *CollectionService {
 	return &CollectionService{Repository: repo}
 }
 
+func (s *CollectionService) GetAllSiteCollections() ([]models.Collection, error) {
+	return s.Repository.GetAllCollections()
+}
 func (s *CollectionService) Create(collection *models.Collection) error {
 	return s.Repository.CreateCollection(collection)
 }

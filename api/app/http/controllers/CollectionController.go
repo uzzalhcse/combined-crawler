@@ -14,6 +14,14 @@ func NewCollectionController(service *services.CollectionService) *CollectionCon
 	return &CollectionController{Service: service}
 }
 
+func (ctrl *CollectionController) Index(c *fiber.Ctx) error {
+	collections, err := ctrl.Service.GetAllSiteCollections()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(collections)
+}
+
 func (ctrl *CollectionController) Create(c *fiber.Ctx) error {
 	var collection models.Collection
 	if err := c.BodyParser(&collection); err != nil {

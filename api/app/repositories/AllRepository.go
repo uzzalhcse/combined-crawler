@@ -81,8 +81,26 @@ func (r *Repository) DeleteSiteCollection(siteID string) error {
 }
 
 // Collection CRUD
-var collection models.SiteCollection
+var collection models.Collection
 
+func (r *Repository) GetAllCollections() ([]models.Collection, error) {
+	collection := r.DB.Database(DBName).Collection(collection.GetTableName())
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []models.Collection
+	if err := cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
 func (r *Repository) CreateCollection(collection *models.Collection) error {
 	collectionColl := r.DB.Database(DBName).Collection(collection.GetTableName())
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

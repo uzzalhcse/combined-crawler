@@ -38,10 +38,11 @@ func SetUpApiRoutes(api fiber.Router) {
 
 	// Collection routes
 	collection := api.Group("/collection")
-	collection.Post("/collections", collectionController.Create)
-	collection.Get("/collections/:collectionID", collectionController.GetByID)
-	collection.Put("/collections/:collectionID", collectionController.Update)
-	collection.Delete("/collections/:collectionID", collectionController.Delete)
+	collection.Get("/", collectionController.Index)
+	collection.Post("/", collectionController.Create)
+	collection.Get("/:collectionID", collectionController.GetByID)
+	collection.Put("/:collectionID", collectionController.Update)
+	collection.Delete("/:collectionID", collectionController.Delete)
 
 	// UrlCollection routes
 	url := api.Group("/urlcollections")
