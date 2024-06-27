@@ -3,11 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - PROJECT_DIR=${PROJECT_DIR}
     environment:
       - PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=0
-      - PROJECT_DIR=${PROJECT_DIR}
       - DB_USERNAME=lazuli
       - DB_PASSWORD=x1RWo6cqFtHiaAHce5HB
       - DB_HOST=mongo
