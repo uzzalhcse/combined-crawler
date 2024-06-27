@@ -13,8 +13,8 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			ConcurrentLimit: 10,
 		},
 		Handler: ninjacrawler.Handler{
-			UrlHandler: UrlHandler,
-			//ProductHandler: ProductHandler,
+			UrlHandler:     UrlHandler,
+			ProductHandler: ProductHandler,
 		},
 	}
 }
