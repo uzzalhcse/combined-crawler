@@ -252,6 +252,7 @@ func ExecuteCommand(command string, args []string) string {
 
 func RunningFromGCP() bool {
 	output := ExecuteCommand("uname", []string{"-a"})
+	fmt.Println("output", output)
 	return strings.Contains(output, "-gcp")
 }
 func StopInstance() {

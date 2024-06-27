@@ -1,22 +1,9 @@
 # Use Ubuntu 22.04 as a base image
 FROM ubuntu:22.04
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    wget \
-    xvfb \
-    libgtk-3-0 \
-    libnotify-dev \
-    libgconf-2-4 \
-    libnss3 \
-    libxss1 \
-    libasound2 \
-    libxtst6 \
-    libx11-xcb1 \
-    ca-certificates \
-    fonts-liberation \
-    --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+# Install necessary tools
+RUN apt-get update && \
+    apt-get install -y wget
 
 # Install Go
 RUN wget https://golang.org/dl/go1.22.3.linux-amd64.tar.gz && \
@@ -26,14 +13,13 @@ RUN wget https://golang.org/dl/go1.22.3.linux-amd64.tar.gz && \
 # Set Go environment variables
 ENV PATH="/usr/local/go/bin:${PATH}"
 
+# Argument to specify which subdirectory to build
+ARG PROJECT_DIR
+
+# Set environment variable for project directory
+ENV PROJECT_DIR=${PROJECT_DIR}
 # Set the working directory inside the container
 WORKDIR /app
-
-# Copy go.mod and go.sum first to leverage Docker layer caching
-COPY go.mod go.sum ./
-
-# Download Go dependencies
-RUN go mod download
 
 # Copy the rest of the application code
 COPY . .
@@ -45,8 +31,6 @@ RUN PWGO_VER=$(grep -oE "playwright-go v\S+" /app/go.mod | sed 's/playwright-go 
 # Install dependencies and all browsers (or specify one)
 RUN go run github.com/playwright-community/playwright-go/cmd/playwright@latest install --with-deps
 
-# Expose a display port for Xvfb
-ENV DISPLAY=:99
 
-# Run Xvfb and the Go application
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1920x1080x24 & go run main.go"]
+# Build and run the Go application based on the argument
+CMD ["sh", "-c", "cd /app/apps/${PROJECT_DIR} && go mod tidy && go run main.go"]
