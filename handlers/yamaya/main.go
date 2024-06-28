@@ -12,6 +12,11 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			DevCrawlLimit:   200,
 			ConcurrentLimit: 2,
 			SleepAfter:      10,
+			ProxyServers: []ninjacrawler.Proxy{
+				{
+					Server: "http://35.200.67.230:3000",
+				},
+			},
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
