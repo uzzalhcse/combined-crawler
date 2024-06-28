@@ -140,9 +140,9 @@ func (app *Crawler) NavigateToURL(page playwright.Page, url string) (*goquery.Do
 		app.Logger.Html(app.getHtmlFromPage(page), url, err.Error())
 		return nil, err
 	}
-	if res.StatusText() != "OK" {
+	if !res.Ok() {
 		app.Logger.Html(app.getHtmlFromPage(page), url, fmt.Sprintf("Failed to load page: %d", res.Status()))
-		return nil, fmt.Errorf("failed to load page: %d", res.Status())
+		return nil, fmt.Errorf("failed to load page: %d %s", res.Status(), res.StatusText())
 	}
 
 	// Handle cookie consent
