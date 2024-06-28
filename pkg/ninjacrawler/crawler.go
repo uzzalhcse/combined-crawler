@@ -62,7 +62,7 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 					app.Logger.Error(markAsError.Error())
 					return
 				}
-				app.Logger.Error(err.Error())
+				app.Logger.Fatal(err.Error())
 				continue
 			}
 
