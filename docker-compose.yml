@@ -13,7 +13,7 @@ services:
       - APP_ENV=production
       - API_USERNAME=lazuli
       - API_PASSWORD=ninja
-      - GCP_CREDENTIALS_PATH=/app/configs/gcp-file-upload-key.json
+      - GCP_CREDENTIALS_PATH=/app/gcp-file-upload-key.json
     depends_on:
       - mongo
     volumes:
