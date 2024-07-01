@@ -29,3 +29,4 @@ RUN go run github.com/playwright-community/playwright-go/cmd/playwright@latest i
 
 # Build and run the Go application based on the argument
 CMD ["sh", "-c", "go mod tidy && go run main.go"]
+#CMD ["sh", "-c", "tail -f /dev/null"]
