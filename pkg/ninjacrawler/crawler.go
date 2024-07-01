@@ -19,7 +19,7 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 	if app.engine.IsDynamic {
 		browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, proxy)
 		if err != nil {
-			app.Logger.Fatal("failed to initialize browser with Proxy: %v\n", err)
+			app.Logger.Fatal(err.Error())
 		}
 		defer browser.Close()
 		defer page.Close()

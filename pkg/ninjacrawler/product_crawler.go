@@ -20,7 +20,10 @@ func (app *Crawler) CrawlPageDetail(processorConfigs []ProcessorConfig) {
 		total := int32(0)
 		app.crawlPageDetailRecursive(processorConfig, processedUrls, &total, 0)
 		app.Logger.Info("Total %v %v Inserted ", atomic.LoadInt32(&total), processorConfig.OriginCollection)
-		exportProductDetailsToCSV(app, processorConfig.Entity, 1)
+		if !app.isLocalEnv {
+			app.Logger.Info("Exporting %s to CSV", processorConfig.Entity)
+			exportProductDetailsToCSV(app, processorConfig.Entity, 1)
+		}
 	}
 }
 
@@ -82,6 +85,11 @@ func (app *Crawler) crawlPageDetailRecursive(processorConfig ProcessorConfig, pr
 				}
 				if len(invalidFields) > 0 {
 					app.Logger.Error("Validation failed: %v\n", invalidFields)
+					err := app.markAsError(v.UrlCollection.Url, processorConfig.OriginCollection)
+					if err != nil {
+						app.Logger.Info(err.Error())
+						continue
+					}
 					continue
 				}
 				if len(invalidFields) > 0 {
@@ -156,7 +164,9 @@ func validateRequiredFields(product *ProductDetail, validationRules []string) ([
 
 		fieldValue := v.FieldByName(field)
 		fieldValueStr := fmt.Sprintf("%v", fieldValue.Interface())
-
+		if fieldValueStr == "" {
+			invalidFields = append(invalidFields, fmt.Sprintf("%s: required", f.Name))
+		}
 		for _, r := range rules {
 			ruleParts := strings.SplitN(r, ":", 2)
 			ruleName := ruleParts[0]
@@ -183,18 +193,17 @@ func validateRequiredFields(product *ProductDetail, validationRules []string) ([
 				if strings.TrimSpace(fieldValueStr) != fieldValueStr {
 					invalidFields = append(invalidFields, fmt.Sprintf("%s: not trimmed", f.Name))
 				}
-			case "exclude_if":
+			case "blacklists":
 				excludeValues := strings.Split(ruleValue, ",")
 				for _, excludeValue := range excludeValues {
 					excludeValue = strings.TrimSpace(excludeValue)
 					if fieldValueStr == excludeValue {
-						invalidFields = append(invalidFields, fmt.Sprintf("%s: excluded value '%s'", f.Name, excludeValue))
+						invalidFields = append(invalidFields, fmt.Sprintf("%s: blacklist value '%s'", f.Name, excludeValue))
 						break
 					}
 				}
 			// Add more cases for other validation rules as needed
 			default:
-				// Handle unknown rules if necessary
 			}
 		}
 	}
