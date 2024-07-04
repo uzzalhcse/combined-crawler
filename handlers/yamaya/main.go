@@ -12,8 +12,8 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			IsDynamic: false,
 			//BoostCrawling:   true,
 			DevCrawlLimit:   2,
-			ConcurrentLimit: 5,
-			SleepAfter:      100,
+			ConcurrentLimit: 3,
+			SleepAfter:      50,
 			ProxyServers: []ninjacrawler.Proxy{
 				{
 					Server: "ZENROWS",
