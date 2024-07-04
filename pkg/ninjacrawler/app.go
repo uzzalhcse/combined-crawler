@@ -28,6 +28,7 @@ type Crawler struct {
 	httpClient            *http.Client
 	isLocalEnv            bool
 	preference            *AppPreference
+	userAgent             string
 }
 
 func NewCrawler(name, url string, engines ...Engine) *Crawler {
@@ -53,6 +54,7 @@ func NewCrawler(name, url string, engines ...Engine) *Crawler {
 	crawler.Client = crawler.mustGetClient()
 	crawler.BaseUrl = crawler.getBaseUrl(url)
 	crawler.isLocalEnv = config.GetString("APP_ENV") == "local"
+	crawler.userAgent = config.GetString("USER_AGENT")
 	crawler.preference = &defaultPreference
 	return crawler
 }

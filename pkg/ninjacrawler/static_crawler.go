@@ -90,7 +90,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 		return nil, fmt.Errorf("Failed to create request: %v", err)
 	}
 
-	req.Header.Set("User-Agent", app.Config.GetString("USER_AGENT"))
+	req.Header.Set("User-Agent", app.userAgent)
 
 	resp, err := client.Do(req)
 	if err != nil {
