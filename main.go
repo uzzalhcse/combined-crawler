@@ -17,6 +17,7 @@ func main() {
 		//AddSite(kyocera.Crawler()).
 		//AddSite(aqua.Crawler()).
 		AddSite(yamaya.Crawler()).
+		//AddSite(midori_anzen.Crawler()).
 		Start()
 	//startServer()
 }

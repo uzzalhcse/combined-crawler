@@ -1,6 +1,8 @@
 package yamaya
 
-import "combined-crawler/pkg/ninjacrawler"
+import (
+	"combined-crawler/pkg/ninjacrawler"
+)
 
 func Crawler() ninjacrawler.CrawlerConfig {
 	return ninjacrawler.CrawlerConfig{
@@ -9,14 +11,14 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic: false,
 			//BoostCrawling:   true,
-			DevCrawlLimit:   500,
-			ConcurrentLimit: 1,
-			SleepAfter:      5,
-			//ProxyServers: []ninjacrawler.Proxy{
-			//	{
-			//		Server: "http://35.221.68.83:3000",
-			//	},
-			//},
+			DevCrawlLimit:   2,
+			ConcurrentLimit: 5,
+			SleepAfter:      100,
+			ProxyServers: []ninjacrawler.Proxy{
+				{
+					Server: "ZENROWS",
+				},
+			},
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
