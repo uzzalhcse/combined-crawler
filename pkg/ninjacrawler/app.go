@@ -1,6 +1,7 @@
 package ninjacrawler
 
 import (
+	"fmt"
 	"github.com/playwright-community/playwright-go"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
@@ -190,7 +191,14 @@ func overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 		defaultEngine.ProxyServers = eng.getProxyList()
 	}
 	if len(eng.ProxyServers) > 0 {
-		defaultEngine.ProxyServers = eng.ProxyServers
+		config := newConfig()
+		zenrowsApiKey := config.EnvString("ZENROWS_API_KEY")
+		for _, proxy := range eng.ProxyServers {
+			if proxy.Server == ZENROWS {
+				proxy.Server = fmt.Sprintf("http://%s:@proxy.zenrows.com:8001", zenrowsApiKey)
+			}
+			defaultEngine.ProxyServers = append(defaultEngine.ProxyServers, proxy)
+		}
 	}
 	if eng.CookieConsent != nil {
 		defaultEngine.CookieConsent = eng.CookieConsent

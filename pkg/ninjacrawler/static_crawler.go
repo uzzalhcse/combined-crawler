@@ -76,7 +76,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 			httpTransport.Proxy = http.ProxyURL(proxyURL)
 		}
 
-		if proxyURL.Scheme == "https" {
+		if proxyURL.Scheme == "http" || proxyURL.Scheme == "https" {
 			httpTransport.TLSClientConfig = &tls.Config{
 				InsecureSkipVerify: true,
 			}
