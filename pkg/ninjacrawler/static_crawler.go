@@ -98,6 +98,13 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 	}
 	defer resp.Body.Close()
 
+	// Log the IP address from the response header
+	if ip := resp.Header.Get("X-Forwarded-For"); ip != "" {
+		app.Logger.Warn("Proxy IP address: %s", ip)
+	} else {
+		app.Logger.Info("Proxy IP address not found in response headers")
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
