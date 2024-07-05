@@ -1,6 +1,7 @@
 package ninjacrawler
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"golang.org/x/net/proxy"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -58,13 +60,20 @@ func (app *Crawler) NavigateToApiURL(client *http.Client, urlString string, prox
 }
 
 func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxyServer Proxy) ([]byte, error) {
+	httpTransport := &http.Transport{
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			conn, err := net.Dial(network, addr)
+			if err == nil {
+				app.Logger.Info("Proxy IP address: %s => %s", conn.RemoteAddr().String(), urlString)
+			}
+			return conn, err
+		},
+	}
 	if len(app.engine.ProxyServers) > 0 {
 		proxyURL, err := url.Parse(proxyServer.Server)
 		if err != nil {
 			log.Fatalf("Failed to parse proxy URL: %v", err)
 		}
-
-		httpTransport := &http.Transport{}
 		if proxyServer.Username != "" && proxyServer.Password != "" {
 			proxyURL.User = url.UserPassword(proxyServer.Username, proxyServer.Password)
 			dialer, err := proxy.FromURL(proxyURL, proxy.Direct)
@@ -97,13 +106,6 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 		return nil, fmt.Errorf("Error sending request: %v", err)
 	}
 	defer resp.Body.Close()
-
-	// Log the IP address from the response header
-	if ip := resp.Header.Get("X-Forwarded-For"); ip != "" {
-		app.Logger.Warn("Proxy IP address: %s", ip)
-	} else {
-		app.Logger.Info("Proxy IP address not found in response headers")
-	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
