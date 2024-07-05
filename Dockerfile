@@ -27,7 +27,7 @@ RUN PWGO_VER=$(grep -oE "playwright-go v\S+" /app/go.mod | sed 's/playwright-go 
 RUN go run github.com/playwright-community/playwright-go/cmd/playwright@latest install --with-deps
 
 # Expose port 8080 to the outside world
-EXPOSE 8080
+EXPOSE 3000
 # Build and run the Go application based on the argument
 CMD ["sh", "-c", "go mod tidy && go run main.go"]
 #CMD ["sh", "-c", "tail -f /dev/null"]
