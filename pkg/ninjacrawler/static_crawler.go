@@ -60,11 +60,13 @@ func (app *Crawler) NavigateToApiURL(client *http.Client, urlString string, prox
 }
 
 func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxyServer Proxy) ([]byte, error) {
+	proxyIp := ""
 	httpTransport := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			conn, err := net.Dial(network, addr)
 			if err == nil {
-				app.Logger.Info("Proxy IP address: %s => %s", conn.RemoteAddr().String(), urlString)
+				proxyIp = conn.RemoteAddr().String()
+				app.Logger.Info("Proxy IP address: %s => %s", proxyIp, urlString)
 			}
 			return conn, err
 		},
@@ -103,7 +105,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Error sending request: %v", err)
+		return nil, fmt.Errorf("Error sending request: from %s to %v", proxyIp, err)
 	}
 	defer resp.Body.Close()
 
