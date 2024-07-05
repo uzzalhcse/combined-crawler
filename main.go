@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	go startServer()
 	//ninjacrawler.NewNinjaCrawler().RunAutoPilot()
 
 	// register all sites configs to run the crawlers
@@ -19,7 +20,6 @@ func main() {
 		AddSite(yamaya.Crawler()).
 		//AddSite(midori_anzen.Crawler()).
 		Start()
-	//startServer()
 }
 
 func startServer() {
