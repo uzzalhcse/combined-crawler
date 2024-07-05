@@ -13,7 +13,8 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			//BoostCrawling:   true,
 			DevCrawlLimit:   2,
 			ConcurrentLimit: 10,
-			SleepAfter:      20,
+			SleepAfter:      200,
+			Timeout:         60,
 			ProxyServers: []ninjacrawler.Proxy{
 				{
 					Server: "ZENROWS",
