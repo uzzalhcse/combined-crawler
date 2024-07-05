@@ -13,14 +13,11 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			//BoostCrawling:   true,
 			DevCrawlLimit:   10,
 			ConcurrentLimit: 5,
-			SleepAfter:      10,
+			SleepAfter:      50,
 			Timeout:         60,
 			ProxyServers: []ninjacrawler.Proxy{
 				{
-					Server: "http://34.48.154.203:3000",
-				},
-				{
-					Server: "http://34.48.157.202:3000",
+					Server: "http://34.86.244.210:3000",
 				},
 			},
 		},
