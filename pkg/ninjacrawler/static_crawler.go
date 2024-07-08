@@ -66,7 +66,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 			conn, err := net.Dial(network, addr)
 			if err == nil {
 				proxyIp = conn.RemoteAddr().String()
-				app.Logger.Info("Proxy IP address: %s => %s", proxyIp, urlString)
+				//app.Logger.Info("Proxy IP address: %s => %s", proxyIp, urlString)
 			}
 			return conn, err
 		},
