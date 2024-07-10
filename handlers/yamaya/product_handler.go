@@ -56,6 +56,10 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.ProductDetails,
 			OriginCollection: constant.Products,
 			Processor:        productDetailSelector,
+			Engine: ninjacrawler.Engine{
+				Provider:      "zenrows",
+				DevCrawlLimit: 300,
+			},
 			Preference: ninjacrawler.Preference{
 				ValidationRules: []string{"PageTitle|blacklists:403 Forbidden,502 Gateway Timeout|required", "ProductName|required"},
 			},
