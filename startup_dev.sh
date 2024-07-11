@@ -23,11 +23,9 @@ git clean -df
 # Pull latest changes from the 'dev' branch of the Git repository
 git pull
 
-# Checkout the dev branch
-git checkout dev
-
+# Checkout the Local branch
+git checkout LZ-102.x
 cp /root/$CODE_DIRECTORY/apps/$INSTANCE_NAME/.env .env
-
 # Download the setup_docker.sh script
 curl -O https://raw.githubusercontent.com/uzzalhcse/awesome-bash-scripts/main/setup_docker.sh
 

@@ -1,14 +1,8 @@
 #!/bin/bash
 
 PROJECT_ID="lazuli-venturas"
-ZONE="asia-northeast1-a"
-
-
 INSTANCE_NAME=$(curl -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/name)
 ZONE=$(curl -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/zone | awk -F/ '{print $NF}')
-CODE_DIRECTORY="combined-crawler"
-
-
 ACCESS_TOKEN=$(gcloud auth print-access-token)
 
 URL="https://compute.googleapis.com/compute/v1/projects/$PROJECT_ID/zones/$ZONE/instances/$INSTANCE_NAME/stop"

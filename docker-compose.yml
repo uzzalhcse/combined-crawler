@@ -15,8 +15,7 @@ services:
       - APP_ENV=${APP_ENV:-production}
       - API_USERNAME=${API_USERNAME:-lazuli}
       - API_PASSWORD=${API_PASSWORD:-ninja}
-      - ZENROWS_API_KEY=${ZENROWS_API_KEY:-""}
-      - DELETE_DB=${DELETE_DB:-false}
+      - DELETE_DB=${DELETE_DB:-true}
       - GCP_CREDENTIALS_PATH=${GCP_CREDENTIALS_PATH:-/app/gcp-file-upload-key.json}
     depends_on:
       - mongo
