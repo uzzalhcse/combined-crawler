@@ -20,11 +20,11 @@ cd /root/$CODE_DIRECTORY
 git reset --hard HEAD
 git clean -df
 
-# Pull latest changes from the 'dev' branch of the Git repository
-git pull
-
 # Checkout the dev branch
 git checkout dev
+
+# Pull latest changes from the 'dev' branch of the Git repository
+git pull
 
 cp /root/$CODE_DIRECTORY/apps/$INSTANCE_NAME/.env .env
 
