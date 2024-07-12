@@ -4,7 +4,6 @@ import (
 	"combined-crawler/constant"
 	"combined-crawler/pkg/ninjacrawler"
 	"github.com/PuerkitoBio/goquery"
-	"strings"
 )
 
 func ProductHandler(crawler *ninjacrawler.Crawler) {
@@ -15,8 +14,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			OriginCollection: constant.Categories,
 			Processor:        handleProduct,
 			Preference: ninjacrawler.Preference{
-				ValidationRules:     []string{"PageTitle|required"},
-				DoNotMarkAsComplete: true,
+				ValidationRules: []string{"PageTitle|required"},
 			},
 		},
 	})
@@ -27,10 +25,9 @@ func handleProduct(ctx ninjacrawler.CrawlerContext, fn func([]ninjacrawler.Produ
 	ctx.Document.Find("#searchresults ul.productlist li.clearfix").Each(func(i int, s *goquery.Selection) {
 		items = append(items, selectProduct(s))
 	})
-
 	nextPageUrl := ""
 	lastPageUrl := ""
-	currentUrl := strings.Split(ctx.UrlCollection.Url, "?")[0]
+	currentUrl := ctx.App.BaseUrl
 	ctx.Document.Find("nav.pager.clearfix:nth-child(1) ul li a").Each(func(i int, s *goquery.Selection) {
 		rel, exists := s.Attr("rel")
 		if exists {
@@ -62,14 +59,14 @@ func selectProduct(selection *goquery.Selection) ninjacrawler.ProductDetailSelec
 		},
 		Url: getUrlHandler,
 		Images: func(ctx ninjacrawler.CrawlerContext) []string {
-			var fullUrl string
+			items := []string{}
 			el := selection.Find("p.thumb img").First()
 			if url, ok := el.Attr("src"); ok {
 				if url != "about:blank" {
-					fullUrl = ctx.App.GetFullUrl(url)
+					items = append(items, ctx.App.GetFullUrl(url))
 				}
 			}
-			return []string{fullUrl}
+			return items
 		},
 		ProductCodes: func(ctx ninjacrawler.CrawlerContext) []string {
 			toolNo := selection.Find("dl dd.toolNo").Text()

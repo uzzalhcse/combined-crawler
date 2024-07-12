@@ -8,6 +8,9 @@ import (
 )
 
 func getUrlHandler(ctx ninjacrawler.CrawlerContext) string {
+	if ctx.UrlCollection.CurrentPageUrl != "" {
+		return ctx.UrlCollection.CurrentPageUrl
+	}
 	return ctx.UrlCollection.Url
 }
 

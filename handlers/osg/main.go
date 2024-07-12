@@ -12,10 +12,10 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic: false,
 			//BoostCrawling:   true,
-			DevCrawlLimit:   10,
-			ConcurrentLimit: 3,
+			DevCrawlLimit:   15,
+			ConcurrentLimit: 4,
 			SleepAfter:      50,
-			Timeout:         60,
+			Timeout:         30,
 		},
 		Preference: ninjacrawler.AppPreference{ExcludeUniqueUrlEntities: []string{constant.ProductDetails}},
 		Handler: ninjacrawler.Handler{
