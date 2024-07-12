@@ -46,8 +46,13 @@ func (app *Crawler) crawlPageDetailRecursive(processorConfig ProcessorConfig, pr
 
 	for _, urlCollection := range newUrlCollections {
 		urlChan <- urlCollection
-		processedUrls[urlCollection.CurrentPageUrl] = true // Mark URL as processed
-		processedUrls[urlCollection.Url] = true            // Mark URL as processed
+		if urlCollection.Attempts > 0 && urlCollection.Attempts <= app.engine.MaxRetryAttempts {
+			processedUrls[urlCollection.CurrentPageUrl] = false // Do Not Mark URL as processed
+			processedUrls[urlCollection.Url] = false            // Do Not Mark URL as processed
+		} else {
+			processedUrls[urlCollection.CurrentPageUrl] = true // Mark URL as processed
+			processedUrls[urlCollection.Url] = true            // Mark URL as processed
+		}
 	}
 	close(urlChan)
 
