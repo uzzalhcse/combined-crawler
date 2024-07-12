@@ -13,13 +13,13 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			IsDynamic: false,
 			//BoostCrawling:   true,
 			DevCrawlLimit:   10,
-			ConcurrentLimit: 1,
+			ConcurrentLimit: 3,
 			SleepAfter:      50,
 			Timeout:         60,
 		},
 		Preference: ninjacrawler.AppPreference{ExcludeUniqueUrlEntities: []string{constant.ProductDetails}},
 		Handler: ninjacrawler.Handler{
-			//UrlHandler:     UrlHandler,
+			UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
 		},
 	}

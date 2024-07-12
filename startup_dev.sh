@@ -20,11 +20,10 @@ cd /root/$CODE_DIRECTORY
 git reset --hard HEAD
 git clean -df
 
-# Pull latest changes from the 'dev' branch of the Git repository
-git pull
 
 # Checkout the Local branch
 git checkout LZ-102.x
+git pull
 cp /root/$CODE_DIRECTORY/apps/$INSTANCE_NAME/.env .env
 # Download the setup_docker.sh script
 curl -O https://raw.githubusercontent.com/uzzalhcse/awesome-bash-scripts/main/setup_docker.sh

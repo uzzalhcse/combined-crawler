@@ -62,10 +62,12 @@ func selectProduct(selection *goquery.Selection) ninjacrawler.ProductDetailSelec
 		},
 		Url: getUrlHandler,
 		Images: func(ctx ninjacrawler.CrawlerContext) []string {
-			fullUrl := ""
+			var fullUrl string
 			el := selection.Find("p.thumb img").First()
 			if url, ok := el.Attr("src"); ok {
-				fullUrl = ctx.App.GetFullUrl(url)
+				if url != "about:blank" {
+					fullUrl = ctx.App.GetFullUrl(url)
+				}
 			}
 			return []string{fullUrl}
 		},
