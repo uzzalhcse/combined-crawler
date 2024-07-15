@@ -25,6 +25,8 @@ func getSellingPrice(ctx ninjacrawler.CrawlerContext) string {
 func getProductAttribute(ctx ninjacrawler.CrawlerContext, selection *goquery.Selection) []ninjacrawler.AttributeItem {
 	attributes := []ninjacrawler.AttributeItem{}
 
+	selection.Find("dd button.btn").Remove()
+
 	selection.Find("details div dl.clearfix").Each(func(i int, s *goquery.Selection) {
 		s.Find("dt").Each(func(j int, dt *goquery.Selection) {
 			key := dt.Find("label").Text()
