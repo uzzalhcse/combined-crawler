@@ -9,7 +9,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.4
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/gofiber/fiber/v2 v2.52.4
-	github.com/playwright-community/playwright-go v0.4401.1
+	github.com/playwright-community/playwright-go v0.4501.0
 	github.com/spf13/viper v1.19.0
 	go.mongodb.org/mongo-driver v1.15.1
 	golang.org/x/crypto v0.23.0
