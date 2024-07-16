@@ -79,17 +79,14 @@ func getListPriceService(ctx ninjacrawler.CrawlerContext) string {
 	listPriceValue := ""
 	keyFound := false
 	tables := ctx.Document.Find("table.data-table.molTableSimple")
-	// println(tables.Length())
 	tables.Each(func(_ int, table *goquery.Selection) {
 		thData := []string{}
 		tdData := []string{}
 
 		thElements := table.Find("tbody th")
 		thElements.Each(func(_ int, th *goquery.Selection) {
-			// fmt.Println(th.Text())
 			thData = append(thData, strings.TrimSpace(th.Text()))
 		})
-		// fmt.Println(thData)
 		tdElements := table.Find("td")
 		tdElements.Each(func(_ int, td *goquery.Selection) {
 			tdData = append(tdData, strings.TrimSpace(td.Text()))
@@ -102,10 +99,6 @@ func getListPriceService(ctx ninjacrawler.CrawlerContext) string {
 			value := tdData[i]
 			spec_dic[key] = value
 		}
-
-		// for key, value := range spec_dic {
-		// 	fmt.Println("Key:", key, "Value:", value)
-		// }
 		if val, ok := spec_dic["メーカー希望小売価格"]; ok {
 			listPriceValue = val
 			keyFound = true
@@ -148,17 +141,14 @@ func getSellingPriceTaxAttributeService(ctx ninjacrawler.CrawlerContext, attribu
 
 func getSpecData(ctx ninjacrawler.CrawlerContext, attributes *[]ninjacrawler.AttributeItem) {
 	tables := ctx.Document.Find("table.data-table.molTableSimple")
-	// println(tables.Length())
 	tables.Each(func(_ int, table *goquery.Selection) {
 		thData := []string{}
 		tdData := []string{}
 
 		thElements := table.Find("tbody th")
 		thElements.Each(func(_ int, th *goquery.Selection) {
-			// fmt.Println(th.Text())
 			thData = append(thData, strings.TrimSpace(th.Text()))
 		})
-		// fmt.Println(thData)
 		tdElements := table.Find("td")
 		tdElements.Each(func(_ int, td *goquery.Selection) {
 			tdData = append(tdData, strings.TrimSpace(td.Text()))

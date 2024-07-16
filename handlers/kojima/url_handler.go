@@ -42,9 +42,7 @@ func subCategoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlColle
 	return subCatUrls
 }
 func RecursiveSubCategoryCrawler(ctx ninjacrawler.CrawlerContext, doc *goquery.Document, subCatUrls *[]ninjacrawler.UrlCollection) {
-
 	subCategoryList := doc.Find("ul#ChangToProdUrl > li")
-
 	if subCategoryList.Length() > 1 {
 		subCategoryList.Each(func(i int, s *goquery.Selection) {
 			href, ok := s.Find("a").First().Attr("href")
@@ -69,7 +67,6 @@ func RecursiveSubCategoryCrawler(ctx ninjacrawler.CrawlerContext, doc *goquery.D
 	}
 }
 func productHandler(ctx ninjacrawler.CrawlerContext, fn func([]ninjacrawler.UrlCollection, string)) error {
-
 	items := []ninjacrawler.UrlCollection{}
 	ctx.Document.Find(".name a.mk2TagClick").Each(func(_ int, s *goquery.Selection) {
 		productLink, exists := s.Attr("href")
