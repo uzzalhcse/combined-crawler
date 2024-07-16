@@ -3,6 +3,7 @@ package sumitool
 import (
 	"combined-crawler/pkg/ninjacrawler"
 	"github.com/PuerkitoBio/goquery"
+	"regexp"
 	"strings"
 )
 
@@ -70,8 +71,11 @@ func GetFeatureAttributeService(app *ninjacrawler.Crawler, document *goquery.Doc
 	key := document.Find(".product-feature-inner .section-title-ja.typesquare_option").First().Text()
 	value := document.Find(".product-feature-lead").Text()
 	document.Find(".product-feature-section").Each(func(i int, s *goquery.Selection) {
-
-		value += "\n" + s.Text()
+		text := strings.TrimSpace(s.Text())
+		// Replace multiple spaces/newlines with a single space
+		re := regexp.MustCompile(`\s+`)
+		cleanedText := re.ReplaceAllString(text, " ")
+		value += "\n" + cleanedText + " "
 	})
 
 	if len(value) > 0 {
