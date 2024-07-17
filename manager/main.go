@@ -30,7 +30,7 @@ func main() {
 
 			fmt.Printf("starting vm %s\n", dirname)
 			outputPath := filepath.Join(parentDir, "dist", dirname)
-			sourcePath := fmt.Sprintf("%s/%s", sitesDir, dirname)
+			sourcePath := fmt.Sprintf("%s/%s/main.go", sitesDir, dirname)
 			fmt.Println("sourcePath: ", sourcePath)
 			fmt.Println("outputPath: ", outputPath)
 			cmd := exec.Command("go", "build", "-o", outputPath, sourcePath)
