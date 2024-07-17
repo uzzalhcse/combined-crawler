@@ -23,8 +23,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error building site: %v\nOutput: %s", err, output)
 	}
-	GCP_CREDENTIALS_PATH := "gcp-file-upload-key.json"
-	fmt.Println("GCP_CREDENTIALS_PATH: ", GCP_CREDENTIALS_PATH)
+	GCP_CREDENTIALS_PATH := filepath.Join(cwd, "/gcp-file-upload-key.json")
 	err = ninjacrawler.UploadToGCPBucket("crawler", GCP_CREDENTIALS_PATH, outputPath, "crawler")
 	if err != nil {
 		log.Fatalf("Error uploading built site to bucket: %v", err)
