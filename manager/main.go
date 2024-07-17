@@ -33,7 +33,7 @@ func main() {
 			sourcePath := fmt.Sprintf("%s/%s", sitesDir, dirname)
 			fmt.Println("sourcePath: ", sourcePath)
 			fmt.Println("outputPath: ", outputPath)
-			cmd := exec.Command("cd", sourcePath, "&&", "go", "build", "-o", outputPath)
+			cmd := exec.Command("sh", "-c", fmt.Sprintf("cd %s && go build -o %s", sourcePath, outputPath))
 			output, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Fatalf("Error building site: %v\nOutput: %s", err, output)
