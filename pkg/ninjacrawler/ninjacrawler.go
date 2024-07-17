@@ -49,6 +49,25 @@ func (ninja *NinjaCrawler) Start() {
 
 	//StopInstanceIfRunningFromGCP()
 }
+
+func (ninja *NinjaCrawler) StartOnly(site string) {
+	var wg sync.WaitGroup
+
+	for _, config := range ninja.Config {
+		if config.Name == site {
+			wg.Add(1)
+			cfg := config // Capture config variable for each goroutine
+			go func(cfg CrawlerConfig) {
+				defer wg.Done()
+				NewCrawler(cfg.Name, cfg.URL, cfg.Engine).SetPreference(cfg.Preference).Handle(cfg.Handler)
+			}(cfg)
+		}
+	}
+
+	wg.Wait()
+
+	//StopInstanceIfRunningFromGCP()
+}
 func (ninja *NinjaCrawler) StartPilot() {
 	var wg sync.WaitGroup
 	wg.Add(len(ninja.Config))
