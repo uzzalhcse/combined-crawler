@@ -13,5 +13,7 @@ logs/
 .terraform/
 .idea/
 .vscode/
+/dist/
+crawler
 
 gcp-file-upload-key.json
