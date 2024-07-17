@@ -30,10 +30,10 @@ func main() {
 
 			fmt.Printf("starting vm %s\n", dirname)
 			outputPath := filepath.Join(parentDir, "dist", dirname)
-			sourcePath := fmt.Sprintf("%s/%s/main.go", sitesDir, dirname)
+			sourcePath := fmt.Sprintf("%s/%s", sitesDir, dirname)
 			fmt.Println("sourcePath: ", sourcePath)
 			fmt.Println("outputPath: ", outputPath)
-			cmd := exec.Command("go", "build", "-o", outputPath, sourcePath)
+			cmd := exec.Command("cd", sourcePath, "&&", "go", "build", "-o", outputPath)
 			output, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Fatalf("Error building site: %v\nOutput: %s", err, output)
