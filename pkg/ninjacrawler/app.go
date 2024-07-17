@@ -165,13 +165,14 @@ func getDefaultEngine() Engine {
 			"googleapis.com",
 			"gstatic.com",
 		},
-		BoostCrawling:    false,
-		ProxyServers:     []Proxy{},
-		CookieConsent:    nil,
-		Timeout:          30 * 1000, // 30 sec
-		SleepAfter:       1000,
-		MaxRetryAttempts: 3,
-		Args:             []string{},
+		BoostCrawling:          false,
+		ProxyServers:           []Proxy{},
+		CookieConsent:          nil,
+		Timeout:                30 * 1000, // 30 sec
+		SleepAfter:             1000,
+		MaxRetryAttempts:       3,
+		ForceInstallPlaywright: false,
+		Args:                   []string{},
 	}
 }
 
@@ -225,6 +226,9 @@ func overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	}
 	if eng.MaxRetryAttempts > 0 {
 		defaultEngine.MaxRetryAttempts = eng.MaxRetryAttempts
+	}
+	if eng.ForceInstallPlaywright {
+		defaultEngine.ForceInstallPlaywright = eng.ForceInstallPlaywright
 	}
 	if len(eng.Args) > 0 {
 		defaultEngine.Args = eng.Args
