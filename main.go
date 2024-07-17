@@ -17,8 +17,11 @@ import (
 )
 
 func main() {
-	//go startServer()
+	startServer()
 	//ninjacrawler.NewNinjaCrawler().RunAutoPilot()
+	//siteRegistry()
+}
+func siteRegistry() {
 	siteName := ""
 	if len(os.Args) > 1 {
 		firstArgument := os.Args[1]

@@ -12,7 +12,7 @@ func Migrate(client *mongo.Client) error {
 	defer cancel()
 
 	// Example: Ensure the 'testmodels' collection exists and has an index
-	err := createCollectionAndIndexes(ctx, client, "ninja_crawler", "testmodels", models.TestModelIndexes())
+	err := createCollectionAndIndexes(ctx, client, "crawl_manager", "testmodels", models.TestModelIndexes())
 	if err != nil {
 		return err
 	}

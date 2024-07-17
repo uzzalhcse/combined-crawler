@@ -5,6 +5,7 @@ import "github.com/gofiber/fiber/v2"
 // RegisterRoutes registers all routes
 func RegisterRoutes(router fiber.Router) {
 	router.Static("/public", "./storage")
+	router.Static("/binary", "./dist")
 	web := router.Group("")
 	SetUpWebRoutes(web)
 

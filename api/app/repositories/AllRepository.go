@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-const DBName = "ninja_crawler"
+const DBName = "crawl_manager"
 
 type Repository struct {
 	DB *mongo.Client
@@ -182,4 +182,66 @@ func (r *Repository) DeleteUrlCollection(collectionID string) error {
 
 	_, err := urlCollectionColl.DeleteOne(ctx, bson.M{"collection_id": collectionID})
 	return err
+}
+
+var siteSecretCollection models.SiteSecret
+
+func (r *Repository) CreateSecretCollection(siteSecret *models.SiteSecret) error {
+	collection := r.DB.Database(DBName).Collection(siteSecret.GetTableName())
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	_, err := collection.InsertOne(ctx, siteSecret)
+	return err
+}
+func (r *Repository) GetAllSiteSecretCollections() ([]models.SiteSecret, error) {
+	collection := r.DB.Database(DBName).Collection(siteSecretCollection.GetTableName())
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []models.SiteSecret
+	if err := cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+func (r *Repository) GetSiteSecretCollectionByID(siteID string) (*models.SiteSecret, error) {
+	collection := r.DB.Database(DBName).Collection(siteSecretCollection.GetTableName())
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var secretCollection models.SiteSecret
+	err := collection.FindOne(ctx, bson.M{"site_id": siteID}).Decode(&secretCollection)
+	if err != nil {
+		return nil, err
+	}
+	return &secretCollection, nil
+}
+
+var globalSecretCollection models.GlobalSecret
+
+func (r *Repository) GetAllGlobalSecretCollections() ([]models.GlobalSecret, error) {
+	collection := r.DB.Database(DBName).Collection(globalSecretCollection.GetTableName())
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := collection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []models.GlobalSecret
+	if err := cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }

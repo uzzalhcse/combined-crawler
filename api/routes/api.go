@@ -14,11 +14,13 @@ func SetUpApiRoutes(api fiber.Router) {
 	siteCollectionService := services.NewSiteCollectionService(repo)
 	collectionService := services.NewCollectionService(repo)
 	urlCollectionService := services.NewUrlCollectionService(repo)
+	secretCollectionService := services.NewSecretCollectionService(repo)
 
 	// Initialize controllers
 	siteCollectionController := controllers.NewSiteCollectionController(siteCollectionService)
 	collectionController := controllers.NewCollectionController(collectionService)
 	urlCollectionController := controllers.NewUrlCollectionController(urlCollectionService)
+	secretCollectionController := controllers.NewSecretCollectionController(secretCollectionService)
 
 	// Test controller
 	testService := services.NewTestService(repo)
@@ -46,8 +48,15 @@ func SetUpApiRoutes(api fiber.Router) {
 
 	// UrlCollection routes
 	url := api.Group("/urlcollections")
-	url.Post("/urlcollections", urlCollectionController.Create)
-	url.Get("/urlcollections/:collectionID", urlCollectionController.GetByID)
-	url.Put("/urlcollections/:collectionID", urlCollectionController.Update)
-	url.Delete("/urlcollections/:collectionID", urlCollectionController.Delete)
+	url.Post("/", urlCollectionController.Create)
+	url.Get("/:collectionID", urlCollectionController.GetByID)
+	url.Put("/:collectionID", urlCollectionController.Update)
+	url.Delete("/:collectionID", urlCollectionController.Delete)
+
+	// SiteSecretCollection routes
+	secret := api.Group("/site-secret")
+	secret.Post("/", secretCollectionController.Create)
+	secret.Get("/:siteID", secretCollectionController.GetByID)
+	secret.Put("/:siteID", secretCollectionController.Update)
+	secret.Delete("/:siteID", secretCollectionController.Delete)
 }
