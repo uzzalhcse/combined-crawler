@@ -13,7 +13,7 @@ func main() {
 	sitesDir := "/root/ninja-combined-crawler/apps"
 
 	// Get the absolute path of the parent directory
-	parentDir, err := filepath.Abs("./")
+	parentDir, err := filepath.Abs("/root/combined-crawler")
 	if err != nil {
 		log.Fatalf("Error getting parent directory: %v", err)
 	}
