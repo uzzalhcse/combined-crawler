@@ -4,21 +4,24 @@ import (
 	"combined-crawler/api/app/exceptions"
 	"combined-crawler/api/bootstrap"
 	"combined-crawler/api/routes"
-	"combined-crawler/handlers/yamaya"
+	"combined-crawler/handlers/sumitool"
 	"combined-crawler/pkg/ninjacrawler"
 	"fmt"
 )
 
 func main() {
-	go startServer()
+	//go startServer()
 	//ninjacrawler.NewNinjaCrawler().RunAutoPilot()
 
 	// register all sites configs to run the crawlers
 	ninjacrawler.NewNinjaCrawler().
 		//AddSite(kyocera.Crawler()).
 		//AddSite(aqua.Crawler()).
-		AddSite(yamaya.Crawler()).
+		//AddSite(yamaya.Crawler()).
 		//AddSite(midori_anzen.Crawler()).
+		//AddSite(osg.Crawler()).
+		AddSite(sumitool.Crawler()).
+		//AddSite(kojima.Crawler()).
 		Start()
 }
 
