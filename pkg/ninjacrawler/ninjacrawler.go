@@ -100,7 +100,7 @@ func (ninja *NinjaCrawler) RunAutoPilot() {
 		pkgOpened := false
 		for i, processor := range site.Processors {
 			isUrlSelector := !reflect.DeepEqual(processor.ProcessorType.UrlSelector, UrlSelector{})
-			isProductDetailSelector := !reflect.DeepEqual(processor.ProcessorType.ProductDetailSelector, ProductDetailSelector{})
+			isElementSelector := !reflect.DeepEqual(processor.ProcessorType.ElementSelector, ElementSelector{})
 			if processor.ProcessorType.Handle != nil || isUrlSelector {
 				functionName, pluginPath, err := ninja.getFunctionNameAndPluginPath(&processor.ProcessorType, pluginMap)
 				if err != nil {
@@ -128,11 +128,6 @@ func (ninja *NinjaCrawler) RunAutoPilot() {
 					}
 
 					functionMap[functionName] = fnSymbol
-				}
-
-				if isProductDetailSelector {
-					// TODO: Implement product detail selector
-					fmt.Println(processor.ProcessorType.ProductDetailSelector)
 				}
 
 				switch v := fnSymbol.(type) {
@@ -166,6 +161,60 @@ func (ninja *NinjaCrawler) RunAutoPilot() {
 					site.Processors[i].Processor = fn
 				default:
 					fmt.Printf("Invalid Signature: %T\n", v)
+				}
+			} else if isElementSelector {
+				for _, element := range processor.ProcessorType.ElementSelector.Elements {
+					if element.Plugin != "" {
+						ElementPluginPath := fmt.Sprintf("plugins/%s/elements", site.Name)
+						pluginPath, err := ninja.buildPlugin(ElementPluginPath, element.Plugin)
+						if err != nil {
+							fmt.Println(err)
+							os.Exit(1)
+						}
+						if !pkgOpened {
+							pkg, err = plugin.Open(pluginPath)
+							if err != nil {
+								fmt.Println(err)
+								os.Exit(1)
+							}
+							pkgOpened = true
+						}
+
+						var fnSymbol interface{}
+						// Look for the function by name in the package
+						fnSymbol, err = pkg.Lookup(element.Plugin)
+						if err != nil {
+							fmt.Println(err)
+							os.Exit(1)
+						}
+						fmt.Printf("fnSymbol %T\n", fnSymbol)
+
+						switch v := fnSymbol.(type) {
+						case func(CrawlerContext) string:
+							fn, ok := fnSymbol.(func(CrawlerContext) string)
+							if !ok {
+								fmt.Printf("Function %s has unexpected type in package\n", element.Plugin)
+							}
+							site.Processors[i].Processor = ProductDetailSelector{
+								ProductName: fn,
+							}
+						case func(CrawlerContext) []string:
+							fn, ok := fnSymbol.(func(CrawlerContext) []string)
+							if !ok {
+								fmt.Printf("Function %s has unexpected type in package\n", element.Plugin)
+							}
+							site.Processors[i].Processor = fn
+						case func(CrawlerContext) []AttributeItem:
+							fn, ok := fnSymbol.(func(CrawlerContext) []AttributeItem)
+							if !ok {
+								fmt.Printf("Function %s has unexpected type in package\n", element.Plugin)
+							}
+							site.Processors[i].Processor = fn
+
+						default:
+							fmt.Printf("Invalid Signature: %T\n", v)
+						}
+					}
 				}
 			}
 		}
@@ -202,4 +251,15 @@ func (ninja *NinjaCrawler) getFunctionNameAndPluginPath(processorType *Processor
 	}
 
 	return functionName, pluginPath, nil
+}
+
+func (ninja *NinjaCrawler) buildPlugin(path, functionName string) (string, error) {
+	filename := "Plugin.go"
+	src := filepath.Join(path, filename)
+	pluginPath := filepath.Join(path, functionName+".so")
+
+	if err := ninja.App.generatePlugin(src, pluginPath); err != nil {
+		return "", fmt.Errorf("failed to build plugin %s: %v", functionName, err)
+	}
+	return pluginPath, nil
 }

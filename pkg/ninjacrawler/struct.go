@@ -16,9 +16,20 @@ type ProcessorConfig struct {
 	ProcessorType    ProcessorType `json:"processor_type"`
 }
 type ProcessorType struct {
-	Handle                *Handle               `json:"handle"`
-	UrlSelector           UrlSelector           `json:"url_selector"`
-	ProductDetailSelector ProductDetailSelector `json:"product_detail_selector"`
+	Handle          *Handle         `json:"handle"`
+	UrlSelector     UrlSelector     `json:"url_selector"`
+	ElementSelector ElementSelector `json:"element_selector"`
+}
+type ElementSelector struct {
+	Handle   *Handle       `json:"handle"`
+	Elements []ElementType `json:"elements"`
+}
+type ElementType struct {
+	Plugin         string         `json:"plugin"`
+	SingleSelector SingleSelector `json:"single_selector"`
+	MultiSelectors MultiSelectors `json:"multi_selectors"`
+	Value          string         `json:"value"`
+	ElementID      string         `json:"element_id"`
 }
 type AppPreference struct {
 	ExcludeUniqueUrlEntities []string

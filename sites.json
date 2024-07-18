@@ -3,97 +3,64 @@
     "name": "abc",
     "url": "https://aqua-has.com",
     "engine": {
-      "boostCrawling": true,
       "isDynamic": false,
-      "devCrawlLimit": 300,
-      "concurrentLimit": 10
+      "devCrawlLimit": 10,
+      "concurrentLimit": 1
     },
     "processors": [
-      {
-        "entity": "categories",
-        "originCollection": "sites",
-        "preference": {
-          "DoNotMarkAsComplete": true
-        },
-        "processor_type": {
-          "handle": {
-            "namespace": "plugins/abc/url_handler",
-            "filename": "UrlHandler.go",
-            "function_name": "HandleCategoryUrl"
-          }
-        }
-      },
-      {
-        "entity": "products",
-        "originCollection": "categories",
-        "preference": {
-          "DoNotMarkAsComplete": true
-        },
-        "processor_type": {
-          "url_selector":{
-            "selector": "div.CategoryTop_Series_Item_Content_List",
-            "find_selector": "a",
-            "single_result": false,
-            "attr": "href",
-            "handle": {
-              "namespace": "plugins/abc/url_handler",
-              "filename": "UrlHandler.go",
-              "function_name": "ProductListHandler"
-            }
-          }
-        }
-      },
       {
         "entity": "product_details",
         "originCollection": "products",
         "processor_type": {
-          "product_detail_selector":{
-            "jan": "",
-            "PageTitle": {
-              "single_selector": {
-                "selector": "title"
-              }
-            },
-            "Url": {
-              "handler": {
-                "path": ""
-              }
-            },
-            "Images": {
-              "multi_selectors":
+          "element_selector":{
+            "elements": [
               {
-                "Selectors": [
-                  {
-                    "Query": ".details .intro .image img",
-                    "Attr": "src"
-                  },
-                  {
-                    "Query": ".details .intro .image img",
-                    "Attr": "data-src"
-                  },
-                  {
-                    "Query": ".details .intro .image a",
-                    "Attr": "href"
-                  }
-                ]
+                "element_id": "PageTitle",
+                "single_selector": {
+                  "selector": "title"
+                }
+              },
+              {
+                "element_id": "Url",
+                "plugin": "Url"
+              },
+              {
+                "element_id": "Images",
+                "multi_selectors":
+                {
+                  "Selectors": [
+                    {
+                      "Query": ".details .intro .image img",
+                      "Attr": "src"
+                    },
+                    {
+                      "Query": ".details .intro .image img",
+                      "Attr": "data-src"
+                    },
+                    {
+                      "Query": ".details .intro .image a",
+                      "Attr": "href"
+                    }
+                  ]
+                }
+              },
+              {
+                "element_id": "ProductName",
+                "plugin": "Name"
+              },
+              {
+                "element_id": "Category",
+                "plugin": "Category"
+              },
+              {
+                "element_id": "Description",
+                "plugin": "Description"
+              },
+              {
+                "element_id": "Attributes",
+                "plugin": "Attributes"
               }
-            },
-            "ProductCodes": "",
-            "Maker": "",
-            "Brand": "",
-            "ProductName": "",
-            "Category": "",
-            "Description": "",
-            "Reviews": "",
-            "ItemTypes": "",
-            "ItemSizes": "",
-            "ItemWeights": "",
-            "SingleItemSize": "",
-            "SingleItemWeight": "",
-            "NumOfItems": "",
-            "ListPrice": "",
-            "SellingPrice": "",
-            "Attributes": ""
+            ]
           }
         }
       }
