@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"combined-crawler/api/app/helper"
 	"combined-crawler/api/app/services"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -35,4 +37,21 @@ func (that *TestController) GetAllHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(models)
+}
+
+func (that *TestController) StartCrawler(c *fiber.Ctx) error {
+	siteID := c.Params("siteID")
+	err := helper.GenerateBinaryBuild(siteID)
+	if err != nil {
+		return err
+	}
+	zone := "asia-northeast1-a"
+	resp, err := helper.CreateVM(siteID, zone)
+	if err != nil {
+		return err
+	}
+	fmt.Println("VM created successfully", resp)
+
+	// TODO: Get the instance name,id and store into db
+	return c.JSON(resp)
 }
