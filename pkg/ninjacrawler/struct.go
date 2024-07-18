@@ -16,8 +16,9 @@ type ProcessorConfig struct {
 	ProcessorType    ProcessorType `json:"processor_type"`
 }
 type ProcessorType struct {
-	Handle      *Handle     `json:"handle"`
-	UrlSelector UrlSelector `json:"url_selector"`
+	Handle                *Handle               `json:"handle"`
+	UrlSelector           UrlSelector           `json:"url_selector"`
+	ProductDetailSelector ProductDetailSelector `json:"product_detail_selector"`
 }
 type AppPreference struct {
 	ExcludeUniqueUrlEntities []string

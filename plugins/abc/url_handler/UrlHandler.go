@@ -22,3 +22,7 @@ func HandleCategoryUrl(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollec
 	})
 	return urls
 }
+func ProductListHandler(urlCollection ninjacrawler.UrlCollection, fullUrl string, a *goquery.Selection) (string, map[string]interface{}) {
+	fmt.Println("Im from custom plugin ProductListHandler.", fullUrl)
+	return fullUrl, nil
+}

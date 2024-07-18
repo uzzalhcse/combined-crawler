@@ -17,8 +17,8 @@
         },
         "processor_type": {
           "handle": {
-            "namespace": "plugins/abc",
-            "filename": "HandleCategoryUrl.go",
+            "namespace": "plugins/abc/url_handler",
+            "filename": "UrlHandler.go",
             "function_name": "HandleCategoryUrl"
           }
         }
@@ -36,10 +36,64 @@
             "single_result": false,
             "attr": "href",
             "handle": {
-              "namespace": "plugins/abc",
-              "filename": "ProductListHandler.go",
+              "namespace": "plugins/abc/url_handler",
+              "filename": "UrlHandler.go",
               "function_name": "ProductListHandler"
             }
+          }
+        }
+      },
+      {
+        "entity": "product_details",
+        "originCollection": "products",
+        "processor_type": {
+          "product_detail_selector":{
+            "jan": "",
+            "PageTitle": {
+              "single_selector": {
+                "selector": "title"
+              }
+            },
+            "Url": {
+              "handler": {
+                "path": ""
+              }
+            },
+            "Images": {
+              "multi_selectors":
+              {
+                "Selectors": [
+                  {
+                    "Query": ".details .intro .image img",
+                    "Attr": "src"
+                  },
+                  {
+                    "Query": ".details .intro .image img",
+                    "Attr": "data-src"
+                  },
+                  {
+                    "Query": ".details .intro .image a",
+                    "Attr": "href"
+                  }
+                ]
+              }
+            },
+            "ProductCodes": "",
+            "Maker": "",
+            "Brand": "",
+            "ProductName": "",
+            "Category": "",
+            "Description": "",
+            "Reviews": "",
+            "ItemTypes": "",
+            "ItemSizes": "",
+            "ItemWeights": "",
+            "SingleItemSize": "",
+            "SingleItemWeight": "",
+            "NumOfItems": "",
+            "ListPrice": "",
+            "SellingPrice": "",
+            "Attributes": ""
           }
         }
       }
