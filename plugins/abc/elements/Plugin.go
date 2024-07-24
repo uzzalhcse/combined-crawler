@@ -1,42 +1,42 @@
 package main
 
 import (
-	"combined-crawler/pkg/ninjacrawler"
+	"combined-crawler/pkg/generic_crawler"
 	"strings"
 )
 
-func Url(ctx ninjacrawler.CrawlerContext) string {
+func Url(ctx generic_crawler.CrawlerContext) interface{} {
 	return ctx.UrlCollection.Url
 }
-func Name(ctx ninjacrawler.CrawlerContext) string {
-	productName := ctx.Document.Find("h2.example").Text()
+func Name(ctx generic_crawler.CrawlerContext) interface{} {
+	productName := ctx.Document.Find(".product-name h2").Text()
 	productName = strings.Trim(productName, " \n")
 
 	return productName
 }
 
-func Category(ctx ninjacrawler.CrawlerContext) string {
+func Category(ctx generic_crawler.CrawlerContext) interface{} {
 	category := ctx.Document.Find("p.ProductDetail_Section_Headline_Sub").First().Text()
 	category = strings.Trim(category, " \n")
 
 	return category
 }
 
-func Description(ctx ninjacrawler.CrawlerContext) string {
-	description := ctx.Document.Find("div.ProductDetail_Section_Text_Group").Text()
+func Description(ctx generic_crawler.CrawlerContext) interface{} {
+	description := ctx.Document.Find(".description p").Text()
 	return description
 }
 
-func Attributes(ctx ninjacrawler.CrawlerContext) []ninjacrawler.AttributeItem {
-	attributes := []ninjacrawler.AttributeItem{}
+func Attributes(ctx generic_crawler.CrawlerContext) interface{} {
+	attributes := []generic_crawler.AttributeItem{}
 	getExampleAttributeService(ctx, &attributes)
 	return attributes
 }
 
-func getExampleAttributeService(ctx ninjacrawler.CrawlerContext, attributes *[]ninjacrawler.AttributeItem) {
+func getExampleAttributeService(ctx generic_crawler.CrawlerContext, attributes *[]generic_crawler.AttributeItem) {
 	item := strings.Trim(ctx.Document.Find(".example p").First().Text(), " \n")
 	if len(item) > 0 {
-		attribute := ninjacrawler.AttributeItem{
+		attribute := generic_crawler.AttributeItem{
 			Key:   "example",
 			Value: item,
 		}

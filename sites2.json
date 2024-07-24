@@ -1,0 +1,69 @@
+[
+  {
+    "name": "abc",
+    "url": "https://aqua-has.com",
+    "engine": {
+      "isDynamic": false,
+      "devCrawlLimit": 10,
+      "concurrentLimit": 1
+    },
+    "processors": [
+      {
+        "entity": "product_details",
+        "originCollection": "products",
+        "processor_type": {
+          "element_selector":{
+            "elements": [
+              {
+                "element_id": "PageTitle",
+                "single_selector": {
+                  "selector": "title"
+                }
+              },
+              {
+                "element_id": "Url",
+                "plugin": "Url"
+              },
+              {
+                "element_id": "Images",
+                "multi_selectors":
+                {
+                  "Selectors": [
+                    {
+                      "Query": ".details .intro .image img",
+                      "Attr": "src"
+                    },
+                    {
+                      "Query": ".details .intro .image img",
+                      "Attr": "data-src"
+                    },
+                    {
+                      "Query": ".details .intro .image a",
+                      "Attr": "href"
+                    }
+                  ]
+                }
+              },
+              {
+                "element_id": "ProductName",
+                "plugin": "Name"
+              },
+              {
+                "element_id": "Category",
+                "plugin": "Category"
+              },
+              {
+                "element_id": "Description",
+                "plugin": "Description"
+              },
+              {
+                "element_id": "Attributes",
+                "plugin": "Attributes"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+]

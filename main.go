@@ -1,9 +1,6 @@
 package main
 
 import (
-	"combined-crawler/api/app/exceptions"
-	"combined-crawler/api/bootstrap"
-	"combined-crawler/api/routes"
 	"combined-crawler/handlers/aqua"
 	"combined-crawler/handlers/kojima"
 	"combined-crawler/handlers/kyocera"
@@ -11,15 +8,17 @@ import (
 	"combined-crawler/handlers/osg"
 	"combined-crawler/handlers/sumitool"
 	"combined-crawler/handlers/yamaya"
+	"combined-crawler/pkg/generic_crawler"
 	"combined-crawler/pkg/ninjacrawler"
 	"fmt"
 	"os"
 )
 
 func main() {
-	startServer()
 	//ninjacrawler.NewNinjaCrawler().RunAutoPilot()
 	//siteRegistry()
+	//PluginGenerate()
+	generic_crawler.NewGenericCrawler().RunAutoPilot()
 }
 func siteRegistry() {
 	siteName := ""
@@ -41,35 +40,4 @@ func siteRegistry() {
 		AddSite(sumitool.Crawler()).
 		AddSite(kojima.Crawler()).
 		StartOnly(siteName)
-}
-
-func startServer() {
-	app := bootstrap.App()
-	defer app.CloseDBConnection()
-	app.ConnectDB()
-
-	// Register routes
-	routes.RegisterRoutes(app.App)
-
-	// Launch the application in a goroutine
-	go startApplication(app)
-
-	// Graceful shutdown
-	app.GracefulShutdown(func() {
-		shutdownApplication(app)
-	})
-}
-func startApplication(app *bootstrap.Application) {
-	port := ":" + app.Config.App.Port
-	if err := app.Run(port); err != nil {
-		exceptions.PanicIfNeeded(err.Error())
-	}
-}
-
-func shutdownApplication(app *bootstrap.Application) {
-	if err := app.Shutdown(); err != nil {
-		fmt.Println("Error during shutdown:", err.Error())
-	}
-
-	app.CloseDBConnection()
 }

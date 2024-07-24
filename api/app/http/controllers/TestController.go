@@ -45,7 +45,7 @@ func (that *TestController) StartCrawler(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	zone := "asia-northeast1-a"
+	zone := c.Params("zone", "asia-northeast1-a")
 	resp, err := helper.CreateVM(siteID, zone)
 	if err != nil {
 		return err

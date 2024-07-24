@@ -1,3 +1,13 @@
 {
-
+  "type": "service_account",
+  "project_id": "lazuli-venturas",
+  "private_key_id": "5ae0f807489fb0bc757bbfdbb26676e78114aff4",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDCyQDSRGIj7y5y\nb9hTfhL69Zv7QBmH4BPm33/yIZRdrcn/AXVswhounjpIz9Ja8KxxfuCZE05IgU6k\nkPsumJGZ6QFs8KhW6CKWbUcOMtLW5iCOyhmyAeYyAISveHSzlLZQSwnL+bXZvRur\nJ+bPaWSmsuzWcqrQArOwp7DIqRVKTiMRoaFm7PY31mWYqiSDqA4JPYhJ3G+WKqJA\nalDMoqcLSZQJ8v3Xz85Okq8QqAzp0dJ5IPBNybWUZJwBzoTQgtzHII0zKgks/w3P\n4YlCA8frhI1knu5qQZOgbbUFJqNmUyNT+RxxLcaesgUGlvLMXoKKqitxNRqhumoa\nrZorw8tLAgMBAAECggEAEchF4exKRVuNkvbw+dZVp0GK5uoYKpZjWr1msdUs9Uxr\nV3Nro+0odL8PNRx76L92Drp1iKQBjo73fgCaXcuh5zolXiuuQpjYp4D8bqhnJSVH\nLaH3rI+N01zGwDov9UELT9M55rw6RNGF2B9BbAgEH0/QXVeEjo7glq0Ib5k4D1tf\nxp8pTa3LuCJ1bWcQJznAQ4e4Q1CYIqDsTMh3UT1a+Fd2loSTqX9t/t9vqbtT6Bc9\nhjFqe6UBfFYuHwra+zakkdEYMsZ0b+DpzQNsF0/DYfQEOydR3R8nFBbByvjuuzxY\nzfVmtzfxbOZeySUiiT3zPWU0MXiCF3c7iP1KVz8pqQKBgQD4+UTu1G8tUoDn+ZEJ\nS1/1b7rVOWGRrLl7h2TXU/KrCH/Nhgdaikael8nUZXME7xXPRnWx/mXluD8bLDtB\npbzBZFC1AvyH1UEmmGwmp+GasynG4ty/JYjhx74q+WBLnHNuzpLBs9tbD3V0zGyZ\nJrqNO+aC8Zv9viuJAIt9aDwVFQKBgQDISD6T/FgoOvHmM3csUpmr8vsSGEYBKNnm\nKxqbgBqPYqhGiZqs7U1OFJmX6ZehRUPAjwH9A2Cu0CMsUZNY0JfR21EmHEvVMViY\nXJbBWIu/WlqYrHrmNeqIt4g445De59Jwbrajc9OymBo32SA5HLLI9vHNGJPeYHwj\nXvyHy8823wKBgQC6OtHqBzKl5wmO+ukW16+OSaWpqkMmENmo4ax3OE7Syge2tqM3\ngSizpfwNCFlRfniE00JkAlM70mY5sAse3pbi3WNVEkfMXqJd+TMkcvzYl10PbFAM\nFkpd/+dqA6CYzgy1/IRfqWXRpi2IUQSGRibST9Tra0fwM9gioSq1gks2xQKBgDsL\nmW9VcMQDhLdCKvslKurXio9uGo1S9tJ1mLWJUcs94bBR9wjOOQEw74sqsao42l2V\ni5eE/GbtM8FoF1GSxX938feTVgP3NVBN06ASs7hpMdZa2yytboR53y4uYNJmc9Lz\nwOJ1Tk8Tqn8WgvpzbH3015qIiWeA+HgRE9ARFPjvAoGBAOpPn/ssi3VgWX8SWM+X\nGsLjc5wrVUeE1ZtWVc9zqA2UdZ41aiNi9tSDxP4KtOnTLwlETx7MD1aGCX6iqdZz\nkbGoSuRTzVFhzETxtPLhnhs45J9wmRSrFwoW4dZHWhh700RHdtpQLhas0yVibLRe\nRNgMOAG4kSujMsw7S55wXf+O\n-----END PRIVATE KEY-----\n",
+  "client_email": "venturas-data-upload-service@lazuli-venturas.iam.gserviceaccount.com",
+  "client_id": "103149924824870268830",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/venturas-data-upload-service%40lazuli-venturas.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
 }

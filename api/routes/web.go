@@ -11,4 +11,7 @@ func SetUpWebRoutes(api fiber.Router) {
 			"status":  "Ok",
 		})
 	})
+	api.Static("/categories", "./api/static/categories.html")
+	api.Static("/product-lists", "./api/static/product-lists.html")
+	api.Static("/product-details", "./api/static/product-details.html")
 }

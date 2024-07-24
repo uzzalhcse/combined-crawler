@@ -1,24 +1,53 @@
 [
   {
     "name": "abc",
-    "url": "https://aqua-has.com",
+    "url": "http://127.0.0.1:8080/product-details",
     "engine": {
       "isDynamic": false,
       "devCrawlLimit": 10,
       "concurrentLimit": 1
     },
-    "processors": [
+    "collections": [
+      {
+        "entity": "categories",
+        "originCollection": "sites",
+        "processor": {
+          "url_processor": {
+            "plugin": "Categories"
+          }
+        }
+      },
+      {
+        "entity": "products",
+        "originCollection": "categories",
+        "processor": {
+          "url_processor": {
+            "selector": {
+              "query": ".categories"
+            }
+          }
+        }
+      },
       {
         "entity": "product_details",
-        "originCollection": "products",
-        "processor_type": {
-          "element_selector":{
+        "originCollection": "sites",
+        "processor": {
+          "element_processor": {
             "elements": [
               {
                 "element_id": "PageTitle",
-                "single_selector": {
-                  "selector": "title"
-                }
+                "selector": {
+                  "query": "title"
+                },
+                "formatters": [
+                  {
+                    "type": "replace",
+                    "args": {
+                      "regex": "[^A-Za-z]",
+                      "repl": ""
+                    }
+                  }
+                ]
               },
               {
                 "element_id": "Url",
@@ -26,20 +55,15 @@
               },
               {
                 "element_id": "Images",
-                "multi_selectors":
-                {
-                  "Selectors": [
+                "multi_selector": {
+                  "selectors": [
                     {
-                      "Query": ".details .intro .image img",
-                      "Attr": "src"
+                      "query": ".images img",
+                      "attr": "src"
                     },
                     {
-                      "Query": ".details .intro .image img",
-                      "Attr": "data-src"
-                    },
-                    {
-                      "Query": ".details .intro .image a",
-                      "Attr": "href"
+                      "query": ".images img",
+                      "attr": "data-src"
                     }
                   ]
                 }
@@ -54,7 +78,15 @@
               },
               {
                 "element_id": "Description",
-                "plugin": "Description"
+                "plugin": "Description",
+                "formatters": [
+                  {
+                    "type": "trim",
+                    "args": {
+                      "cutset": "\n"
+                    }
+                  }
+                ]
               },
               {
                 "element_id": "Attributes",

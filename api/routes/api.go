@@ -29,7 +29,7 @@ func SetUpApiRoutes(api fiber.Router) {
 	// Define routes
 	api.Get("/", testController.Test)
 	api.Get("/test", testController.GetAllHandler)
-	api.Get("/start-crawler/:SiteID", testController.StartCrawler)
+	api.Get("/start-crawler/:SiteID/:zone", testController.StartCrawler)
 
 	// SiteCollection routes
 	site := api.Group("/site")
