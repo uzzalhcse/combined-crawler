@@ -16,8 +16,8 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			Timeout:         300,
 		},
 		Handler: ninjacrawler.Handler{
-			UrlHandler: UrlHandler,
-			//ProductHandler: ProductHandler,
+			UrlHandler:     UrlHandler,
+			ProductHandler: ProductHandler,
 		},
 	}
 }
