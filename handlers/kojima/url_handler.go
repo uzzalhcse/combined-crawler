@@ -56,7 +56,7 @@ func categoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollecti
 		for _, child := range category.Child {
 			fmt.Printf(" URL: %s\n", child.Url)
 			urls = append(urls, ninjacrawler.UrlCollection{
-				Url:    ctx.App.GetFullUrl(child.Url),
+				Url:    ctx.App.GetQueryEscapeFullUrl(child.Url),
 				Parent: ctx.UrlCollection.Url,
 			})
 		}
@@ -64,20 +64,6 @@ func categoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollecti
 	return urls
 }
 
-// Extracts URLs from the category hierarchy
-func extractUrls(categories []Category) []string {
-	var urls []string
-	for _, category := range categories {
-		if category.Url != "" {
-			urls = append(urls, category.Url)
-		}
-		if len(category.Child) > 0 {
-			childUrls := extractUrls(category.Child)
-			urls = append(urls, childUrls...)
-		}
-	}
-	return urls
-}
 func subCategoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
 	subCatUrls := []ninjacrawler.UrlCollection{}
 	RecursiveSubCategoryCrawler(ctx, ctx.Document, &subCatUrls, "")
@@ -89,7 +75,7 @@ func RecursiveSubCategoryCrawler(ctx ninjacrawler.CrawlerContext, doc *goquery.D
 		subCategoryList.Each(func(i int, s *goquery.Selection) {
 			href, ok := s.Find("a").First().Attr("href")
 			if ok {
-				fullUrl := ctx.App.GetFullUrl(href)
+				fullUrl := ctx.App.GetQueryEscapeFullUrl(href)
 				httpClient := ctx.App.GetHttpClient()
 				document, err := ctx.App.NavigateToStaticURL(httpClient, fullUrl, ctx.App.CurrentProxy)
 				if err != nil {
@@ -115,7 +101,7 @@ func productHandler(ctx ninjacrawler.CrawlerContext, fn func([]ninjacrawler.UrlC
 		productLink, exists := s.Attr("href")
 		if exists {
 			items = append(items, ninjacrawler.UrlCollection{
-				Url:    ctx.App.GetFullUrl(productLink),
+				Url:    ctx.App.GetQueryEscapeFullUrl(productLink),
 				Parent: ctx.UrlCollection.Url,
 			})
 		}
