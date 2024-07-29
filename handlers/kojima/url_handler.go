@@ -3,63 +3,106 @@ package kojima
 import (
 	"combined-crawler/constant"
 	"combined-crawler/pkg/ninjacrawler"
+	"encoding/json"
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 )
 
+type Category struct {
+	Child []Category `json:"child"`
+	Url   string     `json:"url"`
+}
+
 func UrlHandler(crawler *ninjacrawler.Crawler) {
-	categorySelector := ninjacrawler.UrlSelector{
-		Selector:     "ul.MK2PFRDH000_01 li li",
-		SingleResult: false,
-		FindSelector: "a",
-		Attr:         "href",
-	}
+	//categorySelector := ninjacrawler.UrlSelector{
+	//	Selector:     "ul.MK2PFRDH000_01 li li",
+	//	SingleResult: false,
+	//	FindSelector: "a",
+	//	Attr:         "href",
+	//}
 
 	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
 		{
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),
-			Processor:        categorySelector,
-			Engine:           ninjacrawler.Engine{IsDynamic: true},
+			Processor:        categoryHandler,
+			//Engine:           ninjacrawler.Engine{IsDynamic: true},
 		},
-		{
-			Entity:           constant.SubCategories,
-			OriginCollection: constant.Categories,
-			Processor:        subCategoryHandler,
-			Engine:           ninjacrawler.Engine{IsDynamic: true},
-		},
-		{
-			Entity:           constant.Products,
-			OriginCollection: constant.SubCategories,
-			Processor:        productHandler,
-			Engine:           ninjacrawler.Engine{IsDynamic: true},
-		},
+		//{
+		//	Entity:           constant.SubCategories,
+		//	OriginCollection: constant.Categories,
+		//	Processor:        subCategoryHandler,
+		//},
+		//{
+		//	Entity:           constant.Products,
+		//	OriginCollection: constant.SubCategories,
+		//	Processor:        productHandler,
+		//},
 	})
 }
 
+func categoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
+	urls := []ninjacrawler.UrlCollection{}
+	strContent := ctx.Document.Find("#MK2HEAD_CATE").Text()
+	// Parse the JSON
+	var categories []Category
+	err := json.Unmarshal([]byte(strContent), &categories)
+	if err != nil {
+		fmt.Println("Error parsing")
+	}
+
+	// Extract and print child categories
+	for _, category := range categories {
+		for _, child := range category.Child {
+			fmt.Printf(" URL: %s\n", child.Url)
+			urls = append(urls, ninjacrawler.UrlCollection{
+				Url:    ctx.App.GetFullUrl(child.Url),
+				Parent: ctx.UrlCollection.Url,
+			})
+		}
+	}
+	return urls
+}
+
+// Extracts URLs from the category hierarchy
+func extractUrls(categories []Category) []string {
+	var urls []string
+	for _, category := range categories {
+		if category.Url != "" {
+			urls = append(urls, category.Url)
+		}
+		if len(category.Child) > 0 {
+			childUrls := extractUrls(category.Child)
+			urls = append(urls, childUrls...)
+		}
+	}
+	return urls
+}
 func subCategoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
 	subCatUrls := []ninjacrawler.UrlCollection{}
-	RecursiveSubCategoryCrawler(ctx, ctx.Document, &subCatUrls)
+	RecursiveSubCategoryCrawler(ctx, ctx.Document, &subCatUrls, "")
 	return subCatUrls
 }
-func RecursiveSubCategoryCrawler(ctx ninjacrawler.CrawlerContext, doc *goquery.Document, subCatUrls *[]ninjacrawler.UrlCollection) {
+func RecursiveSubCategoryCrawler(ctx ninjacrawler.CrawlerContext, doc *goquery.Document, subCatUrls *[]ninjacrawler.UrlCollection, urlStr string) {
 	subCategoryList := doc.Find("ul#ChangToProdUrl > li")
 	if subCategoryList.Length() > 1 {
 		subCategoryList.Each(func(i int, s *goquery.Selection) {
 			href, ok := s.Find("a").First().Attr("href")
 			if ok {
 				fullUrl := ctx.App.GetFullUrl(href)
-				document, err := ctx.App.NavigateToURL(ctx.Page, fullUrl)
+				httpClient := ctx.App.GetHttpClient()
+				document, err := ctx.App.NavigateToStaticURL(httpClient, fullUrl, ctx.App.CurrentProxy)
 				if err != nil {
 					ctx.App.Logger.Error("Error navigating to sub-category page:", err)
 					return
 				}
-				RecursiveSubCategoryCrawler(ctx, document, subCatUrls) // Recursive call
+				RecursiveSubCategoryCrawler(ctx, document, subCatUrls, fullUrl) // Recursive call
 			}
 		})
 	} else {
 		liTags := ctx.Document.Find("li[pn='stock']")
-		if liTags.Length() > 0 {
-			*subCatUrls = append(*subCatUrls, ninjacrawler.UrlCollection{Url: ctx.Page.URL(), Parent: ctx.UrlCollection.Url})
+		if liTags.Length() > 0 && urlStr != "" {
+			*subCatUrls = append(*subCatUrls, ninjacrawler.UrlCollection{Url: urlStr, Parent: ctx.UrlCollection.Url})
 			return
 		} else {
 			return
