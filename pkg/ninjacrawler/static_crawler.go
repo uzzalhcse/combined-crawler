@@ -80,7 +80,6 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 
 		finalUrl := urlString + "&js_render=true"
 		urlString = fmt.Sprintf("https://api.zenrows.com/v1/?apikey=%s&url=%s&custom_headers=true", zenrowsApiKey, finalUrl)
-		fmt.Println("final urlString", urlString)
 	} else {
 		if len(app.engine.ProxyServers) > 0 {
 			proxyURL, err := url.Parse(proxyServer.Server)
