@@ -152,7 +152,7 @@ func (app *Crawler) GetFullUrl(url string) string {
 	return app.BaseUrl + url
 }
 func (app *Crawler) GetQueryEscapeFullUrl(urlStr string) string {
-	fullUrl := ""
+	var fullUrl string
 	if strings.HasPrefix(urlStr, "http://") || strings.HasPrefix(urlStr, "https://") {
 		// If url is already a full URL, return it as is
 		fullUrl = urlStr
@@ -160,12 +160,23 @@ func (app *Crawler) GetQueryEscapeFullUrl(urlStr string) string {
 		// If url starts with "//", use the protocol from BaseUrl
 		if strings.HasPrefix(app.BaseUrl, "https://") {
 			fullUrl = "https:" + urlStr
+		} else {
+			fullUrl = "http:" + urlStr
 		}
-		fullUrl = "http:" + urlStr
+	} else {
+		// Otherwise, concatenate with BaseUrl
+		fullUrl = app.BaseUrl + urlStr
 	}
-	// Otherwise, concatenate with BaseUrl
-	fullUrl = app.BaseUrl + urlStr
-	return url.QueryEscape(fullUrl)
+
+	// Parse the full URL
+	parsedUrl, err := url.Parse(fullUrl)
+	if err != nil {
+		// Handle error, perhaps log and return an empty string or an error message
+		return ""
+	}
+
+	// Encode the URL
+	return parsedUrl.String()
 }
 
 // shouldBlockResource checks if a resource should be blocked based on its type and URL.

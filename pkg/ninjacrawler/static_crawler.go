@@ -117,7 +117,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf(fmt.Sprintf("Error sending request: from %s to %v", proxyIp, err))
+		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -132,11 +132,8 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 
 		var jsonResponse map[string]interface{}
 		err = json.Unmarshal(body, &jsonResponse)
-		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal JSON response: %w", err)
-		}
 
-		if jsonResponse["code"] == "RESP001" && jsonResponse["status"] == 422 && strings.Contains(jsonResponse["title"].(string), "Could not get content. try enabling premium proxies for a higher success rate (RESP001)") {
+		if err == nil && jsonResponse["code"] == "RESP001" && jsonResponse["status"] == 422 && strings.Contains(jsonResponse["title"].(string), "Could not get content. try enabling premium proxies for a higher success rate (RESP001)") {
 
 			if attempt <= 3 {
 				attempt++
