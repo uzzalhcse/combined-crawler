@@ -29,6 +29,7 @@ type Crawler struct {
 	isLocalEnv            bool
 	preference            *AppPreference
 	userAgent             string
+	CurrentProxy          Proxy
 }
 
 func NewCrawler(name, url string, engines ...Engine) *Crawler {
@@ -43,10 +44,11 @@ func NewCrawler(name, url string, engines ...Engine) *Crawler {
 	config := newConfig()
 
 	crawler := &Crawler{
-		Name:   name,
-		Url:    url,
-		engine: &defaultEngine,
-		Config: config,
+		Name:         name,
+		Url:          url,
+		engine:       &defaultEngine,
+		Config:       config,
+		CurrentProxy: Proxy{},
 	}
 
 	logger := newDefaultLogger(crawler, name)
