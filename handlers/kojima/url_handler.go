@@ -22,12 +22,12 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 	//}
 
 	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
-		{
-			Entity:           constant.Categories,
-			OriginCollection: crawler.GetBaseCollection(),
-			Processor:        categoryHandler,
-			//Engine:           ninjacrawler.Engine{IsDynamic: true},
-		},
+		//{
+		//	Entity:           constant.Categories,
+		//	OriginCollection: crawler.GetBaseCollection(),
+		//	Processor:        categoryHandler,
+		//	//Engine:           ninjacrawler.Engine{IsDynamic: true},
+		//},
 		{
 			Entity:           constant.SubCategories,
 			OriginCollection: constant.Categories,
@@ -111,7 +111,7 @@ func productHandler(ctx ninjacrawler.CrawlerContext, fn func([]ninjacrawler.UrlC
 		fn(items, "")
 		return nil
 	} else {
-		fn(items, ctx.App.GetFullUrl(nextPageUrl))
+		fn(items, ctx.App.GetQueryEscapeFullUrl(nextPageUrl))
 	}
 	return nil
 }

@@ -168,15 +168,8 @@ func (app *Crawler) GetQueryEscapeFullUrl(urlStr string) string {
 		fullUrl = app.BaseUrl + urlStr
 	}
 
-	// Parse the full URL
-	parsedUrl, err := url.Parse(fullUrl)
-	if err != nil {
-		// Handle error, perhaps log and return an empty string or an error message
-		return ""
-	}
-
-	// Encode the URL
-	return parsedUrl.String()
+	encodedURL := url.QueryEscape(fullUrl)
+	return encodedURL
 }
 
 // shouldBlockResource checks if a resource should be blocked based on its type and URL.
