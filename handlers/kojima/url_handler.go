@@ -28,16 +28,16 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			Processor:        categoryHandler,
 			//Engine:           ninjacrawler.Engine{IsDynamic: true},
 		},
-		//{
-		//	Entity:           constant.SubCategories,
-		//	OriginCollection: constant.Categories,
-		//	Processor:        subCategoryHandler,
-		//},
-		//{
-		//	Entity:           constant.Products,
-		//	OriginCollection: constant.SubCategories,
-		//	Processor:        productHandler,
-		//},
+		{
+			Entity:           constant.SubCategories,
+			OriginCollection: constant.Categories,
+			Processor:        subCategoryHandler,
+		},
+		{
+			Entity:           constant.Products,
+			OriginCollection: constant.SubCategories,
+			Processor:        productHandler,
+		},
 	})
 }
 

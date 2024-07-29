@@ -12,11 +12,11 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			ConcurrentLimit: 3,
 			BlockResources:  true,
 			SleepAfter:      20,
-			//Provider:        "zenrows",
+			Provider:        "zenrows",
 		},
 		Handler: ninjacrawler.Handler{
-			UrlHandler: UrlHandler,
-			//ProductHandler: ProductHandler,
+			UrlHandler:     UrlHandler,
+			ProductHandler: ProductHandler,
 		},
 	}
 }
