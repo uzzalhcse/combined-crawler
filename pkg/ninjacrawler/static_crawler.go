@@ -117,7 +117,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Error sending request: from %s to %v", proxyIp, err)
+		return nil, fmt.Errorf(fmt.Sprintf("Error sending request: from %s to %v", proxyIp, err))
 	}
 	defer resp.Body.Close()
 

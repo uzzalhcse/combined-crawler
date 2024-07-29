@@ -54,7 +54,6 @@ func categoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollecti
 	// Extract and print child categories
 	for _, category := range categories {
 		for _, child := range category.Child {
-			fmt.Printf(" URL: %s\n", child.Url)
 			urls = append(urls, ninjacrawler.UrlCollection{
 				Url:    ctx.App.GetQueryEscapeFullUrl(child.Url),
 				Parent: ctx.UrlCollection.Url,
