@@ -142,7 +142,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 				attempt++
 				fmt.Println("Zenrows response: ", jsonResponse)
 				urlString += "&premium_proxy=true&proxy_country=jp"
-				fmt.Println("retrying with premium proxy: ", urlString)
+				app.Logger.Warn("retrying with premium proxy: %s", urlString)
 				body, err = app.getResponseBody(client, urlString, proxyServer, attempt)
 				if err != nil {
 					return nil, err
