@@ -14,19 +14,12 @@ type Category struct {
 }
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
-	//categorySelector := ninjacrawler.UrlSelector{
-	//	Selector:     "ul.MK2PFRDH000_01 li li",
-	//	SingleResult: false,
-	//	FindSelector: "a",
-	//	Attr:         "href",
-	//}
 
 	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
 		{
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),
 			Processor:        categoryHandler,
-			//Engine:           ninjacrawler.Engine{IsDynamic: true},
 		},
 		{
 			Entity:           constant.SubCategories,
