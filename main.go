@@ -1,7 +1,7 @@
 package main
 
 import (
-	"combined-crawler/handlers/kojima"
+	"combined-crawler/handlers/panasonic"
 	"combined-crawler/pkg/ninjacrawler"
 )
 
@@ -20,6 +20,7 @@ func siteRegistry() {
 		//AddSite(midori_anzen.Crawler()).
 		//AddSite(osg.Crawler()).
 		//AddSite(sumitool.Crawler()).
-		AddSite(kojima.Crawler()).
+		//AddSite(kojima.Crawler()).
+		AddSite(panasonic.Crawler()).
 		Start()
 }
