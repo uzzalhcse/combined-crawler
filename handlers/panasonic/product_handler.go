@@ -19,8 +19,8 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 		Maker:        "",
 		Brand:        "",
 		ProductName:  ProductNameHandler,
-		Category:     GetProductCategory,
-		Description:  GetProductDescription,
+		Category:     getCategoryService,
+		Description:  getDescriptionService,
 		Reviews: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
 		},
