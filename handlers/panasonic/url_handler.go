@@ -60,6 +60,9 @@ func handleProduct(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection
 			fmt.Println("Invalid href:", href)
 			return
 		}
+		if !strings.HasPrefix(href, "/") {
+			href = "/" + href
+		}
 		href = ctx.App.GetFullUrl(href)
 		if !isValidHost(href) {
 			return

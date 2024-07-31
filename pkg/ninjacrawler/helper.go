@@ -138,9 +138,7 @@ func generateCsvFileName(siteName string) string {
 }
 
 func (app *Crawler) GetFullUrl(url string) string {
-	if !strings.HasPrefix(url, "/") {
-		url = "/" + url
-	}
+
 	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
 		// If url is already a full URL, return it as is
 		return url
