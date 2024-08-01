@@ -18,6 +18,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Selectors: []ninjacrawler.Selector{
 				{Query: "div.molProductsImages img", Attr: "src"},
 			},
+			IsUnique: true,
 		},
 		ProductCodes: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
