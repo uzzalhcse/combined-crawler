@@ -56,7 +56,7 @@ func getReviewsService(ctx ninjacrawler.CrawlerContext) []string {
 		httpClient := ctx.App.GetHttpClient()
 		pageData, err := ctx.App.NavigateToStaticURL(httpClient, reviewUrl, ninjacrawler.Proxy{})
 		if err != nil {
-			ctx.App.Logger.Fatal(err.Error())
+			ctx.App.Logger.Warn(err.Error())
 			return reviews
 
 		}
