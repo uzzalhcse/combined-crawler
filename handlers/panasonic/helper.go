@@ -16,7 +16,11 @@ func getImagesService(ctx ninjacrawler.CrawlerContext) []string {
 	images := []string{}
 
 	url := strings.ReplaceAll(ctx.UrlCollection.Url, baseUrl, "")
-	urlStarting := strings.Split(url, "/")[1]
+	urlParts := strings.Split(url, "/")
+	if len(urlParts) < 2 {
+		return images // Return empty slice if urlParts has less than 2 elements
+	}
+	urlStarting := urlParts[1]
 
 	mainSection := ctx.Document.Find("section#maincontents").First()
 	if mainSection == nil {
@@ -58,6 +62,7 @@ func getImagesService(ctx ninjacrawler.CrawlerContext) []string {
 
 	return images
 }
+
 func getProductCodesService(ctx ninjacrawler.CrawlerContext) []string {
 	productCodes := []string{}
 	if !strings.Contains(ctx.UrlCollection.Url, "products/") {
