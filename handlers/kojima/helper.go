@@ -51,10 +51,15 @@ func getReviewsService(ctx ninjacrawler.CrawlerContext) []string {
 	if !exists {
 		return reviews
 	}
-	reviewUrl := ctx.App.GetFullUrl(reviewHyperlink)
+	reviewUrl := ctx.App.GetQueryEscapeFullUrl(reviewHyperlink)
 	for {
 		httpClient := ctx.App.GetHttpClient()
-		pageData, _ := ctx.App.NavigateToStaticURL(httpClient, reviewUrl, ninjacrawler.Proxy{})
+		pageData, err := ctx.App.NavigateToStaticURL(httpClient, reviewUrl, ninjacrawler.Proxy{})
+		if err != nil {
+			ctx.App.Logger.Fatal(err.Error())
+			return reviews
+
+		}
 		reviewItems := pageData.Find("p.normal-text.mt3")
 		reviewItems.Each(func(_ int, reviewItem *goquery.Selection) {
 			reviewText := strings.TrimSpace(reviewItem.Text())
