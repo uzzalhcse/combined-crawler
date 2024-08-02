@@ -6,13 +6,13 @@ import (
 
 func Crawler() ninjacrawler.CrawlerConfig {
 	return ninjacrawler.CrawlerConfig{
-		Name: "panasonic1",
+		Name: "panasonic",
 		URL:  "https://panasonic.jp/products.html",
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       false,
 			DevCrawlLimit:   200,
-			ConcurrentLimit: 1,
-			SleepAfter:      150,
+			ConcurrentLimit: 10,
+			SleepAfter:      10,
 			Timeout:         30,
 		},
 		Handler: ninjacrawler.Handler{
