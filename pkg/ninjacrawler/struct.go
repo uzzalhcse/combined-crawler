@@ -37,8 +37,12 @@ type AppPreference struct {
 type Preference struct {
 	DoNotMarkAsComplete bool
 	ValidationRules     []string
+	PreHandlers         []func(c PreHandlerContext) error
 }
-
+type PreHandlerContext struct {
+	App           *Crawler
+	UrlCollection UrlCollection
+}
 type Handler struct {
 	UrlHandler     func(c *Crawler)
 	ProductHandler func(c *Crawler)
