@@ -15,7 +15,6 @@ import (
 func uploadToBucket(app *Crawler, sourceFileName, destinationFileName string) {
 	startTime := time.Now()
 	bucketName := "gen_crawled_data_venturas_asia-northeast1"
-	destinationFileName = fmt.Sprintf("maker/%s/%s", app.Name, destinationFileName)
 	googleApplicationCredentialsFileName := app.Config.EnvString("GCP_CREDENTIALS_PATH")
 
 	err := UploadToGCPBucket(app.Name, googleApplicationCredentialsFileName, sourceFileName, destinationFileName)
