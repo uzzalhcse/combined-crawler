@@ -17,7 +17,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			BoostCrawling:   true,
 		},
 		Handler: ninjacrawler.Handler{
-			//UrlHandler:     UrlHandler,
+			UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
 		},
 	}
