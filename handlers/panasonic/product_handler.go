@@ -62,7 +62,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 
 func ValidHost(c ninjacrawler.PreHandlerContext) error {
 	if !isValidHost(c.UrlCollection.Url) {
-		_ = c.App.MarkAsMaxErrorAttempt(c.UrlCollection.Url, constant.Products)
+		_ = c.App.MarkAsMaxErrorAttempt(c.UrlCollection.Url, constant.Products, "Invalid Host")
 		return fmt.Errorf("invalid host %s", c.UrlCollection.Url)
 	}
 	return nil
@@ -70,7 +70,7 @@ func ValidHost(c ninjacrawler.PreHandlerContext) error {
 func HandleUrlExtension(c ninjacrawler.PreHandlerContext) error {
 	ext := GetUrlFileExtension(c.UrlCollection.Url)
 	if ext != "" && ext != ".html" && ext != ".htm" {
-		_ = c.App.MarkAsMaxErrorAttempt(c.UrlCollection.Url, constant.Products)
+		_ = c.App.MarkAsMaxErrorAttempt(c.UrlCollection.Url, constant.Products, "Invalid Url Extension")
 		return fmt.Errorf("invalid Url Extension %s", c.UrlCollection.Url)
 	}
 	return nil
