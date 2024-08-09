@@ -53,7 +53,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.ProductDetails,
 			OriginCollection: constant.Products,
 			Processor:        productDetailSelector,
-			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle"}, DoNotMarkAsComplete: true},
+			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle"}},
 		},
 	})
 }
