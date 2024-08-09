@@ -196,68 +196,88 @@ func getHelmetBodiesAttributes(ctx ninjacrawler.CrawlerContext, attributes *[]ni
 }
 func parseMeasurementTable(ctx ninjacrawler.CrawlerContext, attributes *[]ninjacrawler.AttributeItem) {
 	key := "measurement_information"
-	// Initialize slices for sizes and measurement types
+	var sizeHeader string
 	sizes := []string{}
-	measurementTypes := []string{}
-	measurements := make(map[string][]string)
+	measurements := make(map[string]map[string][]string) // Category -> Measurement Type -> Data
+	order := []string{}
 
-	// Extract headers (sizes)
-	headerLabel := ""
-	ctx.Document.Find(".table-responsive:last-of-type table:first-of-type tr:first-child").Each(func(index int, rowHtml *goquery.Selection) {
-		rowHtml.Find("td").Each(func(cellIdx int, cellHtml *goquery.Selection) {
-			if cellIdx == 0 {
-				headerLabel = strings.TrimSpace(cellHtml.Text())
-			} else { // Skip the first header cell (headerLabel)
-				sizes = append(sizes, strings.TrimSpace(cellHtml.Text()))
-			}
-		})
+	// Extract the header for sizes (the first two columns will be ignored)
+	ctx.Document.Find(".table-responsive:last-of-type table:first-of-type tr:first-child td").Each(func(cellIdx int, cellHtml *goquery.Selection) {
+		if cellIdx == 0 { // The second column should be the header for sizes (e.g., "サイズ")
+			sizeHeader = strings.TrimSpace(cellHtml.Text())
+		}
+		if cellIdx > 1 { // Skip the first two columns (Category and Measurement Type)
+			sizes = append(sizes, strings.TrimSpace(cellHtml.Text()))
+		}
 	})
 	if len(sizes) < 2 {
 		return
 	}
-	// Extract measurement types and their corresponding data
-	ctx.Document.Find(".table-responsive:last-of-type table:first-of-type tr").Each(func(rowIdx int, rowHtml *goquery.Selection) {
-		if rowIdx > 0 { // Skip the first row (headers)
-			var measurementType string
-			rowHtml.Find("td").Each(func(cellIdx int, cellHtml *goquery.Selection) {
-				if cellIdx == 0 { // First column contains the measurement category
-					measurementType = strings.TrimSpace(cellHtml.Text())
-					if _, ok := measurements[measurementType]; !ok {
-						measurements[measurementType] = make([]string, len(sizes))
-						measurementTypes = append(measurementTypes, measurementType)
-					}
-				} else {
-					measurements[measurementType][cellIdx-1] = strings.TrimSpace(cellHtml.Text())
-				}
-			})
-		}
-	})
-	unitInfo := ""
-	ctx.Document.Find(".table-responsive:last-of-type table:last-of-type tr td").Each(func(index int, cellHtml *goquery.Selection) {
-		unitInfo = strings.TrimSpace(cellHtml.Text())
-	})
-	measurement_information := ""
-	// Print the header row (measurement types)
-	headerOutput := headerLabel
-	for _, measurementType := range measurementTypes {
-		headerOutput += fmt.Sprintf("/%s", measurementType)
-	}
 
-	measurement_information = headerOutput + "\n"
-	// Print the extracted data in the "y:x" format
-	for i, size := range sizes {
-		output := size
-		for _, measurementType := range measurementTypes {
-			output += fmt.Sprintf("/%s", measurements[measurementType][i])
+	// Extract measurement types and their corresponding data
+	var currentCategory, measurementType, subCategory string
+	ctx.Document.Find(".table-responsive:last-of-type table:first-of-type tr").Each(func(rowIdx int, rowHtml *goquery.Selection) {
+		if rowIdx == 0 { // Skip the header row
+			return
 		}
-		measurement_information += output + "\n"
+
+		rowHtml.Find("td").Each(func(cellIdx int, cellHtml *goquery.Selection) {
+			cellText := strings.TrimSpace(cellHtml.Text())
+			switch cellIdx {
+			case 0: // Category column
+				if _, exists := cellHtml.Attr("rowspan"); exists {
+					currentCategory = cellText
+					subCategory = fmt.Sprintf("/ %s", currentCategory)
+				} else if currentCategory != "" {
+					subCategory = fmt.Sprintf("// %s / %s", currentCategory, cellText)
+					currentCategory = cellText
+				} else {
+					subCategory = cellText
+				}
+				if _, ok := measurements[subCategory]; !ok {
+					measurements[subCategory] = make(map[string][]string)
+				}
+			case 1: // Measurement Type column
+				measurementType = cellText
+				measurements[subCategory][measurementType] = []string{}
+				order = append(order, fmt.Sprintf("%s_%s", subCategory, measurementType))
+			default: // Data columns
+				measurements[subCategory][measurementType] = append(measurements[subCategory][measurementType], cellText)
+			}
+		})
+	})
+
+	// Extract unit info
+	//unitInfo := ctx.Document.Find(".table-responsive:last-of-type table:last-of-type tr td").Map(func(index int, cellHtml *goquery.Selection) string {
+	//	return strings.TrimSpace(cellHtml.Text())
+	//})
+
+	// Construct the output
+	var measurementInformation strings.Builder
+	measurementInformation.WriteString(sizeHeader)
+	for _, size := range sizes {
+		measurementInformation.WriteString(" / " + size)
 	}
-	measurement_information += unitInfo
-	attribute := ninjacrawler.AttributeItem{
+	measurementInformation.WriteString("\n")
+
+	for _, key := range order {
+		parts := strings.Split(key, "_")
+		category := parts[0]
+		measurementType := parts[1]
+
+		measurementInformation.WriteString(fmt.Sprintf("%s / %s", category, measurementType))
+		for _, value := range measurements[category][measurementType] {
+			measurementInformation.WriteString(" / " + value)
+		}
+		measurementInformation.WriteString("\n")
+	}
+	//measurementInformation.WriteString(strings.Join(unitInfo, " "))
+
+	//fmt.Println(measurementInformation.String())
+	*attributes = append(*attributes, ninjacrawler.AttributeItem{
 		Key:   key,
-		Value: measurement_information,
-	}
-	*attributes = append(*attributes, attribute)
+		Value: measurementInformation.String(),
+	})
 }
 
 func getProductCode(ctx ninjacrawler.CrawlerContext) []string {

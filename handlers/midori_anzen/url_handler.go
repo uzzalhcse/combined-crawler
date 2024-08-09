@@ -14,7 +14,6 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),
 			Processor:        categoryHandler,
-			//Preference:       ninjacrawler.Preference{DoNotMarkAsComplete: true},
 		},
 		{
 			Entity:           constant.Products,
@@ -23,7 +22,6 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			Engine: ninjacrawler.Engine{
 				IsDynamic: true,
 			},
-			Preference: ninjacrawler.Preference{DoNotMarkAsComplete: true},
 		},
 	})
 
@@ -34,7 +32,6 @@ func categoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollecti
 		attrValue, ok := s.Attr("value")
 		if ok {
 			if attrValue != "" {
-				fmt.Println("attrValue", attrValue)
 				pageUrl := fmt.Sprintf("/shop/goods/search.aspx?tree=%s&keyword=&search=x", attrValue)
 				fullUrl := ctx.App.GetFullUrl(pageUrl)
 				urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl, Parent: ctx.UrlCollection.Url})
