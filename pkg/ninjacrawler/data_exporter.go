@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -86,6 +87,17 @@ func mustWriteDataToCSV(crawler *Crawler, filename string, products []ProductDet
 	}
 
 	for _, product := range products {
+		// Decode the URL-encoded string
+		decodedURL, err := url.QueryUnescape(product.Url)
+		if err != nil {
+			fmt.Println("Error decoding URL:", err)
+		}
+		product.Url = decodedURL
+		err = crawler.submitProductData(&product)
+		if err != nil {
+			crawler.Logger.Fatal("Failed to submit product data to API Server: %v", err)
+		}
+		crawler.Logger.Info("Submitted data to API Server: %s", product.Url)
 		row, err := convertFieldsToStrings(product)
 		if err != nil {
 			// Assuming there's a logger defined elsewhere
