@@ -201,12 +201,12 @@ func parseMeasurementTable(ctx ninjacrawler.CrawlerContext, attributes *[]ninjac
 	measurements := make(map[string]map[string][]string) // Category -> Measurement Type -> Data
 	order := []string{}
 
-	// Extract the header for sizes (the first two columns will be ignored)
+	// Extract the header for sizes (skip the first two columns)
 	ctx.Document.Find(".table-responsive:last-of-type table:first-of-type tr:first-child td").Each(func(cellIdx int, cellHtml *goquery.Selection) {
 		if cellIdx == 0 { // The second column should be the header for sizes (e.g., "サイズ")
 			sizeHeader = strings.TrimSpace(cellHtml.Text())
 		}
-		if cellIdx > 1 { // Skip the first two columns (Category and Measurement Type)
+		if cellIdx > 0 { // Skip the first two columns (Category and Measurement Type)
 			sizes = append(sizes, strings.TrimSpace(cellHtml.Text()))
 		}
 	})
@@ -214,8 +214,9 @@ func parseMeasurementTable(ctx ninjacrawler.CrawlerContext, attributes *[]ninjac
 		return
 	}
 
+	isNested := false
 	// Extract measurement types and their corresponding data
-	var currentCategory, measurementType, subCategory string
+	var currentCategory, subCategory, measurementType string
 	ctx.Document.Find(".table-responsive:last-of-type table:first-of-type tr").Each(func(rowIdx int, rowHtml *goquery.Selection) {
 		if rowIdx == 0 { // Skip the header row
 			return
@@ -224,33 +225,36 @@ func parseMeasurementTable(ctx ninjacrawler.CrawlerContext, attributes *[]ninjac
 		rowHtml.Find("td").Each(func(cellIdx int, cellHtml *goquery.Selection) {
 			cellText := strings.TrimSpace(cellHtml.Text())
 			switch cellIdx {
-			case 0: // Category column
+			case 0: // Category or subCategory column
 				if _, exists := cellHtml.Attr("rowspan"); exists {
+					// New Category
 					currentCategory = cellText
-					subCategory = fmt.Sprintf("/ %s", currentCategory)
-				} else if currentCategory != "" {
-					subCategory = fmt.Sprintf("// %s / %s", currentCategory, cellText)
-					currentCategory = cellText
+					subCategory = "" // Reset subCategory for new category
+					isNested = true
 				} else {
+					// This is a subcategory if rowspan doesn't exist
 					subCategory = cellText
-				}
-				if _, ok := measurements[subCategory]; !ok {
-					measurements[subCategory] = make(map[string][]string)
 				}
 			case 1: // Measurement Type column
 				measurementType = cellText
-				measurements[subCategory][measurementType] = []string{}
-				order = append(order, fmt.Sprintf("%s_%s", subCategory, measurementType))
+				combinedCategory := currentCategory
+				if subCategory != "" {
+					combinedCategory += " / " + subCategory
+				}
+				if _, ok := measurements[combinedCategory]; !ok {
+					measurements[combinedCategory] = make(map[string][]string)
+				}
+				measurements[combinedCategory][measurementType] = []string{}
+				order = append(order, fmt.Sprintf("%s_%s", combinedCategory, measurementType))
 			default: // Data columns
-				measurements[subCategory][measurementType] = append(measurements[subCategory][measurementType], cellText)
+				combinedCategory := currentCategory
+				if subCategory != "" {
+					combinedCategory += " / " + subCategory
+				}
+				measurements[combinedCategory][measurementType] = append(measurements[combinedCategory][measurementType], cellText)
 			}
 		})
 	})
-
-	// Extract unit info
-	//unitInfo := ctx.Document.Find(".table-responsive:last-of-type table:last-of-type tr td").Map(func(index int, cellHtml *goquery.Selection) string {
-	//	return strings.TrimSpace(cellHtml.Text())
-	//})
 
 	// Construct the output
 	var measurementInformation strings.Builder
@@ -265,14 +269,30 @@ func parseMeasurementTable(ctx ninjacrawler.CrawlerContext, attributes *[]ninjac
 		category := parts[0]
 		measurementType := parts[1]
 
-		measurementInformation.WriteString(fmt.Sprintf("%s / %s", category, measurementType))
+		// Determine prefix based on category and subcategory
+		prefix := ""
+		if strings.Contains(category, " / ") {
+			prefix = "// "
+		} else {
+			prefix = "/ "
+		}
+
+		// Write the category and measurement type
+		if isNested {
+			measurementInformation.WriteString(prefix + category + " / " + measurementType)
+		} else {
+			val := strings.Split(category, " / ")
+			measurementInformation.WriteString(val[1] + " / " + measurementType)
+		}
+
+		// Write the measurement values
 		for _, value := range measurements[category][measurementType] {
 			measurementInformation.WriteString(" / " + value)
 		}
 		measurementInformation.WriteString("\n")
 	}
-	//measurementInformation.WriteString(strings.Join(unitInfo, " "))
 
+	//fmt.Println("isNested", isNested)
 	//fmt.Println(measurementInformation.String())
 	*attributes = append(*attributes, ninjacrawler.AttributeItem{
 		Key:   key,
