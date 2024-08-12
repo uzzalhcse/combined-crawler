@@ -51,7 +51,7 @@ func getReviewsService(ctx ninjacrawler.CrawlerContext) []string {
 	if !exists {
 		return reviews
 	}
-	reviewUrl := ctx.App.GetQueryEscapeFullUrl(reviewHyperlink)
+	reviewUrl := ctx.App.GetFullUrl(reviewHyperlink)
 	for {
 		httpClient := ctx.App.GetHttpClient()
 		pageData, err := ctx.App.NavigateToStaticURL(httpClient, reviewUrl, ninjacrawler.Proxy{})
