@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -111,12 +112,33 @@ func getCategoryService(ctx ninjacrawler.CrawlerContext) string {
 }
 func getAdditionalPage(ctx ninjacrawler.CrawlerContext, productDetailsSection *goquery.Selection) (*goquery.Document, error) {
 	url := getRelevantUrl(productDetailsSection, ctx)
-	if len(url) > 0 {
-		pageData, err := ctx.App.NavigateToStaticURL(ctx.App.GetHttpClient(), url, ctx.App.CurrentProxy)
-		return pageData, err
+	if url == "" {
+		return nil, nil
 	}
 
-	return nil, nil
+	const maxAttempts = 3
+	const retryDelay = 5 * time.Second
+
+	var document *goquery.Document
+	var err error
+
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		document, err = ctx.App.NavigateToStaticURL(ctx.App.GetHttpClient(), url, ctx.App.CurrentProxy)
+		if err == nil {
+			return document, nil // Successful navigation, return the document
+		}
+
+		ctx.App.Logger.Warn("Attempt %d: Error navigating to page: %v", attempt, err)
+
+		if attempt == maxAttempts {
+			_ = ctx.App.MarkAsError(ctx.UrlCollection.Url, constant.Products, err.Error(), 1)
+			ctx.App.Logger.Error("Error navigating to page after %d attempts: %v", maxAttempts, err)
+		} else {
+			time.Sleep(retryDelay)
+		}
+	}
+
+	return nil, err
 }
 func getRelevantUrl(productDetailsSection *goquery.Selection, ctx ninjacrawler.CrawlerContext) string {
 	url := ""
