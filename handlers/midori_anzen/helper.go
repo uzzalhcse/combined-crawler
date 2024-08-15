@@ -88,8 +88,6 @@ func extractAttributes(ctx ninjacrawler.CrawlerContext, attributes *[]ninjacrawl
 					// Extract the document URL
 					documentURL := docURL[urlStart:urlEnd]
 					value = documentURL
-
-					// Here you can handle the document URL as needed, such as storing it in a struct or variable
 				}
 			}
 			attribute := ninjacrawler.AttributeItem{
@@ -185,7 +183,6 @@ func getHelmetBodiesAttributes(ctx ninjacrawler.CrawlerContext, attributes *[]ni
 	})
 
 	// Print the extracted value
-
 	if key != "" && value != "" {
 		attribute := ninjacrawler.AttributeItem{
 			Key:   key,
@@ -264,7 +261,7 @@ func parseMeasurementTable(ctx ninjacrawler.CrawlerContext, attributes *[]ninjac
 	}
 	measurementInformation.WriteString("\n")
 
-	for _, key := range order {
+	for i, key := range order {
 		parts := strings.Split(key, "_")
 		category := parts[0]
 		measurementType := parts[1]
@@ -274,7 +271,9 @@ func parseMeasurementTable(ctx ninjacrawler.CrawlerContext, attributes *[]ninjac
 		if strings.Contains(category, " / ") {
 			prefix = "// "
 		} else {
-			prefix = "/ "
+			if i > 1 {
+				prefix = "/ "
+			}
 		}
 
 		// Write the category and measurement type
@@ -291,9 +290,6 @@ func parseMeasurementTable(ctx ninjacrawler.CrawlerContext, attributes *[]ninjac
 		}
 		measurementInformation.WriteString("\n")
 	}
-
-	//fmt.Println("isNested", isNested)
-	//fmt.Println(measurementInformation.String())
 	*attributes = append(*attributes, ninjacrawler.AttributeItem{
 		Key:   key,
 		Value: measurementInformation.String(),
