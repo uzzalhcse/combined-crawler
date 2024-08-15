@@ -12,6 +12,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			ConcurrentLimit:         5,
 			WaitForDynamicRendering: true,
 			BlockResources:          true,
+			BrowserType:             "firefox",
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
