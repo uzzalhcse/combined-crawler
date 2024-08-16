@@ -112,7 +112,7 @@ func getCategoryService(ctx ninjacrawler.CrawlerContext) string {
 }
 func getAdditionalPage(ctx ninjacrawler.CrawlerContext, productDetailsSection *goquery.Selection) (*goquery.Document, error) {
 	url := getRelevantUrl(productDetailsSection, ctx)
-	if url == "" {
+	if url == "" || !ctx.App.IsValidPage(url) {
 		return nil, nil
 	}
 
@@ -125,6 +125,7 @@ func getAdditionalPage(ctx ninjacrawler.CrawlerContext, productDetailsSection *g
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		document, err = ctx.App.NavigateToStaticURL(ctx.App.GetHttpClient(), url, ctx.App.CurrentProxy)
 		if err == nil {
+			ctx.App.Logger.Warn("Attempt %d: Successful navigation: %v", attempt)
 			return document, nil // Successful navigation, return the document
 		}
 

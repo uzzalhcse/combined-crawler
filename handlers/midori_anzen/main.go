@@ -11,6 +11,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			DevCrawlLimit:   300,
 			ConcurrentLimit: 10,
 			BoostCrawling:   false,
+			BlockResources:  true,
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
