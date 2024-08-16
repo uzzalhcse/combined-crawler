@@ -3,7 +3,10 @@ package markt
 import (
 	"combined-crawler/constant"
 	"combined-crawler/pkg/ninjacrawler"
+	"fmt"
 	"github.com/playwright-community/playwright-go"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -39,6 +42,7 @@ func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 	}
 
 	for i, item := range items {
+		fullUrl := ""
 		links, _ := item.Locator("a.p-product-card__wrap").Count()
 		modals, _ := item.Locator("div.p-product-card__wrap").Count()
 		if links > 0 {
@@ -48,8 +52,7 @@ func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 				continue
 			}
 
-			fullUrl := ctx.App.GetFullUrl(attribute)
-			urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl, Parent: ctx.UrlCollection.Url})
+			fullUrl = ctx.App.GetFullUrl(attribute)
 		} else if modals > 0 {
 			if err := item.Click(); err != nil {
 				ctx.App.Logger.Warn("Failed to click on Product Card: %v", err)
@@ -76,14 +79,39 @@ func handleProducts(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollectio
 				continue
 			}
 
-			fullUrl := ctx.App.GetFullUrl(productLink)
-			urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl, Parent: ctx.UrlCollection.Url})
+			fullUrl = ctx.App.GetFullUrl(productLink)
 			closeModal(ctx)
+		}
+		if fullUrl != "" {
+			productID, errP := extractProductID(fullUrl)
+			if errP != nil {
+				ctx.App.Logger.Warn("Failed to find product link")
+				continue
+			}
+			apiUrl := fmt.Sprintf("https://markt-mall.jp/api/product/%s", productID)
+			urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl, ApiUrl: apiUrl, Parent: ctx.UrlCollection.Url})
 		}
 
 	}
 
 	return urls
+}
+func extractProductID(productURL string) (string, error) {
+	// Parse the URL
+	parsedURL, err := url.Parse(productURL)
+	if err != nil {
+		return "", err
+	}
+
+	// Split the path and extract the last segment
+	pathSegments := strings.Split(parsedURL.Path, "/")
+	if len(pathSegments) == 0 {
+		return "", fmt.Errorf("invalid URL path")
+	}
+
+	// The product ID is the last segment
+	productID := pathSegments[len(pathSegments)-1]
+	return productID, nil
 }
 
 // retryWithSleep retries the given function fn up to maxRetries times with the specified sleep interval between retries.
