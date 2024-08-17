@@ -22,5 +22,7 @@ func siteRegistry() {
 		//AddSite(sumitool.Crawler()).
 		AddSite(kojima.Crawler()).
 		//AddSite(panasonic.Crawler()).
+		//AddSite(suntory.Crawler()).
+		//AddSite(markt.Crawler()).
 		Start()
 }
