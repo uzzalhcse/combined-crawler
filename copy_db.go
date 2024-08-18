@@ -35,6 +35,13 @@ func main() {
 	sourceCollection := sourceDatabase.Collection("product_details")
 	destinationCollection := destinationDatabase.Collection("product_details")
 
+	// Count the total number of documents in the source collection
+	totalDocuments, err := sourceCollection.CountDocuments(context.TODO(), bson.M{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Total documents to copy: %d\n", totalDocuments)
+
 	// Define the batch size
 	batchSize := 1000
 
@@ -66,7 +73,8 @@ func main() {
 				log.Fatal(err)
 			}
 			totalCopied += len(insertResult.InsertedIDs)
-			fmt.Printf("Copied %d documents so far...\n", totalCopied)
+			progress := float64(totalCopied) / float64(totalDocuments) * 100
+			fmt.Printf("Progress: %.2f%% (%d/%d documents copied)\n", progress, totalCopied, totalDocuments)
 			documents = nil // Clear the slice for the next batch
 
 			// Sleep to prevent overwhelming the server
@@ -81,6 +89,8 @@ func main() {
 			log.Fatal(err)
 		}
 		totalCopied += len(insertResult.InsertedIDs)
+		progress := float64(totalCopied) / float64(totalDocuments) * 100
+		fmt.Printf("Progress: %.2f%% (%d/%d documents copied)\n", progress, totalCopied, totalDocuments)
 	}
 
 	fmt.Printf("Copied %d documents to the destination collection\n", totalCopied)
