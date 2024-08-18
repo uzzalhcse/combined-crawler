@@ -29,7 +29,7 @@ func main() {
 	}
 
 	// Select your database and collection
-	database := client.Database("kojima")                // Replace with your database name
+	database := client.Database("kojima_v2")             // Replace with your database name
 	collection := database.Collection("product_details") // Replace with your collection name
 
 	// Filter to find documents with URL-encoded fields (optional, can be removed if updating all documents)
