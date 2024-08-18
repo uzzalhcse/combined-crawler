@@ -12,38 +12,50 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func processBatch(wg *sync.WaitGroup, client *mongo.Client, urls []string, batchSize int) {
+func processBatch(wg *sync.WaitGroup, client *mongo.Client, urls []string, batchSize int, productsCollection, productDetailsCollection *mongo.Collection) {
 	defer wg.Done()
 
-	// Select the database and collection
-	database := client.Database("kojima_test") // Replace with your database name
-	productsCollection := database.Collection("products")
-
-	// Prepare bulk operations
-	var operations []mongo.WriteModel
+	// Prepare bulk operations for products and product_details collections
+	var productOps, productDetailsOps []mongo.WriteModel
 
 	for _, url := range urls {
 		filter := bson.M{"url": url}
 		update := bson.M{"$set": bson.M{"status": true}}
 
-		model := mongo.NewUpdateOneModel().SetFilter(filter).SetUpdate(update)
-		operations = append(operations, model)
+		productModel := mongo.NewUpdateOneModel().SetFilter(filter).SetUpdate(update)
+		productOps = append(productOps, productModel)
+
+		productDetailsModel := mongo.NewUpdateOneModel().SetFilter(filter).SetUpdate(update)
+		productDetailsOps = append(productDetailsOps, productDetailsModel)
 
 		// Execute the batch if it reaches the batchSize
-		if len(operations) >= batchSize {
-			_, err := productsCollection.BulkWrite(context.TODO(), operations)
+		if len(productOps) >= batchSize {
+			_, err := productsCollection.BulkWrite(context.TODO(), productOps)
 			if err != nil {
-				log.Printf("BulkWrite error: %v", err)
+				log.Printf("BulkWrite error (products): %v", err)
 			}
-			operations = nil // Reset operations after executing the batch
+			productOps = nil // Reset operations after executing the batch
+
+			_, err = productDetailsCollection.BulkWrite(context.TODO(), productDetailsOps)
+			if err != nil {
+				log.Printf("BulkWrite error (product_details): %v", err)
+			}
+			productDetailsOps = nil // Reset operations after executing the batch
 		}
 	}
 
 	// Execute remaining operations
-	if len(operations) > 0 {
-		_, err := productsCollection.BulkWrite(context.TODO(), operations)
+	if len(productOps) > 0 {
+		_, err := productsCollection.BulkWrite(context.TODO(), productOps)
 		if err != nil {
-			log.Printf("BulkWrite error: %v", err)
+			log.Printf("BulkWrite error (products): %v", err)
+		}
+	}
+
+	if len(productDetailsOps) > 0 {
+		_, err := productDetailsCollection.BulkWrite(context.TODO(), productDetailsOps)
+		if err != nil {
+			log.Printf("BulkWrite error (product_details): %v", err)
 		}
 	}
 }
@@ -64,8 +76,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Select your database and collection
-	database := client.Database("kojima_test") // Replace with your database name
+	// Select your database and collections
+	database := client.Database("kojima_v2") // Replace with your database name
+	productsCollection := database.Collection("products")
 	productDetailsCollection := database.Collection("product_details")
 
 	// Find all product_details documents and retrieve URLs
@@ -95,7 +108,7 @@ func main() {
 			// When the batch is full, process it
 			if len(urls) >= batchSize*numWorkers {
 				wg.Add(1)
-				go processBatch(&wg, client, urls, batchSize)
+				go processBatch(&wg, client, urls, batchSize, productsCollection, productDetailsCollection)
 				urls = nil // Reset urls slice after dispatching the batch
 			}
 		}
@@ -104,7 +117,7 @@ func main() {
 	// Process any remaining URLs
 	if len(urls) > 0 {
 		wg.Add(1)
-		go processBatch(&wg, client, urls, batchSize)
+		go processBatch(&wg, client, urls, batchSize, productsCollection, productDetailsCollection)
 	}
 
 	// Wait for all Goroutines to finish
