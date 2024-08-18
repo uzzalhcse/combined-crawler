@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"runtime"
 	"sync"
+	"sync/atomic"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func processBatch(wg *sync.WaitGroup, client *mongo.Client, urls []string, batchSize int, productsCollection, productDetailsCollection *mongo.Collection) {
+func processBatch(wg *sync.WaitGroup, client *mongo.Client, urls []string, batchSize int, productsCollection, productDetailsCollection *mongo.Collection, processedCount *int32, total int32) {
 	defer wg.Done()
 
 	// Prepare bulk operations for products and product_details collections
@@ -58,6 +60,11 @@ func processBatch(wg *sync.WaitGroup, client *mongo.Client, urls []string, batch
 			log.Printf("BulkWrite error (product_details): %v", err)
 		}
 	}
+
+	// Update the processed count and display progress
+	atomic.AddInt32(processedCount, int32(len(urls)))
+	progress := float32(*processedCount) / float32(total) * 100
+	fmt.Printf("Progress: %.2f%%\n", progress)
 }
 
 func main() {
@@ -81,6 +88,13 @@ func main() {
 	productsCollection := database.Collection("products")
 	productDetailsCollection := database.Collection("product_details")
 
+	// Get the total number of documents in product_details
+	total, err := productDetailsCollection.CountDocuments(context.TODO(), bson.M{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Total documents to process: %d\n", total)
+
 	// Find all product_details documents and retrieve URLs
 	cursor, err := productDetailsCollection.Find(context.TODO(), bson.M{})
 	if err != nil {
@@ -91,6 +105,7 @@ func main() {
 	var urls []string
 	batchSize := 1000              // Define the batch size for updates
 	numWorkers := runtime.NumCPU() // Number of parallel workers
+	var processedCount int32       // Counter to track the number of processed documents
 
 	// WaitGroup to synchronize Goroutines
 	var wg sync.WaitGroup
@@ -108,7 +123,7 @@ func main() {
 			// When the batch is full, process it
 			if len(urls) >= batchSize*numWorkers {
 				wg.Add(1)
-				go processBatch(&wg, client, urls, batchSize, productsCollection, productDetailsCollection)
+				go processBatch(&wg, client, urls, batchSize, productsCollection, productDetailsCollection, &processedCount, int32(total))
 				urls = nil // Reset urls slice after dispatching the batch
 			}
 		}
@@ -117,7 +132,7 @@ func main() {
 	// Process any remaining URLs
 	if len(urls) > 0 {
 		wg.Add(1)
-		go processBatch(&wg, client, urls, batchSize, productsCollection, productDetailsCollection)
+		go processBatch(&wg, client, urls, batchSize, productsCollection, productDetailsCollection, &processedCount, int32(total))
 	}
 
 	// Wait for all Goroutines to finish
