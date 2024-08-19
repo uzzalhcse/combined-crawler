@@ -79,14 +79,17 @@ func main() {
 	productsCollection := database.Collection("products")
 	productDetailsCollection := database.Collection("product_details")
 
-	total, err := productDetailsCollection.CountDocuments(context.TODO(), bson.M{})
+	// Filter to only process documents where status is false
+	filter := bson.M{"status": false}
+
+	total, err := productDetailsCollection.CountDocuments(context.TODO(), filter)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("Total documents to process: %d\n", total)
 
-	findOptions := options.Find().SetBatchSize(500) // Set a smaller batch size to avoid CursorNotFound error
-	cursor, err := productDetailsCollection.Find(context.TODO(), bson.M{}, findOptions)
+	findOptions := options.Find().SetBatchSize(500)
+	cursor, err := productDetailsCollection.Find(context.TODO(), filter, findOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
