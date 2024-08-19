@@ -10,8 +10,13 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			IsDynamic:       true,
 			DevCrawlLimit:   300,
 			ConcurrentLimit: 1,
-			BoostCrawling:   false,
+			BoostCrawling:   true,
 			BlockResources:  true,
+			//ProxyServers: []ninjacrawler.Proxy{
+			//	{
+			//		Server: "http://34.85.121.208:3000",
+			//	},
+			//},
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler: UrlHandler,
