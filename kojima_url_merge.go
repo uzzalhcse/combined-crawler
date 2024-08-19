@@ -3,21 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"runtime"
-	"sync"
-	"sync/atomic"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"log"
+	"runtime"
+	"sync"
+	"sync/atomic"
 )
 
 func processBatch(wg *sync.WaitGroup, client *mongo.Client, urls []string, batchSize int, productsCollection, productDetailsCollection *mongo.Collection, processedCount *int32, total int32) {
 	defer wg.Done()
 
-	// Prepare bulk operations for products and product_details collections
 	var productOps, productDetailsOps []mongo.WriteModel
 
 	for _, url := range urls {
@@ -30,23 +28,21 @@ func processBatch(wg *sync.WaitGroup, client *mongo.Client, urls []string, batch
 		productDetailsModel := mongo.NewUpdateOneModel().SetFilter(filter).SetUpdate(update)
 		productDetailsOps = append(productDetailsOps, productDetailsModel)
 
-		// Execute the batch if it reaches the batchSize
 		if len(productOps) >= batchSize {
 			_, err := productsCollection.BulkWrite(context.TODO(), productOps)
 			if err != nil {
 				log.Printf("BulkWrite error (products): %v", err)
 			}
-			productOps = nil // Reset operations after executing the batch
+			productOps = nil
 
 			_, err = productDetailsCollection.BulkWrite(context.TODO(), productDetailsOps)
 			if err != nil {
 				log.Printf("BulkWrite error (product_details): %v", err)
 			}
-			productDetailsOps = nil // Reset operations after executing the batch
+			productDetailsOps = nil
 		}
 	}
 
-	// Execute remaining operations
 	if len(productOps) > 0 {
 		_, err := productsCollection.BulkWrite(context.TODO(), productOps)
 		if err != nil {
@@ -61,53 +57,46 @@ func processBatch(wg *sync.WaitGroup, client *mongo.Client, urls []string, batch
 		}
 	}
 
-	// Update the processed count and display progress
 	atomic.AddInt32(processedCount, int32(len(urls)))
 	progress := float32(*processedCount) / float32(total) * 100
 	fmt.Printf("Progress: %.2f%%\n", progress)
 }
 
 func main() {
-	// MongoDB connection URI
-	uri := "mongodb://lazuli:x1RWo6cqFtHiaAHce5HB@localhost:27017/" // Replace with your MongoDB URI
+	uri := "mongodb://lazuli:x1RWo6cqFtHiaAHce5HB@localhost:27017/"
 
-	// Create a MongoDB client
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer client.Disconnect(context.TODO())
 
-	// Ping the database to check the connection
 	if err := client.Ping(context.TODO(), readpref.Primary()); err != nil {
 		log.Fatal(err)
 	}
 
-	// Select your database and collections
-	database := client.Database("kojima_v2") // Replace with your database name
+	database := client.Database("kojima_v2")
 	productsCollection := database.Collection("products")
 	productDetailsCollection := database.Collection("product_details")
 
-	// Get the total number of documents in product_details
 	total, err := productDetailsCollection.CountDocuments(context.TODO(), bson.M{})
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("Total documents to process: %d\n", total)
 
-	// Find all product_details documents and retrieve URLs
-	cursor, err := productDetailsCollection.Find(context.TODO(), bson.M{})
+	findOptions := options.Find().SetBatchSize(500) // Set a smaller batch size to avoid CursorNotFound error
+	cursor, err := productDetailsCollection.Find(context.TODO(), bson.M{}, findOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer cursor.Close(context.TODO())
 
 	var urls []string
-	batchSize := 1000              // Define the batch size for updates
-	numWorkers := runtime.NumCPU() // Number of parallel workers
-	var processedCount int32       // Counter to track the number of processed documents
+	batchSize := 1000
+	numWorkers := runtime.NumCPU()
+	var processedCount int32
 
-	// WaitGroup to synchronize Goroutines
 	var wg sync.WaitGroup
 
 	for cursor.Next(context.TODO()) {
@@ -116,26 +105,22 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// Extract the URL from product_details
 		if productDetailURL, ok := productDetail["url"].(string); ok {
 			urls = append(urls, productDetailURL)
 
-			// When the batch is full, process it
 			if len(urls) >= batchSize*numWorkers {
 				wg.Add(1)
 				go processBatch(&wg, client, urls, batchSize, productsCollection, productDetailsCollection, &processedCount, int32(total))
-				urls = nil // Reset urls slice after dispatching the batch
+				urls = nil
 			}
 		}
 	}
 
-	// Process any remaining URLs
 	if len(urls) > 0 {
 		wg.Add(1)
 		go processBatch(&wg, client, urls, batchSize, productsCollection, productDetailsCollection, &processedCount, int32(total))
 	}
 
-	// Wait for all Goroutines to finish
 	wg.Wait()
 
 	if err := cursor.Err(); err != nil {
