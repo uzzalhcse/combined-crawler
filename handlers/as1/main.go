@@ -7,7 +7,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "as2",
 		URL:  "https://axel.as-1.co.jp/",
 		Engine: ninjacrawler.Engine{
-			BrowserType:     "webkit",
+			BrowserType:     "firefox",
 			IsDynamic:       true,
 			DevCrawlLimit:   300,
 			ConcurrentLimit: 1,
@@ -15,7 +15,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			BlockResources: true,
 			//ProxyServers: []ninjacrawler.Proxy{
 			//	{
-			//		Server: "http://34.85.121.208:3000",
+			//		Server: "http://35.243.121.253:3000",
 			//	},
 			//},
 		},
