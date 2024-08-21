@@ -7,34 +7,32 @@ import (
 
 func ProductHandler(crawler *ninjacrawler.Crawler) {
 	productDetailSelector := ninjacrawler.ProductDetailSelector{
-		Jan: "",
+		Jan: getJanService,
 		PageTitle: &ninjacrawler.SingleSelector{
 			Selector: "title",
 		},
 		Url: getUrlHandler,
 		Images: &ninjacrawler.MultiSelectors{
 			Selectors: []ninjacrawler.Selector{
-				{Query: ".goods_detail a.thumbnail img", Attr: "src"},
-				{Query: ".goods_c img.img-responsive", Attr: "src"},
-				{Query: ".goods_a img.img-responsive", Attr: "src"},
+				{Query: "#gallery > ul.gallery-thumbnails > li img", Attr: "src"},
+				{Query: "#gallery > ul > li > a > img", Attr: "src"},
 			},
 		},
 		ProductCodes: getProductCode,
 		Maker:        getMaker,
 		Brand:        "",
-		ProductName: &ninjacrawler.SingleSelector{
-			Selector: ".goodsname01",
-			Regexp:   []string{`\s+`},
-		},
-		Category:    productCategoryHandler,
-		Description: getProductDescription,
+		ProductName:  getProductNameService,
+		Category:     "",
+		Description:  "",
 		Reviews: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
 		},
 		ItemTypes: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
 		},
-		ItemSizes: getItemSizes,
+		ItemSizes: func(ctx ninjacrawler.CrawlerContext) []string {
+			return []string{}
+		},
 		ItemWeights: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
 		},
@@ -42,11 +40,8 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 		SingleItemWeight: "",
 		NumOfItems:       "",
 		ListPrice:        "",
-		SellingPrice: &ninjacrawler.SingleSelector{
-			Selector: "td span.goodsprice",
-			Regexp:   []string{`[^0-9]`},
-		},
-		Attributes: getProductAttribute,
+		SellingPrice:     "",
+		Attributes:       getProductAttribute,
 	}
 	crawler.CrawlPageDetail([]ninjacrawler.ProcessorConfig{
 		{

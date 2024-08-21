@@ -5,15 +5,39 @@ import (
 	"combined-crawler/pkg/ninjacrawler"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/playwright-community/playwright-go"
+	"math"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
+	//subCategorySelector := ninjacrawler.UrlSelector{
+	//	Selector:     "#af-categories-list > li",
+	//	SingleResult: false,
+	//	FindSelector: "a",
+	//	Attr:         "href",
+	//}
 	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
+		//{
+		//	Entity:           constant.Categories,
+		//	OriginCollection: crawler.GetBaseCollection(),
+		//	Processor:        categoryHandler,
+		//},
+		//{
+		//	Entity:           constant.SubCategories,
+		//	OriginCollection: constant.Categories,
+		//	Processor:        subCategorySelector,
+		//},
+		//{
+		//	Entity:           constant.Series,
+		//	OriginCollection: constant.SubCategories,
+		//	Processor:        seriesAndProductHandler,
+		//},
 		{
-			Entity:           constant.Categories,
-			OriginCollection: crawler.GetBaseCollection(),
-			Processor:        categoryHandler,
+			Entity:           constant.Products,
+			OriginCollection: constant.Series,
+			Processor:        productHandler,
 		},
 	})
 }
@@ -45,82 +69,147 @@ func categoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollecti
 	})
 	return urls
 }
-func productHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
-	var urls []ninjacrawler.UrlCollection
-	currentPage := "1"
 
-	for {
-		items, err := ctx.Page.Locator(".pagination.pagination-sm li").All()
-		if err != nil {
-			fmt.Printf("Failed to locate pagination items: %v\n", err)
-			return urls
-		}
-		if len(items) < 2 {
-			fmt.Println("Pagination items are insufficient")
-			return urls
-		}
+func seriesAndProductHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
+	var seriesUrls []ninjacrawler.UrlCollection
+	var prdUrls []ninjacrawler.UrlCollection
 
-		lastPage := items[len(items)-2]
-		lastPageNumber, err := lastPage.TextContent()
-		if err != nil {
-			fmt.Printf("Failed to get last page number: %v\n", err)
-			return urls
-		}
-
-		fmt.Printf("c %s, l %s\n", currentPage, lastPageNumber)
-		if currentPage == lastPageNumber {
-			fmt.Println("No more next page")
-			break
-		}
-
-		for _, item := range items {
-			urls = append(urls, getUrls(ctx)...)
-
-			currentPage, err = item.Locator("a").TextContent()
-			if err != nil {
-				fmt.Printf("Failed to get current page number: %v\n", err)
-				return urls
+	scrapeAnchors := func(s *goquery.Selection, urlType string) {
+		href, ok := s.Find("a").Attr("href")
+		fullUrl := ctx.App.GetFullUrl(href)
+		if ok {
+			if urlType == "series" {
+				seriesUrls = append(seriesUrls, ninjacrawler.UrlCollection{
+					Url:    fullUrl,
+					Parent: ctx.UrlCollection.Url,
+				})
+			} else if urlType == "product" {
+				prdUrls = append(prdUrls, ninjacrawler.UrlCollection{
+					Url:    fullUrl,
+					Parent: ctx.UrlCollection.Url,
+				})
 			}
-
-			fmt.Printf("currentPage %s, lastPageNumber %s\n", currentPage, lastPageNumber)
-			if currentPage == lastPageNumber {
-				fmt.Println("No more next page...")
-				break
-			}
-
-			err = item.Locator("a").Click()
-			if err != nil {
-				fmt.Printf("Failed to click on next page: %v\n", err)
-				return urls
-			}
-
-			ctx.Page.WaitForLoadState(playwright.PageWaitForLoadStateOptions{
-				State: playwright.LoadStateNetworkidle,
-			})
+		} else {
+			ctx.App.Logger.Warn("URL not found")
 		}
 	}
-	return urls
+
+	mainFunc := func(pageDt *goquery.Document) {
+		pageDt.Find("#af-product-list > ul > li").Each(func(i int, li *goquery.Selection) {
+			pElements := li.Find("div > div > p")
+			if pElements.Length() > 2 {
+				thirdP := pElements.Eq(2)
+				productsLength := thirdP.Find("a").Length()
+				if productsLength > 1 {
+					scrapeAnchors(li, "series")
+				} else {
+					scrapeAnchors(thirdP, "product")
+				}
+			}
+		})
+	}
+
+	totalItems := ctx.Document.Find("#af-result-count > span").Text()
+	ctx.App.Logger.Info("Total items found: %s", totalItems)
+	re := regexp.MustCompile(`[-+]?(?:\d*\.\d+|\d+)`)
+	totalNo := re.FindString(totalItems)
+	// Check if total number is numeric
+	perBlockItem := 40
+	// Convert total number to float64
+	total, err := strconv.ParseFloat(totalNo, 64)
+	if err != nil {
+		ctx.App.Logger.Error("Failed to convert total number to float64 %s", err.Error())
+	}
+	pageTotal := int(math.Ceil(total / float64(perBlockItem)))
+
+	for i := 1; i <= pageTotal; i++ {
+		pageURL := fmt.Sprintf("%s&page=%d", ctx.UrlCollection.Url, i)
+		ctx.App.Logger.Info("Fetching page %s", pageURL)
+		doc, pwErr := ctx.App.NavigateToStaticURL(ctx.App.GetHttpClient(), pageURL, ctx.App.CurrentProxy)
+		if pwErr != nil {
+			ctx.App.Logger.Error("Failed to fetch page data page_url %s error %s", pageURL, pwErr.Error())
+		}
+		mainFunc(doc)
+	}
+
+	ctx.App.InsertUrlCollections(constant.Products, prdUrls, ctx.UrlCollection.Url)
+	return seriesUrls
+}
+func productHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
+	var productUrls []ninjacrawler.UrlCollection
+
+	series := getSeries(ctx.Document)
+	category := getCategory(ctx.Document)
+	description := getDescription(ctx.Document)
+
+	ctx.Document.Find("#af-product-list-body > tr").Each(func(i int, tr *goquery.Selection) {
+		href, ok := tr.Find("td.af-group-item-productno > a").First().Attr("href")
+		fullUrl := ctx.App.GetFullUrl(href)
+		if ok {
+			productUrls = append(productUrls, ninjacrawler.UrlCollection{
+				Url:    fullUrl,
+				Parent: ctx.UrlCollection.Url,
+				MetaData: map[string]interface{}{
+					"series":      series,
+					"category":    category,
+					"description": description,
+				},
+			})
+		} else {
+			ctx.App.Logger.Error("Product URL not found")
+		}
+	})
+	return productUrls
+}
+func getSeries(doc *goquery.Document) string {
+	series := doc.Find("#af-groupcd > div.groupdetail__name > h1").Text()
+	return series
 }
 
-func getUrls(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
-	var urls []ninjacrawler.UrlCollection
-	items, err := ctx.Page.Locator(".event-goods .iconcard.event-price-img").All()
-	if err != nil {
-		ctx.App.Logger.Warn("Error fetching items:", err)
-		return urls
+func getCategory(doc *goquery.Document) string {
+	var categoryTexts []string
+	lis := doc.Find("body > div.container > nav > ul").First().Find("li")
+	liCount := lis.Length()
+	if liCount < 3 {
+		return ""
 	}
-
-	for _, item := range items {
-
-		attribute, err := item.Locator("a").GetAttribute("href")
-		if err != nil {
-			ctx.App.Logger.Warn("Failed to Get Attribute", err)
-			continue
+	// Iterate through the list items, excluding the first, second, and last items
+	lis.Each(func(i int, li *goquery.Selection) {
+		if i > 1 && i < liCount-1 { // Exclude the first, second, and last items
+			text := li.Text()
+			categoryTexts = append(categoryTexts, strings.TrimSpace(text))
 		}
+	})
+	category := strings.Join(categoryTexts, " > ")
+	return category
+}
 
-		fullUrl := ctx.App.GetFullUrl(attribute)
-		urls = append(urls, ninjacrawler.UrlCollection{Url: fullUrl, Parent: ctx.UrlCollection.Url})
+func getDescription(doc *goquery.Document) string {
+	uls := doc.Find("body > div.container > nav > ul")
+	ulCount := uls.Length()
+	if ulCount <= 1 {
+		return ""
+	} else {
+		var descriptionTexts []string
+		uls.Each(func(j int, ul *goquery.Selection) {
+			if j > 0 {
+				var categoryTexts []string
+				lis := ul.Find("li")
+				liCount := lis.Length()
+				if liCount > 2 {
+					// Iterate through the list items, excluding the first, second, and last items
+					lis.Each(func(i int, li *goquery.Selection) {
+						if i > 1 && i < liCount-1 { // Exclude the first, second, and last items
+							text := li.Text()
+							categoryTexts = append(categoryTexts, strings.TrimSpace(text))
+						}
+					})
+				}
+				category := strings.Join(categoryTexts, " > ")
+				descriptionTexts = append(descriptionTexts, strings.TrimSpace(category))
+			}
+		})
+		description := strings.Join(descriptionTexts, " | ")
+		return description
 	}
-
-	return urls
 }

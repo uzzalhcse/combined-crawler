@@ -7,6 +7,23 @@ import (
 	"strings"
 )
 
+func getJanService(ctx ninjacrawler.CrawlerContext) string {
+	janCode := ""
+	ctx.Document.Find("#item > div.item-action.item-action-scroll > div.sidepanel-and-cart-wrapper > table > " +
+		"tbody.underemphasize > tr").Each(func(index int, rowHtml *goquery.Selection) {
+		th := rowHtml.Find("th").Text()
+		if th == "JANコード" {
+			td := rowHtml.Find("td").Text()
+			td = strings.ReplaceAll(td, "\t", "")
+			janCode = ctx.App.ToNumericsString(td)
+		}
+	})
+	return janCode
+}
+func getProductNameService(ctx ninjacrawler.CrawlerContext) string {
+	productName := ctx.Document.Find("#item > div.item-info > header > div.af-item-head-main > h1.name").Text()
+	return productName
+}
 func productCategoryHandler(ctx ninjacrawler.CrawlerContext) string {
 	categoryItems := make([]string, 0)
 	ctx.Document.Find(".breadcrumb li").Each(func(i int, s *goquery.Selection) {
@@ -40,15 +57,15 @@ func getProductDescription(ctx ninjacrawler.CrawlerContext) string {
 
 func getProductAttribute(ctx ninjacrawler.CrawlerContext) []ninjacrawler.AttributeItem {
 	attributes := []ninjacrawler.AttributeItem{}
-	attributes = append(attributes, ninjacrawler.AttributeItem{Key: "selling_price_tax", Value: "1"}) // Put it in to determine that it is tax included
-
-	extractAttributes(ctx, &attributes)
-
-	getFunctionAttributes(ctx, &attributes)
-	parseMeasurementTable(ctx, &attributes)
-	getTagAttributes(ctx, &attributes)
-	getCoordinationAttributes(ctx, &attributes)
-	getHelmetBodiesAttributes(ctx, &attributes)
+	//attributes = append(attributes, ninjacrawler.AttributeItem{Key: "selling_price_tax", Value: "1"}) // Put it in to determine that it is tax included
+	//
+	//extractAttributes(ctx, &attributes)
+	//
+	//getFunctionAttributes(ctx, &attributes)
+	//parseMeasurementTable(ctx, &attributes)
+	//getTagAttributes(ctx, &attributes)
+	//getCoordinationAttributes(ctx, &attributes)
+	//getHelmetBodiesAttributes(ctx, &attributes)
 	return attributes
 }
 
@@ -297,10 +314,37 @@ func parseMeasurementTable(ctx ninjacrawler.CrawlerContext, attributes *[]ninjac
 }
 
 func getProductCode(ctx ninjacrawler.CrawlerContext) []string {
-	return []string{findTextByThContent(ctx.Document, "商品コード")}
+	productCodes := []string{}
+
+	code := ""
+	ctx.Document.Find("#item > div.item-action.item-action-scroll > div.sidepanel-and-cart-wrapper > table > " +
+		"tbody.underemphasize > tr").Each(func(index int, rowHtml *goquery.Selection) {
+		th := rowHtml.Find("th").Text()
+		if th == "型番" {
+			td := rowHtml.Find("td").Text()
+			code = strings.ReplaceAll(td, "\t", "")
+		}
+	})
+	if len(code) == 0 {
+		ctx.Document.Find("#item > div.item-action.item-action-scroll > div.sidepanel-and-cart-wrapper > table > " +
+			"tbody.underemphasize > tr").Each(func(index int, rowHtml *goquery.Selection) {
+			th := rowHtml.Find("th").Text()
+			if th == "アズワン品番" {
+				td := rowHtml.Find("td").Text()
+				code = strings.ReplaceAll(td, "\t", "")
+			}
+		})
+	}
+
+	if len(code) > 0 {
+		productCodes = append(productCodes, code)
+	}
+
+	return productCodes
 }
 func getMaker(ctx ninjacrawler.CrawlerContext) string {
-	return findTextByThContent(ctx.Document, "メーカー")
+	maker := ctx.Document.Find("#item > div.item-info > header").Find("a").First().Text()
+	return maker
 }
 func findTextByThContent(doc *goquery.Document, thContent string, attr ...string) string {
 	th := doc.Find("th").FilterFunction(func(i int, sel *goquery.Selection) bool {
