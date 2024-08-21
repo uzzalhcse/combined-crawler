@@ -12,28 +12,28 @@ import (
 )
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
-	//subCategorySelector := ninjacrawler.UrlSelector{
-	//	Selector:     "#af-categories-list > li",
-	//	SingleResult: false,
-	//	FindSelector: "a",
-	//	Attr:         "href",
-	//}
+	subCategorySelector := ninjacrawler.UrlSelector{
+		Selector:     "#af-categories-list > li",
+		SingleResult: false,
+		FindSelector: "a",
+		Attr:         "href",
+	}
 	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
-		//{
-		//	Entity:           constant.Categories,
-		//	OriginCollection: crawler.GetBaseCollection(),
-		//	Processor:        categoryHandler,
-		//},
-		//{
-		//	Entity:           constant.SubCategories,
-		//	OriginCollection: constant.Categories,
-		//	Processor:        subCategorySelector,
-		//},
-		//{
-		//	Entity:           constant.Series,
-		//	OriginCollection: constant.SubCategories,
-		//	Processor:        seriesAndProductHandler,
-		//},
+		{
+			Entity:           constant.Categories,
+			OriginCollection: crawler.GetBaseCollection(),
+			Processor:        categoryHandler,
+		},
+		{
+			Entity:           constant.SubCategories,
+			OriginCollection: constant.Categories,
+			Processor:        subCategorySelector,
+		},
+		{
+			Entity:           constant.Series,
+			OriginCollection: constant.SubCategories,
+			Processor:        seriesAndProductHandler,
+		},
 		{
 			Entity:           constant.Products,
 			OriginCollection: constant.Series,
