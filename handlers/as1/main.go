@@ -4,12 +4,12 @@ import "combined-crawler/pkg/ninjacrawler"
 
 func Crawler() ninjacrawler.CrawlerConfig {
 	return ninjacrawler.CrawlerConfig{
-		Name: "as1",
+		Name: "as2",
 		URL:  "https://axel.as-1.co.jp/",
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       false,
 			DevCrawlLimit:   300,
-			ConcurrentLimit: 10,
+			ConcurrentLimit: 1,
 			BlockResources:  true,
 			Provider:        "zenrows",
 			Timeout:         300, // 5 minute

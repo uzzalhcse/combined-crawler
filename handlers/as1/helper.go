@@ -58,12 +58,12 @@ func getProductDescription(ctx ninjacrawler.CrawlerContext) string {
 
 func getSellingPriceService(ctx ninjacrawler.CrawlerContext) string {
 	sellingPrice := ""
-	ctx.Document.Find("div.sidepanel-and-cart-wrapper > table").Find("tr").Each(func(index int, rowHtml *goquery.Selection) {
+	ctx.Document.Find("div.sidepanel-and-cart-wrapper > table tr").Each(func(index int, rowHtml *goquery.Selection) {
 		th := rowHtml.Find("th").Text()
 		if strings.TrimSpace(th) == "WEB価格" {
 			td := rowHtml.Find("td").Text()
 			fmt.Println("td", td)
-			if strings.Contains(td, "別途お問合せ") {
+			if strings.Contains(td, "別途お問合せ") || strings.Contains(td, "-") {
 				sellingPrice = "0"
 				return
 			}
