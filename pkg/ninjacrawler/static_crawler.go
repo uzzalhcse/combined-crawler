@@ -128,6 +128,10 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 		return nil, ContentType, fmt.Errorf("failed to read response body: %w", err)
 	}
 	ContentType = resp.Header.Get("Content-Type")
+	ConcurrencyLimit := resp.Header.Get("Concurrency-Limit")
+	ConcurrencyRemaining := resp.Header.Get("Concurrency-Remaining")
+	fmt.Println("Concurrency-Limit", ConcurrencyLimit)
+	fmt.Println("Concurrency-Remaining", ConcurrencyRemaining)
 	if resp.StatusCode != http.StatusOK {
 		msg := fmt.Sprintf("failed to fetch page: StatusCode:%v and Status:%v", resp.StatusCode, resp.Status)
 		app.Logger.Html(string(body), urlString, msg)
