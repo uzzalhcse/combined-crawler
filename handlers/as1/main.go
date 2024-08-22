@@ -4,7 +4,7 @@ import "combined-crawler/pkg/ninjacrawler"
 
 func Crawler() ninjacrawler.CrawlerConfig {
 	return ninjacrawler.CrawlerConfig{
-		Name: "as2",
+		Name: "as1",
 		URL:  "https://axel.as-1.co.jp/",
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       false,
