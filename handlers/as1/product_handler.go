@@ -51,7 +51,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle", "SellingPrice"}},
 			Engine: ninjacrawler.Engine{
 				ProviderOption: ninjacrawler.ProviderQueryOption{
-					Wait: 5000,
+					Wait: 15000,
 				},
 			},
 		},
