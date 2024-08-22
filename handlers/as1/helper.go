@@ -4,6 +4,7 @@ import (
 	"combined-crawler/pkg/ninjacrawler"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"regexp"
 	"strings"
 )
 
@@ -55,6 +56,29 @@ func getProductDescription(ctx ninjacrawler.CrawlerContext) string {
 	return description
 }
 
+func getSellingPriceService(ctx ninjacrawler.CrawlerContext) string {
+	sellingPrice := ""
+	ctx.Document.Find("#item > div.item-action.item-action-scroll > div.sidepanel-and-cart-wrapper > table").Find("tr").Each(func(index int, rowHtml *goquery.Selection) {
+		th := rowHtml.Find("th").Text()
+		if strings.TrimSpace(th) == "WEB価格" {
+			td := rowHtml.Find("td").Text()
+			fmt.Println("td", td)
+			if strings.Contains(td, "別途お問合せ") {
+				sellingPrice = "0"
+				return
+			}
+			td = strings.ReplaceAll(td, "\t", "")
+			// Regular expression to match numbers and commas
+			re := regexp.MustCompile(`[0-9,.]+`)
+			// Find all matches of the regular expression in the input string
+			matches := re.FindAllString(td, -1)
+			// Join the matches together, removing commas
+			sellingPrice = strings.Join(matches, "")
+			sellingPrice = strings.ReplaceAll(sellingPrice, ",", "")
+		}
+	})
+	return sellingPrice
+}
 func getProductAttribute(ctx ninjacrawler.CrawlerContext) []ninjacrawler.AttributeItem {
 	attributes := []ninjacrawler.AttributeItem{}
 	//attributes = append(attributes, ninjacrawler.AttributeItem{Key: "selling_price_tax", Value: "1"}) // Put it in to determine that it is tax included

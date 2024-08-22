@@ -40,7 +40,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 		SingleItemWeight: "",
 		NumOfItems:       "",
 		ListPrice:        "",
-		SellingPrice:     "",
+		SellingPrice:     getSellingPriceService,
 		Attributes:       getProductAttribute,
 	}
 	crawler.CrawlPageDetail([]ninjacrawler.ProcessorConfig{
@@ -48,7 +48,12 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.ProductDetails,
 			OriginCollection: constant.Products,
 			Processor:        productDetailSelector,
-			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle"}},
+			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle", "SellingPrice"}},
+			Engine: ninjacrawler.Engine{
+				ProviderOption: ninjacrawler.ProviderQueryOption{
+					Wait: 5000,
+				},
+			},
 		},
 	})
 }
