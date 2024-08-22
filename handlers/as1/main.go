@@ -9,7 +9,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       false,
 			DevCrawlLimit:   300,
-			ConcurrentLimit: 50,
+			ConcurrentLimit: 10,
 			BlockResources:  true,
 			Provider:        "zenrows",
 			Timeout:         300, // 5 minute
