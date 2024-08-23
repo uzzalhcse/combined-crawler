@@ -1,6 +1,7 @@
 package as1
 
 import (
+	"combined-crawler/constant"
 	"combined-crawler/pkg/ninjacrawler"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -61,12 +62,13 @@ func getSellingPriceService(ctx ninjacrawler.CrawlerContext) string {
 	ctx.Document.Find("div.sidepanel-and-cart-wrapper > table tr").Each(func(index int, rowHtml *goquery.Selection) {
 		th := rowHtml.Find("th").Text()
 		if strings.TrimSpace(th) == "WEB価格" {
+			// Check if an <img> tag exists in the <td>
+			if rowHtml.Find("td img").Length() > 0 {
+				ctx.App.Logger.Error("Error: WEB価格 contains an <img> tag instead of text.")
+				_ = ctx.App.MarkAsError(ctx.UrlCollection.Url, constant.Products, "WEB価格 contains an <img> tag instead of text.")
+				return
+			}
 			td := rowHtml.Find("td").Text()
-			//fmt.Println("td", td)
-			//if strings.Contains(td, "別途お問合せ") || strings.Contains(td, "-") {
-			//	sellingPrice = "0"
-			//	return
-			//}
 			td = strings.ReplaceAll(td, "\t", "")
 			// Regular expression to match numbers and commas
 			re := regexp.MustCompile(`[0-9,.]+`)
