@@ -62,11 +62,11 @@ func getSellingPriceService(ctx ninjacrawler.CrawlerContext) string {
 		th := rowHtml.Find("th").Text()
 		if strings.TrimSpace(th) == "WEB価格" {
 			td := rowHtml.Find("td").Text()
-			fmt.Println("td", td)
-			if strings.Contains(td, "別途お問合せ") || strings.Contains(td, "-") {
-				sellingPrice = "0"
-				return
-			}
+			//fmt.Println("td", td)
+			//if strings.Contains(td, "別途お問合せ") || strings.Contains(td, "-") {
+			//	sellingPrice = "0"
+			//	return
+			//}
 			td = strings.ReplaceAll(td, "\t", "")
 			// Regular expression to match numbers and commas
 			re := regexp.MustCompile(`[0-9,.]+`)
