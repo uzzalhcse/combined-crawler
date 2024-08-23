@@ -58,29 +58,38 @@ func getProductDescription(ctx ninjacrawler.CrawlerContext) string {
 }
 
 func getSellingPriceService(ctx ninjacrawler.CrawlerContext) string {
-	sellingPrice := ""
+	const defaultPrice = "0"
+	sellingPrice := defaultPrice
+
 	ctx.Document.Find("div.sidepanel-and-cart-wrapper > table tr").Each(func(index int, rowHtml *goquery.Selection) {
-		th := rowHtml.Find("th").Text()
-		if strings.TrimSpace(th) == "WEB価格" {
-			// Check if an <img> tag exists in the <td>
+		th := strings.TrimSpace(rowHtml.Find("th").Text())
+		if th == "WEB価格" {
+			// Check for the presence of an <img> tag
 			if rowHtml.Find("td img").Length() > 0 {
-				ctx.App.Logger.Error("Error: WEB価格 contains an <img> tag instead of text.")
-				_ = ctx.App.MarkAsError(ctx.UrlCollection.Url, constant.Products, "WEB価格 contains an <img> tag instead of text.")
+				errorMessage := "WEB価格 contains an <img> tag instead of text."
+				ctx.App.Logger.Error(errorMessage)
+				_ = ctx.App.MarkAsError(ctx.UrlCollection.Url, constant.Products, errorMessage)
+				sellingPrice = ""
 				return
 			}
-			td := rowHtml.Find("td").Text()
-			td = strings.ReplaceAll(td, "\t", "")
-			// Regular expression to match numbers and commas
+
+			// Extract text and sanitize
+			td := strings.ReplaceAll(rowHtml.Find("td").Text(), "\t", "")
 			re := regexp.MustCompile(`[0-9,.]+`)
-			// Find all matches of the regular expression in the input string
 			matches := re.FindAllString(td, -1)
-			// Join the matches together, removing commas
-			sellingPrice = strings.Join(matches, "")
-			sellingPrice = strings.ReplaceAll(sellingPrice, ",", "")
+			if len(matches) > 0 {
+				sellingPrice = strings.ReplaceAll(strings.Join(matches, ""), ",", "")
+			}
+
+			// Set to defaultPrice if empty
+			if sellingPrice == "" {
+				sellingPrice = defaultPrice
+			}
 		}
 	})
 	return sellingPrice
 }
+
 func getProductAttribute(ctx ninjacrawler.CrawlerContext) []ninjacrawler.AttributeItem {
 	attributes := []ninjacrawler.AttributeItem{}
 	//attributes = append(attributes, ninjacrawler.AttributeItem{Key: "selling_price_tax", Value: "1"}) // Put it in to determine that it is tax included
