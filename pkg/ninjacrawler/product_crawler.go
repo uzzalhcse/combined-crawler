@@ -314,6 +314,7 @@ func (app *Crawler) handleProductDetail(res *ProductDetail, processorConfig Proc
 		if err != nil {
 			return err
 		}
+		return fmt.Errorf(msg)
 	}
 
 	app.saveProductDetail(processorConfig.Entity, res)
