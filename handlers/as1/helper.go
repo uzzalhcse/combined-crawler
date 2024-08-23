@@ -1,7 +1,6 @@
 package as1
 
 import (
-	"combined-crawler/constant"
 	"combined-crawler/pkg/ninjacrawler"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -68,7 +67,6 @@ func getSellingPriceService(ctx ninjacrawler.CrawlerContext) string {
 			if rowHtml.Find("td img").Length() > 0 {
 				errorMessage := "WEB価格 contains an <img> tag instead of text."
 				ctx.App.Logger.Error(errorMessage)
-				_ = ctx.App.MarkAsError(ctx.UrlCollection.Url, constant.Products, errorMessage)
 				sellingPrice = ""
 				return
 			}
