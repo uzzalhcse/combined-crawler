@@ -109,7 +109,8 @@ func (app *Crawler) Stop() {
 		app.closeClient()
 	}
 	// upload logs
-	if !app.isLocalEnv {
+	uploadLogs := app.Config.GetBool("UPLOAD_LOGS")
+	if !app.isLocalEnv || uploadLogs {
 		app.UploadLogs()
 	}
 	duration := time.Since(startTime)
