@@ -62,6 +62,8 @@ func (app *Crawler) NavigateToApiURL(client *http.Client, urlString string, prox
 func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxyServer Proxy, attempt int) ([]byte, string, error) {
 	proxyIp := ""
 	ContentType := ""
+	urlString = app.GetQueryEscapeFullUrl(urlString)
+
 	httpTransport := &http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			conn, err := net.Dial(network, addr)
@@ -79,8 +81,6 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 
 		zenrowsApiKey := app.Config.EnvString("ZENROWS_API_KEY")
 		queryString := app.BuildQueryString()
-		fmt.Println("queryString: ", queryString)
-		urlString = app.GetQueryEscapeFullUrl(urlString)
 		urlString = fmt.Sprintf("https://api.zenrows.com/v1/?apikey=%s&url=%s&%s", zenrowsApiKey, urlString, queryString)
 
 	} else {
@@ -128,10 +128,6 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 		return nil, ContentType, fmt.Errorf("failed to read response body: %w", err)
 	}
 	ContentType = resp.Header.Get("Content-Type")
-	ConcurrencyLimit := resp.Header.Get("Concurrency-Limit")
-	ConcurrencyRemaining := resp.Header.Get("Concurrency-Remaining")
-	fmt.Println("Concurrency-Limit", ConcurrencyLimit)
-	fmt.Println("Concurrency-Remaining", ConcurrencyRemaining)
 	if resp.StatusCode != http.StatusOK {
 		msg := fmt.Sprintf("failed to fetch page: StatusCode:%v and Status:%v", resp.StatusCode, resp.Status)
 		app.Logger.Html(string(body), urlString, msg)

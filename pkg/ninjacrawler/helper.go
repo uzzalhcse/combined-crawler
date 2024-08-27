@@ -249,7 +249,15 @@ func (app *Crawler) GetQueryEscapeFullUrl(urlStr string) string {
 		fullUrl = app.BaseUrl + urlStr
 	}
 
-	encodedURL := url.QueryEscape(fullUrl)
+	parsedUrl, err := url.Parse(fullUrl)
+	if err != nil {
+		return ""
+	}
+
+	// Encode only the query part, not the entire URL
+	parsedUrl.RawQuery = parsedUrl.Query().Encode()
+	//encodedURL := url.QueryEscape(fullUrl)
+	encodedURL := parsedUrl.String()
 	return encodedURL
 }
 
