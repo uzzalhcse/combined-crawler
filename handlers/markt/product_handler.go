@@ -34,7 +34,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 		Maker: "place_of_origin",
 		Brand: "middleCategories.1.name",
 		ProductName: func(ctx ninjacrawler.CrawlerContext) string {
-			return fmt.Sprintf("%v|%v", ctx.ApiResponse.Get("name"), ctx.ApiResponse.Get("amount"))
+			return fmt.Sprintf("%v | %v", ctx.ApiResponse.Get("name"), ctx.ApiResponse.Get("amount"))
 		},
 		Category:    "middleCategories.0.name",
 		Description: "description_detail",
@@ -108,7 +108,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			OriginCollection: constant.Products,
 			Processor:        productDetailSelector,
 			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle", "Jan"}},
-			Engine:           ninjacrawler.Engine{IsDynamic: false},
+			Engine:           ninjacrawler.Engine{IsDynamic: ninjacrawler.Bool(false), ConcurrentLimit: 20},
 		},
 	})
 }

@@ -10,8 +10,8 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		URL:  "https://markt-mall.jp/",
 		Engine: ninjacrawler.Engine{
 			DevCrawlLimit:           100,
-			ConcurrentLimit:         10,
-			IsDynamic:               true,
+			ConcurrentLimit:         3,
+			IsDynamic:               ninjacrawler.Bool(true),
 			BlockResources:          true,
 			Timeout:                 50,
 			BoostCrawling:           true,
@@ -19,7 +19,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			WaitForDynamicRendering: true,
 		},
 		Handler: ninjacrawler.Handler{
-			UrlHandler:     UrlHandler,
+			//UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
 		},
 	}
