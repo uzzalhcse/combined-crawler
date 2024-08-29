@@ -224,9 +224,7 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	if eng.ConcurrentLimit > 0 {
 		defaultEngine.ConcurrentLimit = eng.ConcurrentLimit
 	}
-	if eng.IsDynamic {
-		defaultEngine.IsDynamic = eng.IsDynamic
-	}
+	defaultEngine.IsDynamic = eng.IsDynamic
 	if eng.WaitForDynamicRendering {
 		defaultEngine.WaitForDynamicRendering = eng.WaitForDynamicRendering
 	}

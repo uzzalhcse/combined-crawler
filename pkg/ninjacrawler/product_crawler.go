@@ -252,7 +252,7 @@ func validateRequiredFields(product *ProductDetail, validationRules []string) ([
 
 		fieldValue := v.FieldByName(field)
 		fieldValueStr := fmt.Sprintf("%v", fieldValue.Interface())
-		if fieldValueStr == "" {
+		if fieldValueStr == "" || fieldValue.IsZero() || !fieldValue.IsValid() {
 			invalidFields = append(invalidFields, fmt.Sprintf("%s: required", f.Name))
 		}
 		for _, r := range rules {
