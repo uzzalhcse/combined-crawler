@@ -306,7 +306,7 @@ func (app *Crawler) handleProductDetail(res *ProductDetail, processorConfig Proc
 	if len(invalidFields) > 0 {
 		msg := fmt.Sprintf("Validation failed: %v\n", invalidFields)
 		html, _ := v.Document.Html()
-		if app.engine.IsDynamic {
+		if *app.engine.IsDynamic {
 			html = app.getHtmlFromPage(v.Page)
 		}
 		app.Logger.Html(html, v.UrlCollection.Url, msg)
