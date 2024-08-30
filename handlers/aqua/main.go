@@ -7,8 +7,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "aqua",
 		URL:  "https://aqua-has.com",
 		Engine: ninjacrawler.Engine{
-			IsDynamic:       false,
-			BoostCrawling:   true,
+			IsDynamic:       ninjacrawler.Bool(false),
 			DevCrawlLimit:   300,
 			ConcurrentLimit: 10,
 		},

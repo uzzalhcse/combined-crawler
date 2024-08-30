@@ -9,7 +9,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "panasonic",
 		URL:  "https://panasonic.jp/products.html",
 		Engine: ninjacrawler.Engine{
-			IsDynamic:       false,
+			IsDynamic:       ninjacrawler.Bool(false),
 			DevCrawlLimit:   200,
 			ConcurrentLimit: 10,
 			SleepAfter:      10,

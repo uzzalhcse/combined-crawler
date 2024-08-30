@@ -7,7 +7,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "as1",
 		URL:  "https://axel.as-1.co.jp/",
 		Engine: ninjacrawler.Engine{
-			IsDynamic:       false,
+			IsDynamic:       ninjacrawler.Bool(false),
 			DevCrawlLimit:   300,
 			ConcurrentLimit: 30,
 			BlockResources:  true,
@@ -22,7 +22,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			},
 		},
 		Handler: ninjacrawler.Handler{
-			//UrlHandler:     UrlHandler,
+			UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
 		},
 	}

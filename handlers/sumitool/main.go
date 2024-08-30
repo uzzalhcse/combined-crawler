@@ -9,7 +9,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "sumitool",
 		URL:  "https://www.sumitool.com/products/cutting-tools/",
 		Engine: ninjacrawler.Engine{
-			IsDynamic: false,
+			IsDynamic: ninjacrawler.Bool(false),
 			//BoostCrawling:   true,
 			DevCrawlLimit:   500,
 			ConcurrentLimit: 1,

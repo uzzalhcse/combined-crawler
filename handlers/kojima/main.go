@@ -7,7 +7,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "kojima_v2",
 		URL:  "https://www.kojima.net",
 		Engine: ninjacrawler.Engine{
-			IsDynamic:       false,
+			IsDynamic:       ninjacrawler.Bool(false),
 			DevCrawlLimit:   50,
 			ConcurrentLimit: 3,
 			BlockResources:  true,

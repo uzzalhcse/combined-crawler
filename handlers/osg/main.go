@@ -10,7 +10,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "osg",
 		URL:  "https://osg.icata.net/product-search/catalog/item/",
 		Engine: ninjacrawler.Engine{
-			IsDynamic: false,
+			IsDynamic: ninjacrawler.Bool(false),
 			//BoostCrawling:   true,
 			DevCrawlLimit:   15,
 			ConcurrentLimit: 4,

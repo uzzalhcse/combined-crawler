@@ -7,7 +7,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "suntory",
 		URL:  "https://products.suntory.co.jp?ke=hd",
 		Engine: ninjacrawler.Engine{
-			IsDynamic:               true,
+			IsDynamic:               ninjacrawler.Bool(true),
 			DevCrawlLimit:           999999,
 			ConcurrentLimit:         5,
 			WaitForDynamicRendering: true,

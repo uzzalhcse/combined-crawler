@@ -9,7 +9,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "yamaya",
 		URL:  "https://drive.yamaya.jp/index.php",
 		Engine: ninjacrawler.Engine{
-			IsDynamic: false,
+			IsDynamic: ninjacrawler.Bool(false),
 			//BoostCrawling:   true,
 			DevCrawlLimit:   1,
 			ConcurrentLimit: 5,

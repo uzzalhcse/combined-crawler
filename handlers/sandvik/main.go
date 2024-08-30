@@ -10,7 +10,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			BoostCrawling:  true,
 			BlockResources: true,
 			//DevCrawlLimit:  100,
-			IsDynamic: true,
+			IsDynamic: ninjacrawler.Bool(true),
 			CookieConsent: &ninjacrawler.CookieAction{
 				ButtonText:                  "Accept Cookies",
 				MustHaveSelectorAfterAction: "body .column.grid_12.col-12",

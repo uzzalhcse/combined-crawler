@@ -20,7 +20,7 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			OriginCollection: constant.Categories,
 			Processor:        productHandler,
 			Engine: ninjacrawler.Engine{
-				IsDynamic: true,
+				IsDynamic: ninjacrawler.Bool(true),
 			},
 		},
 	})

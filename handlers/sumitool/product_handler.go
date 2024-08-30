@@ -49,8 +49,9 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.ProductDetails,
 			OriginCollection: constant.Products,
 			Processor:        productDetailSelector,
-			Engine:           ninjacrawler.Engine{IsDynamic: true},
-			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle"}},
+			Engine: ninjacrawler.Engine{
+				IsDynamic: ninjacrawler.Bool(true)},
+			Preference: ninjacrawler.Preference{ValidationRules: []string{"PageTitle"}},
 		},
 	})
 }
