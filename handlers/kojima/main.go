@@ -13,8 +13,12 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			BlockResources:  true,
 			SleepAfter:      10,
 			Provider:        "zenrows",
-			ProviderOption:  ninjacrawler.ProviderQueryOption{UsePremiumProxyRetry: true},
-			Timeout:         300,
+			ProviderOption: ninjacrawler.ProviderQueryOption{
+				UsePremiumProxyRetry: true,
+				CustomHeaders:        true,
+				OriginalStatus:       true,
+			},
+			Timeout: 300,
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
