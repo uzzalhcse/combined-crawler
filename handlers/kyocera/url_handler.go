@@ -8,20 +8,6 @@ import (
 )
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
-
-	handleCategory := func(keyword string) ninjacrawler.UrlSelector {
-		return ninjacrawler.UrlSelector{
-			Selector:     "div.index.clearfix ul.clearfix li",
-			FindSelector: "a",
-			Attr:         "href",
-			Handler: func(urlCollection ninjacrawler.UrlCollection, fullUrl string, a *goquery.Selection) (string, map[string]interface{}) {
-				if strings.Contains(fullUrl, keyword) {
-					return fullUrl, nil
-				}
-				return "", nil
-			},
-		}
-	}
 	productSelector := ninjacrawler.UrlSelector{
 		Selector:     "ul.heightLineParent.clearfix li",
 		FindSelector: "dl dt a",
@@ -36,19 +22,7 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 		{
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),
-			Processor:        handleCategory("/prdct/tool/category/product/"),
-			Preference:       ninjacrawler.Preference{DoNotMarkAsComplete: true},
-		},
-		{
-			Entity:           constant.Other,
-			OriginCollection: crawler.GetBaseCollection(),
-			Processor:        handleCategory("/prdct/tool/sgs/"),
-			Preference:       ninjacrawler.Preference{DoNotMarkAsComplete: true},
-		},
-		{
-			Entity:           constant.Products,
-			OriginCollection: crawler.GetBaseCollection(),
-			Processor:        handleCategory("/prdct/tool/product/"),
+			Processor:        handleCategory,
 		},
 		{
 			Entity:           constant.Products,
@@ -61,4 +35,32 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			Processor:        productOtherSelector,
 		},
 	})
+}
+func handleCategory(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
+	categoryUrls := []ninjacrawler.UrlCollection{}
+	otherUrls := []ninjacrawler.UrlCollection{}
+	productUrls := []ninjacrawler.UrlCollection{}
+	ctx.Document.Find("div.index.clearfix ul.clearfix li").Each(func(i int, s *goquery.Selection) {
+		href, _ := s.Find("a").Attr("href")
+		fullUrl := ctx.App.GetFullUrl(href)
+		if strings.Contains(fullUrl, "/prdct/tool/category/product/") {
+			categoryUrls = append(categoryUrls, ninjacrawler.UrlCollection{
+				Url:    fullUrl,
+				Parent: ctx.UrlCollection.Url,
+			})
+		} else if strings.Contains(fullUrl, "/prdct/tool/sgs/") {
+			otherUrls = append(otherUrls, ninjacrawler.UrlCollection{
+				Url:    fullUrl,
+				Parent: ctx.UrlCollection.Url,
+			})
+		} else if strings.Contains(fullUrl, "/prdct/tool/product/") {
+			productUrls = append(productUrls, ninjacrawler.UrlCollection{
+				Url:    fullUrl,
+				Parent: ctx.UrlCollection.Url,
+			})
+		}
+	})
+	ctx.App.InsertUrlCollections(constant.Other, otherUrls, ctx.UrlCollection.Url)
+	ctx.App.InsertUrlCollections(constant.Products, productUrls, ctx.UrlCollection.Url)
+	return categoryUrls
 }
