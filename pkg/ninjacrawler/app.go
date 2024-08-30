@@ -355,4 +355,7 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	if eng.CrawlTimeout > 0 {
 		defaultEngine.CrawlTimeout = eng.CrawlTimeout
 	}
+	if eng.WaitForSelector != nil {
+		defaultEngine.WaitForSelector = eng.WaitForSelector
+	}
 }
