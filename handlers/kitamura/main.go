@@ -12,11 +12,13 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			ConcurrentLimit: 1,
 			//WaitForDynamicRendering: true,
 			BlockResources: true,
-			//ProxyServers: []ninjacrawler.Proxy{
-			//	{
-			//		Server: "",
-			//	},
-			//},
+			Provider:       "zenrows",
+			ProviderOption: ninjacrawler.ProviderQueryOption{
+				JsRender:       true,
+				CustomHeaders:  true,
+				OriginalStatus: true,
+				Wait:           5000,
+			},
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler: UrlHandler,

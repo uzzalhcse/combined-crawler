@@ -17,9 +17,6 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),
 			Processor:        categorySelector,
-			Engine: ninjacrawler.Engine{
-				WaitForSelector: ninjacrawler.String(".category-item"),
-			},
 		},
 	})
 
