@@ -7,7 +7,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "kitamura",
 		URL:  "https://shop.kitamura.jp/",
 		Engine: ninjacrawler.Engine{
-			BrowserType:     "webkit",
+			BrowserType:     "firefox",
 			IsDynamic:       ninjacrawler.Bool(true),
 			DevCrawlLimit:   999999,
 			ConcurrentLimit: 1,
