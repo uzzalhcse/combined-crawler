@@ -50,9 +50,9 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Processor:        productDetailSelector,
 			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle"}},
 			Engine: ninjacrawler.Engine{
-				WaitForSelector: ninjacrawler.String("div.product-image-thumbnail-list"),
+				WaitForSelector: ninjacrawler.String("div.product-image-thumbnail-list img"),
 				ProviderOption: ninjacrawler.ProviderQueryOption{
-					WaitFor: "div.product-image-thumbnail-list",
+					WaitFor: "div.product-image-thumbnail-list img",
 				},
 			},
 		},
