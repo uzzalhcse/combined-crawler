@@ -9,8 +9,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       ninjacrawler.Bool(false),
 			DevCrawlLimit:   50,
-			ConcurrentLimit: 3,
-			BlockResources:  true,
+			ConcurrentLimit: 1,
 			SleepAfter:      10,
 			Provider:        "zenrows",
 			ProviderOption: ninjacrawler.ProviderQueryOption{
