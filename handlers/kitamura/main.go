@@ -7,24 +7,24 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "kitamura",
 		URL:  "https://shop.kitamura.jp/",
 		Engine: ninjacrawler.Engine{
-			BrowserType:     "firefox",
-			IsDynamic:       ninjacrawler.Bool(true),
+			//IsDynamic:       ninjacrawler.Bool(true),
 			DevCrawlLimit:   999999,
 			ConcurrentLimit: 1,
-			//WaitForDynamicRendering: true,
-			WaitForSelector: ninjacrawler.String(".category-item"),
-			BlockResources:  true,
-			//Provider:       "zenrows",
-			//ProviderOption: ninjacrawler.ProviderQueryOption{
-			//	JsRender:       true,
-			//	CustomHeaders:  true,
-			//	OriginalStatus: true,
-			//	Wait:           5000,
-			//},
+			Timeout:         90,
+			//BlockResources:  true,
+			Provider: "zenrows",
+			ProviderOption: ninjacrawler.ProviderQueryOption{
+				JsRender:       true,
+				CustomHeaders:  true,
+				OriginalStatus: true,
+				//Wait:           5000,
+				PremiumProxy: true,
+				ProxyCountry: "jp",
+			},
 		},
 		Handler: ninjacrawler.Handler{
-			UrlHandler: UrlHandler,
-			//ProductHandler: ProductHandler,
+			UrlHandler:     UrlHandler,
+			ProductHandler: ProductHandler,
 		},
 	}
 }

@@ -209,8 +209,9 @@ func getDefaultEngine() Engine {
 			OriginalStatus:       true,
 			CustomHeaders:        true,
 		},
-		SleepDuration: 10,
-		CrawlTimeout:  99999,
+		SleepDuration:   10,
+		CrawlTimeout:    99999,
+		WaitForSelector: nil,
 	}
 }
 

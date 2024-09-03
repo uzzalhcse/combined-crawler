@@ -3,7 +3,13 @@ package kitamura
 import (
 	"combined-crawler/constant"
 	"combined-crawler/pkg/ninjacrawler"
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"math"
+	"net/url"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
@@ -11,75 +17,104 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 		Selector:     ".category-item",
 		FindSelector: "a",
 		Attr:         "href",
+		Handler: func(urlCollection ninjacrawler.UrlCollection, fullUrl string, a *goquery.Selection) (string, map[string]interface{}) {
+			fullUrl = fullUrl + "?limit=100&page=1"
+			return fullUrl, nil
+		},
 	}
 	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
 		{
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),
 			Processor:        categorySelector,
+			Engine: ninjacrawler.Engine{
+				WaitForSelector: ninjacrawler.String(".category-item"),
+				ProviderOption: ninjacrawler.ProviderQueryOption{
+					WaitFor: ".category-item",
+				},
+			},
+		},
+		{
+			Entity:           constant.Products,
+			OriginCollection: constant.Categories,
+			Processor:        productHandler,
+			Engine: ninjacrawler.Engine{
+				WaitForSelector: ninjacrawler.String("div#product-list-area .product"),
+				ProviderOption: ninjacrawler.ProviderQueryOption{
+					WaitFor: "div#product-list-area>.product",
+				},
+			},
 		},
 	})
 
 }
 
-func subCategoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
-	items := []ninjacrawler.UrlCollection{}
+func productHandler(ctx ninjacrawler.CrawlerContext, next func([]ninjacrawler.UrlCollection, string)) error {
+	productUrls := []ninjacrawler.UrlCollection{}
+	productCountInfo := strings.TrimSpace(ctx.Document.Find("div.result-count").Text())
 
-	// Process the DOM elements if they exist
-	ctx.Document.Find("ul.category_list li,ul li").Each(func(_ int, s *goquery.Selection) {
-		s.Find("div.category_order h4 a").Each(func(_ int, a *goquery.Selection) {
-			href, exists := a.Attr("href")
-			if exists {
-				brand1 := a.Text()
-				href = ctx.App.GetFullUrl(href)
-				if !isValidHost(href) {
-					return
-				}
-				items = append(items, GetProductUrls(ctx, href, brand1)...)
-			}
-		})
-	})
+	re := regexp.MustCompile(`^\d+`)
+	productCountStr := re.FindString(productCountInfo)
+	if productCountStr == "" {
+		return fmt.Errorf("could not find product count")
+	}
 
-	return items
-}
-func GetProductUrls(ctx ninjacrawler.CrawlerContext, subCategory string, brand1 string) []ninjacrawler.UrlCollection {
-	var productUrls []ninjacrawler.UrlCollection
-
-	doc, err := ctx.App.NavigateToURL(ctx.Page, subCategory)
+	productCountInt, err := strconv.Atoi(productCountStr)
 	if err != nil {
-		_ = ctx.App.MarkAsError(ctx.UrlCollection.Url, constant.Categories, err.Error())
-		return productUrls
+		fmt.Println("Error:", err)
+		return err
 	}
-	// Check if "ul.category_list li" exists in the DOM
-	if doc.Find(".category_wrap").Length() == 0 {
-		return []ninjacrawler.UrlCollection{{
-			Url:    subCategory,
-			Parent: ctx.UrlCollection.Url,
-			MetaData: map[string]interface{}{
-				"brand1": brand1,
-			},
-		}}
-	}
-	doc.Find("ul.category_list li,ul li").Each(func(i int, li *goquery.Selection) {
-		li.Find("div.category_order h4 a").Each(func(j int, a *goquery.Selection) {
-			brand2 := a.Text()
-			href, exists := a.Attr("href")
-			if exists {
-				href = ctx.App.GetFullUrl(href)
-				if !isValidHost(href) {
-					return
-				}
-				productUrls = append(productUrls, ninjacrawler.UrlCollection{
-					Url:    href,
-					Parent: subCategory,
-					MetaData: map[string]interface{}{
-						"brand1": brand1,
-						"brand2": brand2,
-					},
-				})
-			}
-		})
-	})
 
-	return productUrls
+	totalPageNumber := int(math.Ceil(float64(productCountInt) / 100))
+	fmt.Println("totalPageNumber:", totalPageNumber)
+
+	currentPage := 1
+	crawlableUrl := ctx.UrlCollection.Url
+	if ctx.UrlCollection.CurrentPageUrl != "" {
+		crawlableUrl = ctx.UrlCollection.CurrentPageUrl
+	}
+
+	parsedURL, err := url.Parse(crawlableUrl)
+	if err != nil {
+		fmt.Println("Error parsing URL:", err)
+		return err
+	}
+
+	queryParams := parsedURL.Query()
+
+	currentPageStr := queryParams.Get("page")
+	if currentPageStr != "" {
+		currentPage, err = strconv.Atoi(currentPageStr)
+		if err != nil {
+			fmt.Println("Error converting page to int:", err)
+			return err
+		}
+	}
+	fmt.Println("currentPage:", currentPage)
+	productDiv := ctx.Document.Find("div#product-list-area").First()
+	productDiv.Find("a.product-link").Each(func(i int, s *goquery.Selection) {
+		href, ok := s.Attr("href")
+		if ok {
+			href = ctx.App.GetFullUrl(href)
+			productUrls = append(productUrls, ninjacrawler.UrlCollection{
+				Url:      href,
+				MetaData: nil,
+				Parent:   ctx.UrlCollection.Url,
+			})
+		} else {
+			ctx.App.Logger.Warn("Product URL not found for %s", ctx.UrlCollection.Url)
+		}
+
+	})
+	if currentPage < totalPageNumber {
+		queryParams.Set("page", strconv.Itoa(currentPage+1))
+		parsedURL.RawQuery = queryParams.Encode()
+		nextPageUrl := parsedURL.String()
+		fmt.Println("nextPageUrl:", nextPageUrl)
+		next(productUrls, nextPageUrl)
+	} else {
+		next(productUrls, "")
+	}
+
+	return nil
 }
