@@ -12,7 +12,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			IsDynamic:          ninjacrawler.Bool(false),
 			DevCrawlLimit:      200,
 			ConcurrentLimit:    10,
-			SleepAfter:         15,
+			SleepAfter:         5,
 			Timeout:            30,
 			RetrySleepDuration: 15,
 		},
