@@ -72,7 +72,7 @@ func (app *Crawler) Start() {
 		}
 	}()
 	startTime = time.Now()
-	app.Logger.Info("Crawler Started! 🚀")
+	app.Logger.Summary("Crawler started!")
 
 	deleteDB := app.Config.GetBool("DELETE_DB")
 	if deleteDB {
@@ -116,7 +116,8 @@ func (app *Crawler) Stop() {
 		app.UploadLogs()
 	}
 	duration := time.Since(startTime)
-	app.Logger.Info("Crawler stopped in ⚡ %v", duration)
+	app.Logger.Summary("Crawler completed!")
+	app.Logger.Summary("Crawling duration %v", duration)
 }
 
 func (app *Crawler) UploadLogs() {

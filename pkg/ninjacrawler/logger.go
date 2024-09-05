@@ -1,6 +1,10 @@
 package ninjacrawler
 
 import (
+	"cloud.google.com/go/compute/metadata"
+	"cloud.google.com/go/logging"
+	"context"
+	"fmt"
 	"github.com/playwright-community/playwright-go"
 	"io"
 	"log"
@@ -15,13 +19,15 @@ type logger interface {
 	Error(format string, args ...interface{})
 	Fatal(format string, args ...interface{})
 	Printf(format string, args ...interface{})
+	Summary(format string, args ...interface{})
 	Html(page playwright.Page, message string)
 }
 
 // defaultLogger is a default implementation of the logger interface using the standard log package.
 type defaultLogger struct {
-	logger *log.Logger
-	app    *Crawler
+	logger    *log.Logger
+	app       *Crawler
+	gcpLogger *log.Logger // GCP logger
 }
 
 // newDefaultLogger creates a new instance of defaultLogger.
@@ -46,12 +52,48 @@ func newDefaultLogger(app *Crawler, siteName string) *defaultLogger {
 	// Create a multi-writer that writes to both the file and the terminal.
 	multiWriter := io.MultiWriter(file, os.Stdout)
 
-	return &defaultLogger{
+	// Create the default logger
+	dLogger := &defaultLogger{
 		logger: log.New(multiWriter, "【"+app.Name+"】", log.LstdFlags),
 		app:    app,
 	}
+
+	// Initialize GCP logger if requested
+	if metadata.OnGCE() {
+		dLogger.gcpLogger = getGCPLogger(app.Config, "ninjacrawler_log")
+	}
+
+	return dLogger
+
 }
 
+func getGCPLogger(config *configService, logID string) *log.Logger {
+
+	os.Setenv("GCP_LOG_CREDENTIALS_PATH", "log-key.json")
+	projectID := config.EnvString("PROJECT_ID", "lazuli-venturas-stg")
+
+	client, err := logging.NewClient(context.Background(), projectID)
+	if err != nil {
+		panic(fmt.Sprintf("Failed to create GCP logging client: %v", err))
+	}
+
+	logger := client.Logger(logID)
+	return logger.StandardLogger(logging.Debug)
+}
+
+// logWithGCP logs both to the local logger
+func (l *defaultLogger) logWithGCP(level string, format string, args ...interface{}) {
+	// Log to local logger
+	l.logger.Printf(level+format, args...)
+
+	// log to GCP
+	if l.gcpLogger != nil {
+		l.gcpLogger.Printf(level+format, args...)
+	}
+}
+func (l *defaultLogger) Summary(format string, args ...interface{}) {
+	l.logWithGCP("✔ ", format, args...)
+}
 func (l *defaultLogger) Info(format string, args ...interface{}) {
 	l.logger.Printf("✔ "+format, args...)
 }
