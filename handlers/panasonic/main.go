@@ -14,7 +14,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			ConcurrentLimit:    10,
 			SleepAfter:         5,
 			Timeout:            30,
-			RetrySleepDuration: 15,
+			RetrySleepDuration: 120,
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
