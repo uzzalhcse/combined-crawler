@@ -6,6 +6,8 @@ import (
 )
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
+
+	crawler.Logger.Debug("This custom Debug Log for testing")
 	categorySelector := ninjacrawler.UrlSelector{
 		Selector:     "ul.Header_Navigation_List_Item_Sub_Group_Inner",
 		SingleResult: false,
