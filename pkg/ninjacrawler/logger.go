@@ -25,9 +25,10 @@ type logger interface {
 
 // defaultLogger is a default implementation of the logger interface using the standard log package.
 type defaultLogger struct {
-	logger    *log.Logger
-	app       *Crawler
-	gcpLogger *log.Logger // GCP logger
+	logger         *log.Logger
+	app            *Crawler
+	gcpLogger      *log.Logger // GCP Summary logger
+	gcpDebugLogger *log.Logger // GCP Debug logger
 }
 
 // newDefaultLogger creates a new instance of defaultLogger.
@@ -61,6 +62,7 @@ func newDefaultLogger(app *Crawler, siteName string) *defaultLogger {
 	// Initialize GCP logger if requested
 	if metadata.OnGCE() {
 		dLogger.gcpLogger = getGCPLogger(app.Config, "ninjacrawler_log")
+		dLogger.gcpDebugLogger = getGCPLogger(app.Config, "ninjacrawler_debug_log")
 	}
 
 	return dLogger
@@ -88,11 +90,18 @@ func (l *defaultLogger) logWithGCP(level string, format string, args ...interfac
 
 	// log to GCP
 	if l.gcpLogger != nil {
-		l.gcpLogger.Printf(level+format, args...)
+		l.gcpLogger.Printf(format, args...)
 	}
 }
 func (l *defaultLogger) Summary(format string, args ...interface{}) {
-	l.logWithGCP("✔ ", format, args...)
+	l.logWithGCP("", format, args...)
+}
+func (l *defaultLogger) Debug(format string, args ...interface{}) {
+	l.logger.Printf("DEBUG: "+format, args...)
+	// log to GCP
+	if l.gcpDebugLogger != nil {
+		l.gcpDebugLogger.Printf(format, args...)
+	}
 }
 func (l *defaultLogger) Info(format string, args ...interface{}) {
 	l.logger.Printf("✔ "+format, args...)

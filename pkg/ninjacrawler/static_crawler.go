@@ -149,7 +149,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 		}
 		msg := fmt.Sprintf("failed to fetch page: StatusCode:%v and Status:%v", resp.StatusCode, resp.Status)
 		app.Logger.Html(string(body), urlString, msg)
-
+		app.Logger.Debug("Http Error URL: %s Error: %v\n", app.CurrentUrl, msg)
 		var jsonResponse map[string]interface{}
 		err = json.Unmarshal(body, &jsonResponse)
 

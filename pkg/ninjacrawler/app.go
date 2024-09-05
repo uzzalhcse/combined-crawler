@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"time"
 )
@@ -68,7 +69,9 @@ func NewCrawler(name, url string, engines ...Engine) *Crawler {
 func (app *Crawler) Start() {
 	defer func() {
 		if r := recover(); r != nil {
-			app.Logger.Error("Recovered in Start: %v", r)
+			app.Logger.Summary("Program crashed!: %v", r)
+			app.Logger.Debug("Panic caught: %v", r)
+			app.Logger.Debug("Stack trace:", string(debug.Stack()))
 		}
 	}()
 	startTime = time.Now()
@@ -89,6 +92,7 @@ func (app *Crawler) toggleClient() {
 	if *app.engine.IsDynamic {
 		pw, err := app.GetPlaywright()
 		if err != nil {
+			app.Logger.Debug("failed to initialize playwright: %v\n", err)
 			app.Logger.Fatal("failed to initialize playwright: %v\n", err)
 			return // exit if playwright initialization fails
 		}
@@ -101,7 +105,9 @@ func (app *Crawler) toggleClient() {
 func (app *Crawler) Stop() {
 	defer func() {
 		if r := recover(); r != nil {
-			app.Logger.Error("Recovered in Stop: %v", r)
+			app.Logger.Summary("Program crashed!: %v", r)
+			app.Logger.Debug("Panic caught: %v", r)
+			app.Logger.Debug("Stack trace:", string(debug.Stack()))
 		}
 	}()
 	if app.pw != nil {
