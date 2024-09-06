@@ -37,8 +37,6 @@ func newDefaultLogger(app *Crawler, siteName string) *defaultLogger {
 	if err != nil {
 		log.Fatalf("Failed to open log file: %v", err)
 	}
-	// Ensure the log file is closed properly when no longer needed.
-	defer logFile.Close()
 
 	multiWriter := io.MultiWriter(logFile, os.Stdout)
 

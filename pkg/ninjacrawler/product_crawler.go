@@ -28,7 +28,7 @@ func (app *Crawler) CrawlPageDetail(processorConfigs []ProcessorConfig) {
 		app.Logger.Summary("Data count: %s", dataCount)
 		exportProductDetailsToCSV(app, processorConfig.Entity, 1)
 	}
-	app.Logger.Summary("Data count: %s", "999999")
+	app.Logger.Debug("Data count: %s", "999999")
 }
 
 func (app *Crawler) crawlPageDetailRecursive(processorConfig ProcessorConfig, processedUrls map[string]bool, total *int32, counter int32) {
