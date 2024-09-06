@@ -33,25 +33,14 @@ type defaultLogger struct {
 
 // newDefaultLogger creates a new instance of defaultLogger.
 func newDefaultLogger(app *Crawler, siteName string) *defaultLogger {
-	// Open a log file in append mode, create if it doesn't exist.
-
-	currentDate := time.Now().Format("2006-01-02")
-	directory := filepath.Join("storage", "logs", siteName)
-	err := os.MkdirAll(directory, 0755)
-	if err != nil {
-		log.Fatalf("Failed to create log directory: %v", err)
-	}
-
-	// Construct the log file path.
-	logFilePath := filepath.Join(directory, currentDate+"_application.log")
-
-	// Open the log file in append mode, create if it doesn't exist.
-	file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	logFile, err := os.OpenFile(getLogFileName(siteName), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatalf("Failed to open log file: %v", err)
 	}
-	// Create a multi-writer that writes to both the file and the terminal.
-	multiWriter := io.MultiWriter(file, os.Stdout)
+	// Ensure the log file is closed properly when no longer needed.
+	defer logFile.Close()
+
+	multiWriter := io.MultiWriter(logFile, os.Stdout)
 
 	// Create the default logger
 	dLogger := &defaultLogger{
@@ -68,7 +57,17 @@ func newDefaultLogger(app *Crawler, siteName string) *defaultLogger {
 	return dLogger
 
 }
+func getLogFileName(siteName string) string {
+	currentDate := time.Now().Format("2006-01-02")
+	directory := filepath.Join("storage", "logs", siteName)
 
+	if err := os.MkdirAll(directory, 0755); err != nil {
+		log.Fatalf("Failed to create log directory: %v", err)
+	}
+
+	// Return the log file path with the formatted current date.
+	return filepath.Join(directory, fmt.Sprintf("%s_application.log", currentDate))
+}
 func getGCPLogger(config *configService, logID string) *logging.Logger {
 
 	os.Setenv("GCP_LOG_CREDENTIALS_PATH", "log-key.json")
@@ -90,18 +89,18 @@ func (l *defaultLogger) logWithGCP(level string, format string, args ...interfac
 	// Log to local logger
 	l.logger.Printf("☁️ "+format, args...)
 
-	if l.gcpLogger != nil && level != "summary" {
+	if l.gcpLogger != nil && level == "summary" {
 		l.gcpLogger.Log(logging.Entry{
 			Payload: map[string]interface{}{
 				"level":  "info",
-				"caller": "", // Caller information is logged automatically in the local logger.
+				"caller": "ninjacrawler/logger.go",
 				"ts":     ts,
 				"msg":    msg,
 			},
 			Severity: logging.Info,
 		})
 	}
-	if l.gcpDebugLogger != nil && level != "debug" {
+	if l.gcpDebugLogger != nil && level == "debug" {
 		l.gcpLogger.Log(logging.Entry{
 			Payload: map[string]interface{}{
 				"level":  "error",
