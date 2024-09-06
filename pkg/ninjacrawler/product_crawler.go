@@ -15,7 +15,7 @@ import (
 // It distributes the work among multiple goroutines and uses proxies if available.
 func (app *Crawler) CrawlPageDetail(processorConfigs []ProcessorConfig) {
 	for _, processorConfig := range processorConfigs {
-		app.Logger.Summary("Starting :%s: Details Crawler", processorConfig.OriginCollection)
+		app.Logger.Summary("Starting :%s: Details Crawler1", processorConfig.OriginCollection)
 		//app.overrideEngineDefaults(app.engine, &processorConfig.Engine)
 		//app.toggleClient()
 		////processedUrls := make(map[string]bool) // Track processed URLs
