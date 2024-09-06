@@ -121,9 +121,6 @@ func (app *Crawler) Stop() {
 	if !app.isLocalEnv || uploadLogs {
 		app.UploadLogs()
 	}
-	duration := time.Since(startTime)
-	app.Logger.Summary("Crawler completed!")
-	app.Logger.Summary("Crawling duration %v", duration)
 }
 
 func (app *Crawler) UploadLogs() {
@@ -175,6 +172,10 @@ func (app *Crawler) Handle(handler Handler) {
 	if handler.ProductHandler != nil {
 		handler.ProductHandler(app)
 	}
+
+	duration := time.Since(startTime)
+	app.Logger.Summary("Crawler completed!")
+	app.Logger.Summary("Crawling duration %v", duration)
 }
 func (app *Crawler) AutoHandle(configs []ProcessorConfig) {
 	defer app.Stop() // Ensure Stop is called after handlers
