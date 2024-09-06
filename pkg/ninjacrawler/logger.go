@@ -48,8 +48,8 @@ func newDefaultLogger(app *Crawler, siteName string) *defaultLogger {
 
 	// Initialize GCP logger if requested
 	if metadata.OnGCE() {
-		dLogger.gcpLogger = getGCPLogger(app.Config, "ninjacrawler_log")
-		dLogger.gcpDebugLogger = getGCPLogger(app.Config, "ninjacrawler_debug_log")
+		dLogger.gcpLogger = getGCPLogger(app.Config, "summary_log")
+		dLogger.gcpDebugLogger = getGCPLogger(app.Config, "dev_log")
 	}
 
 	return dLogger
