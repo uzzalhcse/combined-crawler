@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/playwright-community/playwright-go"
-	"go.uber.org/zap"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -23,55 +23,18 @@ type logger interface {
 	Html(page playwright.Page, message string)
 }
 
-// defaultLogger is a default implementation of the logger interface using Zap.
+// defaultLogger is a default implementation of the logger interface using the standard log package.
 type defaultLogger struct {
-	logger         *zap.SugaredLogger
+	logger         *log.Logger
 	app            *Crawler
 	gcpLogger      *logging.Logger // GCP Summary logger
 	gcpDebugLogger *logging.Logger // GCP Debug logger
-	siteName       string
 }
 
 // newDefaultLogger creates a new instance of defaultLogger.
 func newDefaultLogger(app *Crawler, siteName string) *defaultLogger {
-	// Create the log directory
-	logFileName := getLogFileName(siteName)
+	// Open a log file in append mode, create if it doesn't exist.
 
-	// Setup Zap logger to write to both file and console, logging only the message
-	cfg := zap.NewProductionConfig()
-	cfg.OutputPaths = []string{
-		"stdout",
-		logFileName,
-	}
-	cfg.EncoderConfig.EncodeTime = nil   // Disable timestamp in local logs
-	cfg.EncoderConfig.TimeKey = ""       // No time key in local logs
-	cfg.EncoderConfig.LevelKey = ""      // No log level in local logs
-	cfg.EncoderConfig.CallerKey = ""     // No caller information in local logs
-	cfg.EncoderConfig.MessageKey = "msg" // Keep only the message
-
-	// Build the logger without caller and time information
-	zapLogger, err := cfg.Build()
-	if err != nil {
-		panic(fmt.Sprintf("Failed to create Zap logger: %v", err))
-	}
-
-	sugarLogger := zapLogger.Sugar()
-
-	dLogger := &defaultLogger{
-		logger:   sugarLogger,
-		app:      app,
-		siteName: siteName,
-	}
-
-	// Initialize GCP logger if requested
-	if metadata.OnGCE() {
-		dLogger.gcpLogger = getGCPLogger(app.Config, "ninjacrawler_summary_log")
-		dLogger.gcpDebugLogger = getGCPLogger(app.Config, "ninjacrawler_dev_log")
-	}
-
-	return dLogger
-}
-func getLogFileName(siteName string) string {
 	currentDate := time.Now().Format("2006-01-02")
 	directory := filepath.Join("storage", "logs", siteName)
 	err := os.MkdirAll(directory, 0755)
@@ -81,10 +44,33 @@ func getLogFileName(siteName string) string {
 
 	// Construct the log file path.
 	logFilePath := filepath.Join(directory, currentDate+"_application.log")
-	return logFilePath
+
+	// Open the log file in append mode, create if it doesn't exist.
+	file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatalf("Failed to open log file: %v", err)
+	}
+	// Create a multi-writer that writes to both the file and the terminal.
+	multiWriter := io.MultiWriter(file, os.Stdout)
+
+	// Create the default logger
+	dLogger := &defaultLogger{
+		logger: log.New(multiWriter, "【"+app.Name+"】", log.LstdFlags),
+		app:    app,
+	}
+
+	// Initialize GCP logger if requested
+	if metadata.OnGCE() {
+		dLogger.gcpLogger = getGCPLogger(app.Config, "ninjacrawler_log")
+		dLogger.gcpDebugLogger = getGCPLogger(app.Config, "ninjacrawler_debug_log")
+	}
+
+	return dLogger
+
 }
 
 func getGCPLogger(config *configService, logID string) *logging.Logger {
+
 	os.Setenv("GCP_LOG_CREDENTIALS_PATH", "log-key.json")
 	projectID := config.EnvString("PROJECT_ID", "lazuli-venturas-stg")
 
@@ -93,72 +79,63 @@ func getGCPLogger(config *configService, logID string) *logging.Logger {
 		panic(fmt.Sprintf("Failed to create GCP logging client: %v", err))
 	}
 
-	logger := client.Logger(logID)
-	return logger
+	return client.Logger(logID)
 }
 
-// logWithGCP logs both to the local logger and GCP.
-func (l *defaultLogger) logWithGCP(level string, msg string, args ...interface{}) {
+// logWithGCP logs both to the local logger
+func (l *defaultLogger) logWithGCP(level string, format string, args ...interface{}) {
 	ts := time.Now().Format("2006-01-02 15:04:05")
+	msg := fmt.Sprintf(format, args...)
 
-	// Log to local logger (console and file) - only the message
-	l.logger.Infof(msg, args...)
+	// Log to local logger
+	l.logger.Printf(format, args...)
 
-	// Log to GCP
 	if l.gcpLogger != nil && level != "summary" {
 		l.gcpLogger.Log(logging.Entry{
 			Payload: map[string]interface{}{
-				"level":     "info",
-				"caller":    "", // Caller information is logged automatically in the local logger.
-				"ts":        ts,
-				"site_name": l.siteName,
-				"msg":       fmt.Sprintf(msg, args...),
+				"level":  "info",
+				"caller": "", // Caller information is logged automatically in the local logger.
+				"ts":     ts,
+				"msg":    msg,
 			},
-			Severity: logging.Default,
+			Severity: logging.Info,
 		})
 	}
-
-	// Log debug to GCP Debug logger
-	if l.gcpDebugLogger != nil && level == "debug" {
-		l.gcpDebugLogger.Log(logging.Entry{
+	if l.gcpDebugLogger != nil && level != "debug" {
+		l.gcpLogger.Log(logging.Entry{
 			Payload: map[string]interface{}{
-				"level":     "error",
-				"caller":    "", // Caller information is logged automatically in the local logger.
-				"ts":        ts,
-				"site_name": l.siteName,
-				"msg":       fmt.Sprintf(msg, args...),
+				"level":  "error",
+				"caller": "ninjacrawler/logger.go",
+				"ts":     ts,
+				"msg":    msg,
 			},
 			Severity: logging.Debug,
 		})
 	}
 }
-
 func (l *defaultLogger) Summary(format string, args ...interface{}) {
 	l.logWithGCP("summary", format, args...)
 }
-
 func (l *defaultLogger) Debug(format string, args ...interface{}) {
 	l.logWithGCP("debug", format, args...)
 }
-
 func (l *defaultLogger) Info(format string, args ...interface{}) {
-	l.logWithGCP("info", "✔ "+format, args...)
+	l.logger.Printf("✔ "+format, args...)
 }
 func (l *defaultLogger) Warn(format string, args ...interface{}) {
-	l.logWithGCP("warn", "⚠️ "+format, args...)
+	l.logger.Printf("⚠️ "+format, args...)
 }
 
 func (l *defaultLogger) Error(format string, args ...interface{}) {
-	l.logWithGCP("error", "🛑 "+format, args...)
+	l.logger.Printf("🛑 ERROR: "+format, args...)
 }
 
 func (l *defaultLogger) Fatal(format string, args ...interface{}) {
-	l.logWithGCP("fatal", "🚨 "+format, args...)
-	os.Exit(1)
+	l.logger.Fatalf("🚨 FATAL: "+format, args...)
 }
 
 func (l *defaultLogger) Printf(format string, args ...interface{}) {
-	l.logger.Infof(format, args...)
+	l.logger.Printf(format, args...)
 }
 
 func (l *defaultLogger) Html(html, url, msg string) {
@@ -166,7 +143,7 @@ func (l *defaultLogger) Html(html, url, msg string) {
 		l.Error("Html Error: %v", msg)
 		err := l.app.writePageContentToFile(html, url, msg)
 		if err != nil {
-			l.logger.Infof("⚛️ HTML: %v", err)
+			l.logger.Printf("⚛️ HTML: %v", err)
 		}
 	}
 }
