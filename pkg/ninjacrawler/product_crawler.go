@@ -14,21 +14,20 @@ import (
 // CrawlPageDetail initiates the crawling process for detailed page information from the specified collection.
 // It distributes the work among multiple goroutines and uses proxies if available.
 func (app *Crawler) CrawlPageDetail(processorConfigs []ProcessorConfig) {
-	//for _, processorConfig := range processorConfigs {
-	//	app.Logger.Summary("Starting :%s: Details Crawler1", processorConfig.OriginCollection)
-	//	//app.overrideEngineDefaults(app.engine, &processorConfig.Engine)
-	//	//app.toggleClient()
-	//	////processedUrls := make(map[string]bool) // Track processed URLs
-	//	//total := int32(0)
-	//	////app.crawlPageDetailRecursive(processorConfig, processedUrls, &total, 0)
-	//	//if atomic.LoadInt32(&total) > 0 {
-	//	//	//app.Logger.Info("Total %v %v Inserted ", atomic.LoadInt32(&total), processorConfig.OriginCollection)
-	//	//}
-	//	//dataCount := app.GetDataCount(processorConfig.OriginCollection)
-	//	//app.Logger.Summary("Data count: %s", dataCount)
-	//	//exportProductDetailsToCSV(app, processorConfig.Entity, 1)
-	//}
-	app.Logger.Debug("Data count: %s", "999999")
+	for _, processorConfig := range processorConfigs {
+		app.Logger.Summary("Starting :%s: Crawler", processorConfig.OriginCollection)
+		app.overrideEngineDefaults(app.engine, &processorConfig.Engine)
+		app.toggleClient()
+		processedUrls := make(map[string]bool) // Track processed URLs
+		total := int32(0)
+		app.crawlPageDetailRecursive(processorConfig, processedUrls, &total, 0)
+		if atomic.LoadInt32(&total) > 0 {
+			//app.Logger.Info("Total %v %v Inserted ", atomic.LoadInt32(&total), processorConfig.OriginCollection)
+		}
+		dataCount := app.GetDataCount(processorConfig.OriginCollection)
+		app.Logger.Summary("Data count: %s", dataCount)
+		exportProductDetailsToCSV(app, processorConfig.Entity, 1)
+	}
 }
 
 func (app *Crawler) crawlPageDetailRecursive(processorConfig ProcessorConfig, processedUrls map[string]bool, total *int32, counter int32) {
@@ -205,7 +204,7 @@ func (app *Crawler) crawlPageDetailRecursiveDeprecated(processorConfig Processor
 		return
 	}
 	if len(newUrlCollections) > 0 {
-		app.crawlPageDetailRecursive(processorConfig, processedUrls, total, counter)
+		app.crawlPageDetailRecursiveDeprecated(processorConfig, processedUrls, total, counter)
 	}
 }
 
