@@ -165,7 +165,7 @@ func (app *Crawler) SetPreference(preference AppPreference) *Crawler {
 	return app
 }
 
-func (app *Crawler) Handle(handler Handler) *Crawler {
+func (app *Crawler) Handle(handler Handler) {
 	defer app.Stop() // Ensure Stop is called after handlers
 	app.Start()
 
@@ -175,7 +175,6 @@ func (app *Crawler) Handle(handler Handler) *Crawler {
 	if handler.ProductHandler != nil {
 		handler.ProductHandler(app)
 	}
-	return app
 }
 func (app *Crawler) AutoHandle(configs []ProcessorConfig) {
 	defer app.Stop() // Ensure Stop is called after handlers

@@ -18,9 +18,9 @@ func (app *Crawler) CrawlPageDetail(processorConfigs []ProcessorConfig) {
 		app.Logger.Summary("Starting :%s: Details Crawler", processorConfig.OriginCollection)
 		app.overrideEngineDefaults(app.engine, &processorConfig.Engine)
 		app.toggleClient()
-		processedUrls := make(map[string]bool) // Track processed URLs
+		//processedUrls := make(map[string]bool) // Track processed URLs
 		total := int32(0)
-		app.crawlPageDetailRecursive(processorConfig, processedUrls, &total, 0)
+		//app.crawlPageDetailRecursive(processorConfig, processedUrls, &total, 0)
 		if atomic.LoadInt32(&total) > 0 {
 			//app.Logger.Info("Total %v %v Inserted ", atomic.LoadInt32(&total), processorConfig.OriginCollection)
 		}

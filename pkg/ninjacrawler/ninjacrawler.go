@@ -42,8 +42,7 @@ func (ninja *NinjaCrawler) Start() {
 		cfg := config // Capture config variable for each goroutine
 		go func(cfg CrawlerConfig) {
 			defer wg.Done()
-			app := NewCrawler(cfg.Name, cfg.URL, cfg.Engine).SetPreference(cfg.Preference).Handle(cfg.Handler)
-			app.Logger.Summary("Crawler Stoppeeeed!")
+			NewCrawler(cfg.Name, cfg.URL, cfg.Engine).SetPreference(cfg.Preference).Handle(cfg.Handler)
 		}(cfg)
 	}
 
