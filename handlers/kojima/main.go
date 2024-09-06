@@ -9,7 +9,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       ninjacrawler.Bool(false),
 			DevCrawlLimit:   50,
-			ConcurrentLimit: 1,
+			ConcurrentLimit: 3,
 			SleepAfter:      10,
 			Provider:        "zenrows",
 			ProviderOption: ninjacrawler.ProviderQueryOption{
@@ -17,7 +17,8 @@ func Crawler() ninjacrawler.CrawlerConfig {
 				CustomHeaders:        true,
 				OriginalStatus:       true,
 			},
-			Timeout: 300,
+			Timeout:            300,
+			RetrySleepDuration: 30,
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
