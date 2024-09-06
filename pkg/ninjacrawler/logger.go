@@ -98,7 +98,7 @@ func (l *defaultLogger) logWithGCP(level string, format string, args ...interfac
 			Severity: logging.Info,
 		})
 	}
-	if l.gcpDebugLogger != nil && level == "debug" {
+	if level == "debug" {
 		l.gcpLogger.Log(logging.Entry{
 			Payload: map[string]interface{}{
 				"level":  "error",
