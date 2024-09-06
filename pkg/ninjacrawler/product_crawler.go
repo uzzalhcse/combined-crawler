@@ -16,14 +16,14 @@ import (
 func (app *Crawler) CrawlPageDetail(processorConfigs []ProcessorConfig) {
 	for _, processorConfig := range processorConfigs {
 		app.Logger.Summary("Starting :%s: Details Crawler", processorConfig.OriginCollection)
-		app.overrideEngineDefaults(app.engine, &processorConfig.Engine)
-		app.toggleClient()
-		//processedUrls := make(map[string]bool) // Track processed URLs
-		total := int32(0)
-		//app.crawlPageDetailRecursive(processorConfig, processedUrls, &total, 0)
-		if atomic.LoadInt32(&total) > 0 {
-			//app.Logger.Info("Total %v %v Inserted ", atomic.LoadInt32(&total), processorConfig.OriginCollection)
-		}
+		//app.overrideEngineDefaults(app.engine, &processorConfig.Engine)
+		//app.toggleClient()
+		////processedUrls := make(map[string]bool) // Track processed URLs
+		//total := int32(0)
+		////app.crawlPageDetailRecursive(processorConfig, processedUrls, &total, 0)
+		//if atomic.LoadInt32(&total) > 0 {
+		//	//app.Logger.Info("Total %v %v Inserted ", atomic.LoadInt32(&total), processorConfig.OriginCollection)
+		//}
 		dataCount := app.GetDataCount(processorConfig.OriginCollection)
 		app.Logger.Summary("Data count: %s", dataCount)
 		exportProductDetailsToCSV(app, processorConfig.Entity, 1)
