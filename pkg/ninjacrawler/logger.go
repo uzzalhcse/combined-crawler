@@ -88,7 +88,7 @@ func (l *defaultLogger) logWithGCP(level string, format string, args ...interfac
 	msg := fmt.Sprintf(format, args...)
 
 	// Log to local logger
-	l.logger.Printf(format, args...)
+	l.logger.Printf("☁️ "+format, args...)
 
 	if l.gcpLogger != nil && level != "summary" {
 		l.gcpLogger.Log(logging.Entry{
