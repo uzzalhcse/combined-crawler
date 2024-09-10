@@ -17,16 +17,16 @@ type Category struct {
 func UrlHandler(crawler *ninjacrawler.Crawler) {
 
 	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
-		{
-			Entity:           constant.Categories,
-			OriginCollection: crawler.GetBaseCollection(),
-			Processor:        categoryHandler,
-		},
-		{
-			Entity:           constant.SubCategories,
-			OriginCollection: constant.Categories,
-			Processor:        subCategoryHandler,
-		},
+		//{
+		//	Entity:           constant.Categories,
+		//	OriginCollection: crawler.GetBaseCollection(),
+		//	Processor:        categoryHandler,
+		//},
+		//{
+		//	Entity:           constant.SubCategories,
+		//	OriginCollection: constant.Categories,
+		//	Processor:        subCategoryHandler,
+		//},
 		{
 			Entity:           constant.Products,
 			OriginCollection: constant.SubCategories,
