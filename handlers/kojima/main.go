@@ -4,7 +4,7 @@ import "combined-crawler/pkg/ninjacrawler"
 
 func Crawler() ninjacrawler.CrawlerConfig {
 	return ninjacrawler.CrawlerConfig{
-		Name: "kojima_v2",
+		Name: "kojima",
 		URL:  "https://www.kojima.net",
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       ninjacrawler.Bool(false),
@@ -12,6 +12,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			ConcurrentLimit: 3,
 			SleepAfter:      10,
 			Provider:        "zenrows",
+			SleepDuration:   30,
 			ProviderOption: ninjacrawler.ProviderQueryOption{
 				UsePremiumProxyRetry: true,
 				CustomHeaders:        true,
