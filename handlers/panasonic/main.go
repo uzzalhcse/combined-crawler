@@ -14,7 +14,11 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			ConcurrentLimit:    10,
 			SleepAfter:         5,
 			Timeout:            30,
-			RetrySleepDuration: 15,
+			RetrySleepDuration: 30,
+			Provider:           "zenrows",
+			ProviderOption: ninjacrawler.ProviderQueryOption{
+				OriginalStatus: true,
+			},
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,

@@ -116,8 +116,8 @@ func getAdditionalPage(ctx ninjacrawler.CrawlerContext, productDetailsSection *g
 		return nil, nil
 	}
 
-	const maxAttempts = 3
-	const retryDelay = 5 * time.Second
+	const maxAttempts = 1
+	const retryDelay = 300 * time.Second
 
 	var document *goquery.Document
 	var err error
@@ -135,7 +135,7 @@ func getAdditionalPage(ctx ninjacrawler.CrawlerContext, productDetailsSection *g
 			_ = ctx.App.MarkAsError(ctx.UrlCollection.Url, constant.Products, err.Error(), 1)
 			ctx.App.Logger.Error("Error navigating to page after %d attempts: %v", maxAttempts, err)
 		} else {
-			time.Sleep(retryDelay)
+			ctx.App.HandleThrottling(attempt, 494)
 		}
 	}
 
