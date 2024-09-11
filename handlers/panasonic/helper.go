@@ -116,7 +116,7 @@ func getAdditionalPage(ctx ninjacrawler.CrawlerContext, productDetailsSection *g
 		return nil, nil
 	}
 
-	const maxAttempts = 1
+	const maxAttempts = 2
 	const retryDelay = 2 * time.Second
 
 	var document *goquery.Document
