@@ -1,6 +1,7 @@
 package ninjacrawler
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -61,23 +62,24 @@ func (app *Crawler) NavigateToApiURL(client *http.Client, urlString string, prox
 func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxyServer Proxy, attempt int) ([]byte, string, error) {
 
 	ContentType := ""
+	proxyIp := ""
 	urlString = app.GetQueryEscapeFullUrl(urlString)
 
 	httpTransport := &http.Transport{
-		//DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-		//	conn, err := net.Dial(network, addr)
-		//	if err == nil {
-		//		proxyIp = conn.RemoteAddr().String()
-		//		if app.engine.Provider == "zenrows" || strings.Contains(proxyServer.Server, "proxy.zenrows.com") {
-		//			app.Logger.Info("Proxy IP address: %s => %s", proxyIp, urlString)
-		//		}
-		//	}
-		//	return conn, err
-		//},
-		DialContext: (&net.Dialer{
-			Timeout:   client.Timeout, // Connection timeout
-			KeepAlive: client.Timeout,
-		}).DialContext,
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			conn, err := net.Dial(network, addr)
+			if err == nil {
+				proxyIp = conn.RemoteAddr().String()
+				if app.engine.Provider == "zenrows" || strings.Contains(proxyServer.Server, "proxy.zenrows.com") {
+					app.Logger.Info("Proxy IP address: %s => %s", proxyIp, urlString)
+				}
+			}
+			return conn, err
+		},
+		//DialContext: (&net.Dialer{
+		//	Timeout:   client.Timeout, // Connection timeout
+		//	KeepAlive: client.Timeout,
+		//}).DialContext,
 		TLSHandshakeTimeout: 10 * time.Second, // TLS handshake timeout
 	}
 
