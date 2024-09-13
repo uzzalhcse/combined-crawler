@@ -71,9 +71,12 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 					currentProxy = rotateProxy()
 					app.CurrentProxy = currentProxy
 					app.Logger.Debug("Received 403. Rotating proxy to %s", currentProxy.Server)
-					browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, currentProxy)
-					if err != nil {
-						app.Logger.Fatal(err.Error())
+
+					if *app.engine.IsDynamic {
+						browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, currentProxy)
+						if err != nil {
+							app.Logger.Fatal(err.Error())
+						}
 					}
 				}
 			}

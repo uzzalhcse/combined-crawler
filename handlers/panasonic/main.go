@@ -15,8 +15,8 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			SleepAfter:         15,
 			Timeout:            30, // 30 seconds
 			SleepDuration:      60, // 1 minutes
-			RetrySleepDuration: 5,
-			ProxyStrategy:      ninjacrawler.ProxyStrategyRotation,
+			RetrySleepDuration: 120,
+			ProxyStrategy:      ninjacrawler.ProxyStrategyConcurrency,
 			ProxyServers: []ninjacrawler.Proxy{
 				{
 					Server:   "socks5://5.59.251.78:6117",
