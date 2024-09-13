@@ -84,19 +84,23 @@ func (app *Crawler) handleProductJob(urlCollections []UrlCollection, processorCo
 	proxyCount := len(app.engine.ProxyServers)
 	batchSize := app.engine.ConcurrentLimit
 	totalUrls := len(urlCollections)
-	goroutineCount := min(max(proxyCount, 1)*batchSize, totalUrls) // Determine the required number of goroutines
+	goroutineCount := min(max(proxyCount, 1)*batchSize, totalUrls)
+	if app.engine.ProxyStrategy == ProxyStrategyRotation {
+		goroutineCount = min(batchSize, totalUrls)
+	}
 
 	for i := 0; i < goroutineCount; i++ {
 		proxy := Proxy{}
+		currentProxyIndex := 0
 		if proxyCount > 0 {
 			proxy = app.engine.ProxyServers[i%proxyCount]
+			currentProxyIndex = i % proxyCount
 		}
 		innerWg.Add(1)
 		go func(proxy Proxy) {
 			defer innerWg.Done()
-			app.CurrentProxy = proxy
 			app.CurrentCollection = processorConfig.OriginCollection
-			app.crawlWorker(ctx, processorConfig, urlChan, resultChan, proxy, app.isLocalEnv, &counter)
+			app.crawlWorker(ctx, processorConfig, urlChan, resultChan, app.isLocalEnv, &counter, currentProxyIndex)
 		}(proxy)
 	}
 
@@ -174,7 +178,7 @@ func (app *Crawler) crawlPageDetailRecursiveDeprecated(processorConfig Processor
 		wg.Add(1)
 		go func(proxy Proxy) {
 			defer wg.Done()
-			app.crawlWorker(ctx, processorConfig, urlChan, resultChan, proxy, app.isLocalEnv, &counter)
+			app.crawlWorker(ctx, processorConfig, urlChan, resultChan, app.isLocalEnv, &counter, 0)
 		}(proxy)
 	}
 
@@ -319,8 +323,8 @@ func (app *Crawler) handleProductDetail(res *ProductDetail, processorConfig Proc
 		if *app.engine.IsDynamic {
 			html = app.getHtmlFromPage(v.Page)
 		}
-		app.Logger.Html(html, v.UrlCollection.Url, msg)
-		err := app.MarkAsError(v.UrlCollection.Url, processorConfig.OriginCollection, msg)
+		app.Logger.Html(html, v.UrlCollection.Url, msg, "validation")
+		err := app.MarkAsMaxErrorAttempt(v.UrlCollection.Url, processorConfig.OriginCollection, msg)
 		if err != nil {
 			return err
 		}

@@ -94,7 +94,7 @@ func (app *Crawler) GetPageDom(page playwright.Page) (*goquery.Document, error) 
 	}
 	return document, nil
 }
-func (app *Crawler) writePageContentToFile(html, url, msg string) error {
+func (app *Crawler) writePageContentToFile(html, url, msg string, dir ...string) error {
 	if html == "" {
 		html = "No Page Content Found"
 	}
@@ -102,6 +102,9 @@ func (app *Crawler) writePageContentToFile(html, url, msg string) error {
 	html = fmt.Sprintf("<!-- Time: %v \n Page Url: %s -->\n%s", time.Now(), url, html)
 	filename := generateFilename(url)
 	directory := filepath.Join("storage", "logs", app.Name, "html")
+	if dir != nil && len(dir) > 0 {
+		directory = filepath.Join("storage", "logs", app.Name, "html", dir[0])
+	}
 	err := os.MkdirAll(directory, 0755)
 	if err != nil {
 		return err

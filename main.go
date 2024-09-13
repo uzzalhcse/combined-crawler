@@ -1,7 +1,7 @@
 package main
 
 import (
-	"combined-crawler/handlers/aqua"
+	"combined-crawler/handlers/panasonic"
 	"combined-crawler/pkg/ninjacrawler"
 )
 
@@ -15,13 +15,13 @@ func siteRegistry() {
 	// register all sites configs to run the crawlers
 	ninjacrawler.NewNinjaCrawler().
 		//AddSite(kyocera.Crawler()).
-		AddSite(aqua.Crawler()).
+		//AddSite(aqua.Crawler()).
 		//AddSite(yamaya.Crawler()).
 		//AddSite(midori_anzen.Crawler()).
 		//AddSite(osg.Crawler()).
 		//AddSite(sumitool.Crawler()).
 		//AddSite(kojima.Crawler()).
-		//AddSite(panasonic.Crawler()).
+		AddSite(panasonic.Crawler()).
 		//AddSite(suntory.Crawler()).
 		//AddSite(markt.Crawler()).
 		//AddSite(as1.Crawler()).

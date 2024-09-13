@@ -3,6 +3,7 @@ package ninjacrawler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/playwright-community/playwright-go"
 	"strings"
@@ -10,15 +11,34 @@ import (
 	"time"
 )
 
-func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorConfig, urlChan <-chan UrlCollection, resultChan chan<- interface{}, proxy Proxy, isLocalEnv bool, counter *int32) {
+func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorConfig, urlChan <-chan UrlCollection, resultChan chan<- interface{}, isLocalEnv bool, counter *int32, currentProxyIndex int) {
 	var page playwright.Page
 	var browser playwright.Browser
 	var err error
 	var doc *goquery.Document
 	var apiResponse map[string]interface{}
 
+	// Used to track the proxy index
+	proxyIndex := 0
+	if app.engine.ProxyStrategy == ProxyStrategyConcurrency && currentProxyIndex > 0 {
+		proxyIndex = currentProxyIndex
+	}
+	usedProxies := make(map[int]bool)
+
+	rotateProxy := func() Proxy {
+		proxyIndex = (proxyIndex + 1) % len(app.engine.ProxyServers)
+		usedProxies[proxyIndex] = true
+		app.Logger.Warn(fmt.Sprintf("Rotating proxy proxyIndex %d", proxyIndex))
+		return app.engine.ProxyServers[proxyIndex]
+	}
+
+	// Get the initial proxy
+	currentProxy := app.engine.ProxyServers[proxyIndex]
+	usedProxies[proxyIndex] = true
+	app.CurrentProxy = currentProxy
+
 	if *app.engine.IsDynamic {
-		browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, proxy)
+		browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, currentProxy)
 		if err != nil {
 			app.Logger.Fatal(err.Error())
 		}
@@ -41,9 +61,20 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 			if !more {
 				return
 			}
-			if app.engine.RetrySleepDuration > 0 {
-				if urlCollection.StatusCode == 403 || (app.engine.Provider == "zenrows" && urlCollection.StatusCode >= 400 && urlCollection.StatusCode < 500) {
-					app.HandleThrottling(urlCollection.Attempts, urlCollection.StatusCode)
+			if app.engine.ProxyStrategy == ProxyStrategyRotation {
+				if urlCollection.StatusCode == 403 {
+					if app.engine.RetrySleepDuration > 0 && app.engine.Provider == "zenrows" && urlCollection.StatusCode >= 400 && urlCollection.StatusCode < 500 && urlCollection.StatusCode != 404 {
+						app.HandleThrottling(urlCollection.Attempts, urlCollection.StatusCode)
+					}
+					//app.HandleThrottling(urlCollection.Attempts, urlCollection.StatusCode)
+					// Rotate the proxy on receiving a 403
+					currentProxy = rotateProxy()
+					app.CurrentProxy = currentProxy
+					app.Logger.Debug("Received 403. Rotating proxy to %s", currentProxy.Server)
+					browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, currentProxy)
+					if err != nil {
+						app.Logger.Fatal(err.Error())
+					}
 				}
 			}
 			preHandlerError := false
@@ -66,8 +97,8 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 				crawlableUrl = urlCollection.CurrentPageUrl
 			}
 
-			if proxy.Server != "" {
-				app.Logger.Info("Crawling :%s: %s using Proxy %s", processorConfig.OriginCollection, crawlableUrl, proxy.Server)
+			if currentProxy.Server != "" {
+				app.Logger.Info("Crawling :%s: %s using Proxy %s", processorConfig.OriginCollection, crawlableUrl, currentProxy.Server)
 			} else {
 				app.Logger.Info("Crawling :%s: %s", processorConfig.OriginCollection, crawlableUrl)
 			}
@@ -76,14 +107,14 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 			} else {
 				switch processorConfig.Processor.(type) {
 				case ProductDetailApi:
-					apiResponse, err = app.NavigateToApiURL(app.httpClient, crawlableUrl, proxy)
+					apiResponse, err = app.NavigateToApiURL(app.httpClient, crawlableUrl, currentProxy)
 				default:
-					doc, err = app.NavigateToStaticURL(app.httpClient, crawlableUrl, proxy)
+					doc, err = app.NavigateToStaticURL(app.httpClient, crawlableUrl, currentProxy)
 				}
 			}
 
 			if err != nil {
-				if strings.Contains(err.Error(), "StatusCode:40") {
+				if strings.Contains(err.Error(), "StatusCode:404") {
 					if markMaxErr := app.MarkAsMaxErrorAttempt(urlCollection.Url, processorConfig.OriginCollection, err.Error()); markMaxErr != nil {
 						app.Logger.Error("markMaxErr: ", markMaxErr.Error())
 						return

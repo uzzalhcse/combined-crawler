@@ -20,6 +20,7 @@ type Engine struct {
 	BlockedURLs             []string
 	BoostCrawling           bool
 	ProxyServers            []Proxy
+	ProxyStrategy           string
 	CookieConsent           *CookieAction
 	Timeout                 time.Duration
 	WaitForDynamicRendering bool

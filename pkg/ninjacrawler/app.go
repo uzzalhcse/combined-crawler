@@ -227,6 +227,7 @@ func getDefaultEngine() Engine {
 		RetrySleepDuration: 0, //30min
 		CrawlTimeout:       999999,
 		WaitForSelector:    nil,
+		ProxyStrategy:      ProxyStrategyConcurrency,
 	}
 }
 
@@ -376,5 +377,8 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	}
 	if eng.WaitForSelector != nil {
 		defaultEngine.WaitForSelector = eng.WaitForSelector
+	}
+	if eng.ProxyStrategy != "" {
+		defaultEngine.ProxyStrategy = eng.ProxyStrategy
 	}
 }
