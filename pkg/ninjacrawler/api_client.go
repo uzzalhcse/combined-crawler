@@ -34,7 +34,7 @@ func (app *Crawler) submitProductData(productData *ProductDetail) error {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("%s: unexpected status code: %d", productData.Url, response.StatusCode)
+		return fmt.Errorf("%s: unexpected status code: %d and body: %s", productData.Url, response.StatusCode, response.Body)
 	}
 
 	return nil
