@@ -142,7 +142,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 	if req.URL.String() != resp.Request.URL.String() {
 		resUrl, _ := url.Parse(resp.Request.URL.String())
 		if resUrl.Host != req.Host {
-			app.Logger.Debug("===Redirect detected: %s -> %s === Request URL: %s Response URL: %s\n", req.Host, resUrl.Host, req.URL.String(), resp.Request.URL.String())
+			app.Logger.Warn("===Redirect detected: %s -> %s === Request URL: %s Response URL: %s\n", req.Host, resUrl.Host, req.URL.String(), resp.Request.URL.String())
 		}
 	}
 	if resp.StatusCode != http.StatusOK {
