@@ -53,7 +53,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Preference: ninjacrawler.Preference{
 				ValidationRules: []string{"PageTitle|required|blacklist:ページが見つかりません | Panasonic,エラー,URL変更のお知らせ,Redirect"},
 				PreHandlers: []func(c ninjacrawler.PreHandlerContext) error{
-					ValidUrlStr,
+					//ValidUrlStr,
 					ValidHost,
 					HandleUrlExtension,
 				},
