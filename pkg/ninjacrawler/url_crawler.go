@@ -18,7 +18,7 @@ func (app *Crawler) CrawlUrls(processorConfigs []ProcessorConfig) {
 		if atomic.LoadInt32(&total) > 0 {
 			app.Logger.Info("[Total (%d) :%s: found from :%s:]", atomic.LoadInt32(&total), processorConfig.Entity, processorConfig.OriginCollection)
 		}
-		dataCount := app.GetDataCount(processorConfig.OriginCollection)
+		dataCount := app.GetDataCount(processorConfig.Entity)
 		app.Logger.Summary("[Total (%s) :%s: found from :%s:]", dataCount, processorConfig.Entity, processorConfig.OriginCollection)
 
 		errDataCount := app.GetErrorDataCount(processorConfig.OriginCollection)

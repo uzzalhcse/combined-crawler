@@ -13,6 +13,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			DevCrawlLimit:   200,
 			ConcurrentLimit: 100,
 			SleepAfter:      15,
+			SleepDuration:   60,
 			Timeout:         30, // 30 seconds
 			ErrorCodes:      []int{403, 429},
 			//RetrySleepDuration: 120,

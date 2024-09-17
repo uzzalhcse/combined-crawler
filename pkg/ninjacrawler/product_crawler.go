@@ -24,7 +24,7 @@ func (app *Crawler) CrawlPageDetail(processorConfigs []ProcessorConfig) {
 		if atomic.LoadInt32(&total) > 0 {
 			//app.Logger.Info("Total %v %v Inserted ", atomic.LoadInt32(&total), processorConfig.OriginCollection)
 		}
-		dataCount := app.GetDataCount(processorConfig.OriginCollection)
+		dataCount := app.GetDataCount(processorConfig.Entity)
 		app.Logger.Summary("Data count: %s", dataCount)
 
 		errDataCount := app.GetErrorDataCount(processorConfig.OriginCollection)
