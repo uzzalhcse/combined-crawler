@@ -130,7 +130,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 			}
 			_ = app.updateStatusCode(urlString, 429)
 			if app.engine.RetrySleepDuration > 0 {
-				app.HandleThrottling(1, 429)
+				//app.HandleThrottling(1, 429)
 			}
 		}
 		return nil, ContentType, fmt.Errorf(errMsg)
