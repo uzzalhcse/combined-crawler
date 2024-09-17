@@ -79,9 +79,9 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 				return
 			}
 			app.CurrentUrlCollection = urlCollection
-			if app.engine.RetrySleepDuration > 0 && inArray(app.engine.ErrorCodes, urlCollection.StatusCode) {
-				app.HandleThrottling(urlCollection.Attempts, urlCollection.StatusCode)
-			}
+			//if app.engine.RetrySleepDuration > 0 && inArray(app.engine.ErrorCodes, urlCollection.StatusCode) {
+			//	app.HandleThrottling(urlCollection.Attempts, urlCollection.StatusCode)
+			//}
 			atomic.AddInt32(&activeGoroutines, 1) // Increment the active goroutine counter
 
 			// Rotate proxy on receiving specific error codes
