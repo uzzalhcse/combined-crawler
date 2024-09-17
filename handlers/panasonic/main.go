@@ -11,7 +11,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       ninjacrawler.Bool(false),
 			DevCrawlLimit:   200,
-			ConcurrentLimit: 150,
+			ConcurrentLimit: 100,
 			SleepAfter:      15,
 			Timeout:         30, // 30 seconds
 			ErrorCodes:      []int{403, 429},
