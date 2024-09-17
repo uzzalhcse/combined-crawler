@@ -125,7 +125,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 			_ = app.updateStatusCode(urlString, 408)
 		}
 		if strings.Contains(err.Error(), "Too Many Requests") {
-			if inArray(app.engine.ErrorCodes, resp.StatusCode) {
+			if inArray(app.engine.ErrorCodes, 429) {
 				errMsg = fmt.Sprintf("isRetryable : Too Many Requests: %v", err)
 			}
 			_ = app.updateStatusCode(urlString, 429)
