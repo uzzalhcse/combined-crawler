@@ -101,9 +101,6 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 			// Set the proxy in the transport
 			httpTransport.Proxy = http.ProxyURL(proxyURL)
 
-			// Log the proxy being used
-			app.Logger.Info("Using proxy: %s with credentials", proxyServer.Server)
-
 			if proxyURL.Scheme == "http" || proxyURL.Scheme == "https" {
 				httpTransport.TLSClientConfig = &tls.Config{
 					InsecureSkipVerify: true,

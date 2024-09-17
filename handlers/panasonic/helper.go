@@ -317,7 +317,7 @@ func getLinkedUrlsAttributeService(ctx ninjacrawler.CrawlerContext, pageData *go
 		if strings.HasPrefix(href, "http") {
 			link = href
 		} else {
-			link = JoinURLs(ctx.UrlCollection.Url, href)
+			link = JoinURLs(ctx.App.CurrentUrl, href)
 		}
 		if isValidHost(link) {
 			linkedUrls = append(linkedUrls, ninjacrawler.UrlCollection{
