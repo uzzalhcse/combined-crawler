@@ -120,13 +120,17 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 
 	resp, err := client.Do(req)
 	if err != nil {
+		errMsg := fmt.Sprintf("Failed to send request: %v", err)
 		if strings.Contains(err.Error(), "Client.Timeout") {
 			_ = app.updateStatusCode(urlString, 408)
 		}
 		if strings.Contains(err.Error(), "Too Many Requests") {
+			if inArray(app.engine.ErrorCodes, resp.StatusCode) {
+				errMsg = fmt.Sprintf("isRetryable : Too Many Requests: %v", err)
+			}
 			_ = app.updateStatusCode(urlString, 429)
 		}
-		return nil, ContentType, fmt.Errorf("Failed to send request: %v", err)
+		return nil, ContentType, fmt.Errorf(errMsg)
 	}
 	defer resp.Body.Close()
 
