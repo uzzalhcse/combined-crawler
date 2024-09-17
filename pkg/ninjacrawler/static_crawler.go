@@ -129,6 +129,9 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 				errMsg = fmt.Sprintf("isRetryable : Too Many Requests: %v", err)
 			}
 			_ = app.updateStatusCode(urlString, 429)
+			if app.engine.RetrySleepDuration > 0 {
+				app.HandleThrottling(1, 429)
+			}
 		}
 		return nil, ContentType, fmt.Errorf(errMsg)
 	}

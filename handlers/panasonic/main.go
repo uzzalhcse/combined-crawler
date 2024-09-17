@@ -9,15 +9,15 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: "panasonic",
 		URL:  "https://panasonic.jp/products.html",
 		Engine: ninjacrawler.Engine{
-			IsDynamic:       ninjacrawler.Bool(false),
-			DevCrawlLimit:   200,
-			ConcurrentLimit: 100,
-			SleepAfter:      15,
-			SleepDuration:   60,
-			Timeout:         30, // 30 seconds
-			ErrorCodes:      []int{403, 429},
-			//RetrySleepDuration: 120,
-			ProxyStrategy: ninjacrawler.ProxyStrategyRotation,
+			IsDynamic:          ninjacrawler.Bool(false),
+			DevCrawlLimit:      200,
+			ConcurrentLimit:    100,
+			SleepAfter:         15,
+			SleepDuration:      60,
+			Timeout:            30, // 30 seconds
+			ErrorCodes:         []int{403, 429},
+			RetrySleepDuration: 10,
+			ProxyStrategy:      ninjacrawler.ProxyStrategyRotation,
 			ProxyServers: []ninjacrawler.Proxy{
 				{
 					Server:   "http://5.59.251.78:6117",
