@@ -3,7 +3,6 @@ package ninjacrawler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/playwright-community/playwright-go"
 	"strings"
@@ -18,26 +17,49 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 	var doc *goquery.Document
 	var apiResponse map[string]interface{}
 
-	// Used to track the proxy index
+	// Used to track the proxy index and used proxies
+	var usedProxies = make(map[int]bool)
 	proxyIndex := 0
+	currentProxy := Proxy{}
 	if app.engine.ProxyStrategy == ProxyStrategyConcurrency && currentProxyIndex > 0 {
 		proxyIndex = currentProxyIndex
 	}
-	usedProxies := make(map[int]bool)
 
 	rotateProxy := func() Proxy {
-		proxyIndex = (proxyIndex + 1) % len(app.engine.ProxyServers)
-		usedProxies[proxyIndex] = true
-		app.Logger.Warn(fmt.Sprintf("Rotating proxy proxyIndex %d", proxyIndex))
-		return app.engine.ProxyServers[proxyIndex]
-	}
+		// Check if all proxies have been used, reset if so
+		if len(usedProxies) == len(app.engine.ProxyServers) {
+			usedProxies = make(map[int]bool) // Reset used proxies
+		}
 
+		// Find the next available proxy that hasn't been used
+		for {
+			proxyIndex = (proxyIndex + 1) % len(app.engine.ProxyServers)
+			if !usedProxies[proxyIndex] {
+				break
+			}
+		}
+
+		// Mark the current proxy as used
+		usedProxies[proxyIndex] = true
+
+		// Rotate to the next proxy
+		proxy := app.engine.ProxyServers[proxyIndex]
+		app.CurrentProxy = proxy
+		app.Logger.Debug("Rotating proxy to %s", proxy.Server)
+
+		if *app.engine.IsDynamic {
+			browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, proxy)
+			if err != nil {
+				app.Logger.Fatal(err.Error())
+			}
+		}
+
+		return proxy
+	}
 	// Get the initial proxy
-	currentProxy := Proxy{}
 	if len(app.engine.ProxyServers) > 0 {
 		currentProxy = app.engine.ProxyServers[proxyIndex]
 	}
-	usedProxies[proxyIndex] = true
 	app.CurrentProxy = currentProxy
 
 	if *app.engine.IsDynamic {
@@ -64,21 +86,13 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 			if !more {
 				return
 			}
+			app.CurrentUrlCollection = urlCollection
 			if app.engine.RetrySleepDuration > 0 && inArray(app.engine.ErrorCodes, urlCollection.StatusCode) {
 				app.HandleThrottling(urlCollection.Attempts, urlCollection.StatusCode)
 			}
 			if app.engine.ProxyStrategy == ProxyStrategyRotation && inArray(app.engine.ErrorCodes, urlCollection.StatusCode) {
 				// Rotate the proxy on receiving a 403
 				currentProxy = rotateProxy()
-				app.CurrentProxy = currentProxy
-				app.Logger.Debug("Received %d. Rotating proxy to %s", urlCollection.StatusCode, currentProxy.Server)
-
-				if *app.engine.IsDynamic {
-					browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, currentProxy)
-					if err != nil {
-						app.Logger.Fatal(err.Error())
-					}
-				}
 			}
 			preHandlerError := false
 			if processorConfig.Preference.PreHandlers != nil { // Execute pre handlers
@@ -120,6 +134,15 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 				if strings.Contains(err.Error(), "StatusCode:404") {
 					if markMaxErr := app.MarkAsMaxErrorAttempt(urlCollection.Url, processorConfig.OriginCollection, err.Error()); markMaxErr != nil {
 						app.Logger.Error("markMaxErr: ", markMaxErr.Error())
+						return
+					}
+				} else if strings.Contains(err.Error(), "isRetryable") {
+					if app.engine.ProxyStrategy == ProxyStrategyRotation {
+						// Rotate the proxy on receiving a 403
+						currentProxy = rotateProxy()
+					}
+					if markErr := app.MarkAsError(urlCollection.Url, processorConfig.OriginCollection, err.Error()); markErr != nil {
+						app.Logger.Error("markErr: ", markErr.Error())
 						return
 					}
 				} else {

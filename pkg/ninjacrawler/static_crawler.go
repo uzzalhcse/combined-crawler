@@ -151,8 +151,9 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 			_ = app.MarkAsMaxErrorAttempt(urlString, app.CurrentCollection, "Url Not Found")
 			return nil, ContentType, fmt.Errorf("Url Not Found StatusCode: %v", resp.StatusCode)
 		}
-		if app.engine.RetrySleepDuration > 0 && (resp.StatusCode == 403) {
-			app.Logger.Error("failed: StatusCode:%v and Status:%v", resp.StatusCode, resp.Status)
+		if inArray(app.engine.ErrorCodes, resp.StatusCode) {
+			msg = fmt.Sprintf("isRetryable: StatusCode:%v and Status:%v", resp.StatusCode, resp.Status)
+			app.Logger.Error(msg)
 			app.Logger.Debug("Got Blocked at URL: %s Error: %v\n", app.CurrentUrl, msg)
 			//app.HandleThrottling(1, resp.StatusCode)
 		} else {

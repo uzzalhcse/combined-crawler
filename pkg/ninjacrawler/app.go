@@ -35,6 +35,7 @@ type Crawler struct {
 	userAgent             string
 	CurrentProxy          Proxy
 	CurrentCollection     string
+	CurrentUrlCollection  UrlCollection
 	CurrentUrl            string
 }
 
