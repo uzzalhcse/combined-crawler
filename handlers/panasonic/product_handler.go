@@ -70,7 +70,7 @@ func ValidHost(c ninjacrawler.PreHandlerContext) error {
 	return nil
 }
 func ValidUrlStr(c ninjacrawler.PreHandlerContext) error {
-	if strings.Contains(c.UrlCollection.Url, "/qr/rss/") || strings.Contains(c.UrlCollection.Url, "/qr/news/") {
+	if strings.Contains(c.UrlCollection.Url, "/qr/rss/") || strings.Contains(c.UrlCollection.Url, "sr/fv/qr") || strings.Contains(c.UrlCollection.Url, "/qr/news/") {
 		_ = c.App.MarkAsMaxErrorAttempt(c.UrlCollection.Url, constant.Products, "Invalid Host")
 		return fmt.Errorf("invalid url str %s", c.UrlCollection.Url)
 	}
