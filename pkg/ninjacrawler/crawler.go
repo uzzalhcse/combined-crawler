@@ -85,9 +85,9 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 			atomic.AddInt32(&activeGoroutines, 1) // Increment the active goroutine counter
 
 			// Rotate proxy on receiving specific error codes
-			if app.engine.ProxyStrategy == ProxyStrategyRotation && inArray(app.engine.ErrorCodes, urlCollection.StatusCode) {
-				currentProxy = rotateProxy()
-			}
+			//if app.engine.ProxyStrategy == ProxyStrategyRotation && inArray(app.engine.ErrorCodes, urlCollection.StatusCode) {
+			//	currentProxy = rotateProxy()
+			//}
 			preHandlerError := false
 			if processorConfig.Preference.PreHandlers != nil { // Execute pre handlers
 				for _, preHandler := range processorConfig.Preference.PreHandlers {
@@ -130,7 +130,7 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 						app.Logger.Error("markMaxErr: ", markMaxErr.Error())
 						return
 					}
-				} else if strings.Contains(err.Error(), "isRetryable") {
+				} else if strings.Contains(err.Error(), "isRetryable") && atomic.AddInt32(&activeGoroutines, -1) == 0 {
 					if app.engine.ProxyStrategy == ProxyStrategyRotation {
 						// Rotate the proxy on receiving a 403
 						currentProxy = rotateProxy()
