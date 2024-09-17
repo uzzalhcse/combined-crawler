@@ -123,6 +123,9 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 		if strings.Contains(err.Error(), "Client.Timeout") {
 			_ = app.updateStatusCode(urlString, 408)
 		}
+		if strings.Contains(err.Error(), "Too Many Requests") {
+			_ = app.updateStatusCode(urlString, 429)
+		}
 		return nil, ContentType, fmt.Errorf("Failed to send request: %v", err)
 	}
 	defer resp.Body.Close()
