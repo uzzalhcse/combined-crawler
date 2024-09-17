@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html/charset"
-	"golang.org/x/net/proxy"
 	"io"
 	"log"
 	"net"
@@ -94,16 +93,16 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 			if err != nil {
 				log.Fatalf("Failed to parse proxy URL: %v", err)
 			}
+			// Set proxy credentials if available
 			if proxyServer.Username != "" && proxyServer.Password != "" {
 				proxyURL.User = url.UserPassword(proxyServer.Username, proxyServer.Password)
-				dialer, err := proxy.FromURL(proxyURL, proxy.Direct)
-				if err != nil {
-					log.Fatalf("Failed to obtain proxy dialer: %v", err)
-				}
-				httpTransport.Dial = dialer.Dial
-			} else {
-				httpTransport.Proxy = http.ProxyURL(proxyURL)
 			}
+
+			// Set the proxy in the transport
+			httpTransport.Proxy = http.ProxyURL(proxyURL)
+
+			// Log the proxy being used
+			app.Logger.Info("Using proxy: %s with credentials", proxyServer.Server)
 
 			if proxyURL.Scheme == "http" || proxyURL.Scheme == "https" {
 				httpTransport.TLSClientConfig = &tls.Config{
