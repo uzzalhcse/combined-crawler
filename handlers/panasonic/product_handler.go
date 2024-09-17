@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 func ProductHandler(crawler *ninjacrawler.Crawler) {
@@ -52,6 +53,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Preference: ninjacrawler.Preference{
 				ValidationRules: []string{"PageTitle|required|blacklist:ページが見つかりません | Panasonic,エラー,URL変更のお知らせ,Redirect"},
 				PreHandlers: []func(c ninjacrawler.PreHandlerContext) error{
+					ValidUrlStr,
 					ValidHost,
 					HandleUrlExtension,
 				},
@@ -64,6 +66,13 @@ func ValidHost(c ninjacrawler.PreHandlerContext) error {
 	if !isValidHost(c.UrlCollection.Url) {
 		_ = c.App.MarkAsMaxErrorAttempt(c.UrlCollection.Url, constant.Products, "Invalid Host")
 		return fmt.Errorf("invalid host %s", c.UrlCollection.Url)
+	}
+	return nil
+}
+func ValidUrlStr(c ninjacrawler.PreHandlerContext) error {
+	if strings.Contains(c.UrlCollection.Url, "/qr/rss/") || strings.Contains(c.UrlCollection.Url, "/qr/news/") {
+		_ = c.App.MarkAsMaxErrorAttempt(c.UrlCollection.Url, constant.Products, "Invalid Host")
+		return fmt.Errorf("invalid url str %s", c.UrlCollection.Url)
 	}
 	return nil
 }
