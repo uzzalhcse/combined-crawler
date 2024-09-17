@@ -3,44 +3,33 @@ package ninjacrawler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/playwright-community/playwright-go"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 )
 
-var activeGoroutines int32 // Tracks how many goroutines are currently active
-var proxyMutex sync.Mutex  // Ensures exclusive access when rotating proxies
-
-func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorConfig, urlChan <-chan UrlCollection, resultChan chan<- interface{}, isLocalEnv bool, counter *int32, currentProxyIndex *int32) {
+func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorConfig, urlChan <-chan UrlCollection, resultChan chan<- interface{}, isLocalEnv bool, counter *int32, currentProxyIndex int) {
 	var page playwright.Page
 	var browser playwright.Browser
 	var err error
 	var doc *goquery.Document
 	var apiResponse map[string]interface{}
 
-	// Rotate proxy in ascending order (round-robin)
+	// Used to track the proxy index
+	currentProxy := Proxy{}
+	proxyIndex := 0
+	if app.engine.ProxyStrategy == ProxyStrategyConcurrency && currentProxyIndex > 0 {
+		proxyIndex = currentProxyIndex
+	}
 	rotateProxy := func() Proxy {
-		proxyMutex.Lock()
-		defer proxyMutex.Unlock()
+		proxyIndex = (proxyIndex + 1) % len(app.engine.ProxyServers)
+		proxy := app.engine.ProxyServers[proxyIndex]
 
-		// Ensure the proxies rotate in ascending order, wrapping around to the first one after the last
-		newIndex := atomic.AddInt32(currentProxyIndex, 1)
-		if newIndex >= int32(len(app.engine.ProxyServers)) {
-			atomic.StoreInt32(currentProxyIndex, 0) // Reset to the first proxy
-			newIndex = 0
-		}
-
-		// Select the proxy based on the updated index
-		proxy := app.engine.ProxyServers[newIndex]
 		app.CurrentProxy = proxy
-
 		app.Logger.Debug("Rotating proxy to %s", proxy.Server)
 
-		// Initialize the browser with the new proxy if dynamic crawling is used
 		if *app.engine.IsDynamic {
 			browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, proxy)
 			if err != nil {
@@ -51,8 +40,10 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 		return proxy
 	}
 
-	// Set the initial proxy (start from the first proxy)
-	currentProxy := app.engine.ProxyServers[*currentProxyIndex]
+	// Get the initial proxy
+	if len(app.engine.ProxyServers) > 0 {
+		currentProxy = app.engine.ProxyServers[proxyIndex]
+	}
 	app.CurrentProxy = currentProxy
 
 	if *app.engine.IsDynamic {
@@ -83,10 +74,8 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 			if app.engine.RetrySleepDuration > 0 && inArray(app.engine.ErrorCodes, urlCollection.StatusCode) {
 				app.HandleThrottling(urlCollection.Attempts, urlCollection.StatusCode)
 			}
-			atomic.AddInt32(&activeGoroutines, 1) // Increment the active goroutine counter
-
-			// Rotate proxy on receiving specific error codes
 			if app.engine.ProxyStrategy == ProxyStrategyRotation && inArray(app.engine.ErrorCodes, urlCollection.StatusCode) {
+				// Rotate the proxy on receiving a 403
 				currentProxy = rotateProxy()
 			}
 			preHandlerError := false
@@ -314,12 +303,6 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 			if isLocalEnv && atomic.LoadInt32(counter) >= int32(app.engine.DevCrawlLimit) {
 				//app.Logger.Warn("Dev Crawl limit %d reached!", atomic.LoadInt32(counter))
 				return
-			}
-			// Signal that this goroutine is done
-			if atomic.AddInt32(&activeGoroutines, -1) == 0 {
-				// Rotate proxy only after all goroutines have finished processing
-				//currentProxy = rotateProxy()
-				fmt.Println("All goroutines are done!")
 			}
 
 			operationCount++                               // Increment the operation count
