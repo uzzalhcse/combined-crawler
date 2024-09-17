@@ -59,7 +59,7 @@ func (app *Crawler) NavigateToApiURL(client *http.Client, urlString string, prox
 }
 
 func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxyServer Proxy, attempt int) ([]byte, string, error) {
-
+	app.CurrentUrl = urlString
 	ContentType := ""
 	//proxyIp := ""
 	urlString = app.GetQueryEscapeFullUrl(urlString)
@@ -137,11 +137,11 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 	}
 	ContentType = resp.Header.Get("Content-Type")
 	_ = app.updateStatusCode(urlString, resp.StatusCode)
-	app.CurrentUrl = resp.Request.URL.String()
 	// Check if a redirect occurred
 	if req.URL.String() != resp.Request.URL.String() {
 		resUrl, _ := url.Parse(resp.Request.URL.String())
 		if resUrl.Host != req.Host {
+			app.CurrentUrl = resp.Request.URL.String()
 			//app.Logger.Warn("===Redirect detected: %s -> %s === Request URL: %s Response URL: %s\n", req.Host, resUrl.Host, req.URL.String(), resp.Request.URL.String())
 		}
 	}
