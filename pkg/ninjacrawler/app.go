@@ -228,6 +228,9 @@ func getDefaultEngine() Engine {
 		CrawlTimeout:       999999,
 		WaitForSelector:    nil,
 		ProxyStrategy:      ProxyStrategyConcurrency,
+		ErrorCodes: []int{
+			403,
+		},
 	}
 }
 
@@ -380,5 +383,9 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	}
 	if eng.ProxyStrategy != "" {
 		defaultEngine.ProxyStrategy = eng.ProxyStrategy
+	}
+	if eng.ErrorCodes != nil && len(eng.ErrorCodes) > 0 {
+		defaultEngine.ErrorCodes = eng.ErrorCodes
+
 	}
 }

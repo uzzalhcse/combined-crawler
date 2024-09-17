@@ -33,7 +33,10 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 	}
 
 	// Get the initial proxy
-	currentProxy := app.engine.ProxyServers[proxyIndex]
+	currentProxy := Proxy{}
+	if len(app.engine.ProxyServers) > 0 {
+		currentProxy = app.engine.ProxyServers[proxyIndex]
+	}
 	usedProxies[proxyIndex] = true
 	app.CurrentProxy = currentProxy
 
@@ -61,22 +64,19 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 			if !more {
 				return
 			}
-			if app.engine.ProxyStrategy == ProxyStrategyRotation {
-				if urlCollection.StatusCode == 403 {
-					if app.engine.RetrySleepDuration > 0 && app.engine.Provider == "zenrows" && urlCollection.StatusCode >= 400 && urlCollection.StatusCode < 500 && urlCollection.StatusCode != 404 {
-						app.HandleThrottling(urlCollection.Attempts, urlCollection.StatusCode)
-					}
-					//app.HandleThrottling(urlCollection.Attempts, urlCollection.StatusCode)
-					// Rotate the proxy on receiving a 403
-					currentProxy = rotateProxy()
-					app.CurrentProxy = currentProxy
-					app.Logger.Debug("Received 403. Rotating proxy to %s", currentProxy.Server)
+			if app.engine.RetrySleepDuration > 0 && inArray(app.engine.ErrorCodes, urlCollection.StatusCode) {
+				app.HandleThrottling(urlCollection.Attempts, urlCollection.StatusCode)
+			}
+			if app.engine.ProxyStrategy == ProxyStrategyRotation && inArray(app.engine.ErrorCodes, urlCollection.StatusCode) {
+				// Rotate the proxy on receiving a 403
+				currentProxy = rotateProxy()
+				app.CurrentProxy = currentProxy
+				app.Logger.Debug("Received %d. Rotating proxy to %s", urlCollection.StatusCode, currentProxy.Server)
 
-					if *app.engine.IsDynamic {
-						browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, currentProxy)
-						if err != nil {
-							app.Logger.Fatal(err.Error())
-						}
+				if *app.engine.IsDynamic {
+					browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, currentProxy)
+					if err != nil {
+						app.Logger.Fatal(err.Error())
 					}
 				}
 			}

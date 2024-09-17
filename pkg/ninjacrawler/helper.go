@@ -468,3 +468,20 @@ func (app *Crawler) HandleThrottling(attempt, StatusCode int) {
 		time.Sleep(sleepDuration)
 	}
 }
+
+type comparableType interface {
+	int | string
+}
+
+// Generic contains function
+func inArray[T comparableType](arr []T, val T) bool {
+	if arr == nil || len(arr) == 0 {
+		return false
+	}
+	for _, v := range arr {
+		if v == val {
+			return true
+		}
+	}
+	return false
+}

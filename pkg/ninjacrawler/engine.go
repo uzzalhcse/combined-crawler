@@ -29,6 +29,7 @@ type Engine struct {
 	Args                    []string
 	SleepDuration           int
 	RetrySleepDuration      int
+	ErrorCodes              []int
 	CrawlTimeout            int
 	WaitForSelector         *string
 }
