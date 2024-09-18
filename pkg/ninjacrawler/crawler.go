@@ -49,9 +49,11 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 
 		return proxy
 	}
-
+	currentProxy := Proxy{}
 	// Set the initial proxy (start from the first proxy)
-	currentProxy := app.engine.ProxyServers[*currentProxyIndex]
+	if len(app.engine.ProxyServers) > 0 {
+		currentProxy = app.engine.ProxyServers[*currentProxyIndex]
+	}
 	app.CurrentProxy = currentProxy
 
 	if *app.engine.IsDynamic {
