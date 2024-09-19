@@ -123,6 +123,32 @@ func (app *Crawler) writePageContentToFile(html, url, msg string, dir ...string)
 
 	return nil
 }
+func (app *Crawler) writeRawHtmlFile(html, url string) error {
+	if html == "" {
+		html = "No Page Content Found"
+	}
+	html = fmt.Sprintf("<!-- Time: %v \n Page Url: %s -->\n%s", time.Now(), url, html)
+	filename := generateRawFilename(url)
+	currentDate := time.Now().Format("2006-01-02")
+	directory := filepath.Join("storage", "raw_html", app.Name, currentDate)
+	err := os.MkdirAll(directory, 0755)
+	if err != nil {
+		return err
+	}
+	filePath := filepath.Join(directory, filename)
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(html)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 // generateFilename generates a filename based on URL and current date
 func generateFilename(rawURL string) string {
@@ -147,6 +173,30 @@ func generateFilename(rawURL string) string {
 	currentDate := time.Now().Format("2006-01-02")
 	return fmt.Sprintf("%s_%s_%s.html", currentDate, trimmedURL, hash)
 }
+
+// generateFilename generates a filename based on URL and current date
+func generateRawFilename(rawURL string) string {
+	// Replace characters not allowed in file names
+	invalidChars := []string{"/", "\\", ":", "*", "?", "\"", "<", ">", "|"}
+	for _, char := range invalidChars {
+		rawURL = strings.ReplaceAll(rawURL, char, "_")
+	}
+
+	// Maximum filename length is 255 characters, minus 5 characters for ".html"
+	maxFilenameLength := 255 - 5
+
+	// Trim the URL to fit within the maximum length
+	trimmedURL := rawURL
+	if len(trimmedURL) > maxFilenameLength {
+		trimmedURL = trimmedURL[:maxFilenameLength]
+	}
+
+	// Remove trailing underscore if it exists
+	trimmedURL = strings.TrimSuffix(trimmedURL, "_")
+
+	return fmt.Sprintf("%s.html", trimmedURL)
+}
+
 func generateCsvFileName(siteName string) string {
 	productDetailsFileName := fmt.Sprintf("storage/data/%s/%s.csv", siteName, time.Now().Format("2006_01_02"))
 
@@ -484,4 +534,26 @@ func inArray[T comparableType](arr []T, val T) bool {
 		}
 	}
 	return false
+}
+
+func (app *Crawler) SaveHtml(data interface{}, urlString string) error {
+	var htmlContent string
+	var err error
+
+	switch v := data.(type) {
+	case *playwright.Page:
+		htmlContent = app.getHtmlFromPage(*v)
+	case *goquery.Document:
+		htmlContent, err = v.Html() // Fetch HTML from goquery document
+		if err != nil {
+			return fmt.Errorf("Failed to get content from goquery document in SaveHtml %v", err.Error())
+		}
+	default:
+	}
+
+	err = app.writeRawHtmlFile(htmlContent, urlString)
+	if err != nil {
+		return fmt.Errorf("Failed to write html content to file in SaveHtml %v", err.Error())
+	}
+	return nil
 }

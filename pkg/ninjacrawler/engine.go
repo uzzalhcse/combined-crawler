@@ -33,6 +33,7 @@ type Engine struct {
 	ErrorCodes              []int
 	CrawlTimeout            int
 	WaitForSelector         *string
+	StoreHtml               *bool
 }
 type ProviderQueryOption struct {
 	JsRender             bool
