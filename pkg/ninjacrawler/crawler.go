@@ -320,7 +320,7 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 			if atomic.AddInt32(&activeGoroutines, -1) == 0 {
 				// Rotate proxy only after all goroutines have finished processing
 				//currentProxy = rotateProxy()
-				app.Logger.Info("Rotate proxy only after all goroutines have finished processing")
+				//app.Logger.Info("Rotate proxy only after all goroutines have finished processing")
 			}
 			operationCount++                               // Increment the operation count
 			if operationCount%app.engine.SleepAfter == 0 { // Apply sleep after a certain number of operations
