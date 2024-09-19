@@ -7,17 +7,12 @@ import (
 
 func ProductHandler(crawler *ninjacrawler.Crawler) {
 	productDetailSelector := ninjacrawler.ProductDetailSelector{
-		Jan: "",
+		Jan: getJanService,
 		PageTitle: &ninjacrawler.SingleSelector{
 			Selector: "title",
 		},
-		Url: getUrlHandler,
-		Images: &ninjacrawler.MultiSelectors{
-			Selectors: []ninjacrawler.Selector{
-				{Query: "div.product-image-thumbnail-list img", Attr: "src"},
-			},
-			IsUnique: true,
-		},
+		Url:    getUrlHandler,
+		Images: getImagesFromJson,
 		ProductCodes: func(ctx ninjacrawler.CrawlerContext) []string {
 			return []string{}
 		},
@@ -48,11 +43,11 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.ProductDetails,
 			OriginCollection: constant.Products,
 			Processor:        productDetailSelector,
-			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle"}},
+			Preference:       ninjacrawler.Preference{ValidationRules: []string{"Images"}},
 			Engine: ninjacrawler.Engine{
 				WaitForSelector: ninjacrawler.String("div.product-image-thumbnail-list img"),
 				ProviderOption: ninjacrawler.ProviderQueryOption{
-					WaitFor: "div.product-image-thumbnail-list img",
+					WaitFor: ".v-breadcrumbs__item",
 				},
 			},
 		},

@@ -26,6 +26,7 @@ type Engine struct {
 	WaitForDynamicRendering bool
 	SleepAfter              int
 	MaxRetryAttempts        int
+	IgnoreRetryOnValidation *bool
 	Args                    []string
 	SleepDuration           int
 	RetrySleepDuration      int

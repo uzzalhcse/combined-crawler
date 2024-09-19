@@ -2,7 +2,9 @@ package kitamura
 
 import (
 	"combined-crawler/pkg/ninjacrawler"
+	"encoding/json"
 	"github.com/PuerkitoBio/goquery"
+	"log"
 	"regexp"
 	"strings"
 )
@@ -81,11 +83,64 @@ func getDescriptionService(ctx ninjacrawler.CrawlerContext) string {
 	return description
 }
 
+func getImagesFromJson(ctx ninjacrawler.CrawlerContext) []string {
+	var images []string
+	type ProductSchema struct {
+		Image []string `json:"image"`
+	}
+
+	// Find the script tag containing JSON
+	scriptTag := ctx.Document.Find("script[type='application/ld+json']").First()
+	jsonContent := scriptTag.Text()
+
+	// Extract the image property using a regular expression
+	re := regexp.MustCompile(`"image":\s*\[.*?\]`)
+	matches := re.FindString(jsonContent)
+	if matches == "" {
+		html, _ := ctx.Document.Html()
+		ctx.App.Logger.Html(html, ctx.UrlCollection.Url, "image property not found in JSON")
+		log.Println("Error: Image property not found in JSON . Url: %s", ctx.UrlCollection.Url)
+		return images
+	}
+
+	// Create a valid JSON string containing only the image property
+	jsonContent = "{" + matches + "}"
+
+	// Parse the JSON content
+	var product ProductSchema
+	err := json.Unmarshal([]byte(jsonContent), &product)
+	if err != nil {
+		log.Println("Error parsing JSON:", err)
+		return images
+	}
+
+	// Return the images from the parsed JSON
+	return product.Image
+}
+
 func getReviewsService(ctx ninjacrawler.CrawlerContext) []string {
 	reviews := []string{}
-	ctx.Document.Find(".review-item-description").Each(func(i int, s *goquery.Selection) {
-		review := GetDescriptionText(s)
-		reviews = append(reviews, review)
+	reviewListMoreLink, exist := ctx.Document.Find("a.review-list-more-btn").Attr("href")
+	if !exist {
+		return reviews
+	}
+	reviewListMoreLink = ctx.App.GetFullUrl(reviewListMoreLink)
+	document, err := ctx.App.NavigateToStaticURL(ctx.App.GetHttpClient(), reviewListMoreLink, ctx.App.CurrentProxy)
+	if err != nil {
+		ctx.App.Logger.Error("reviewListMoreLink: %v", err.Error())
+		return reviews
+	}
+	document.Find(".review-list-area a").Each(func(i int, s *goquery.Selection) {
+		reviewLink, ok := s.Attr("href")
+		reviewLink = ctx.App.GetFullUrl(reviewLink)
+		if ok {
+			reviewDocument, reviewErr := ctx.App.NavigateToStaticURL(ctx.App.GetHttpClient(), reviewLink, ctx.App.CurrentProxy)
+			if reviewErr != nil {
+				ctx.App.Logger.Error("reviewLink: %v", err.Error())
+			}
+			review := GetDescriptionText(reviewDocument.Find(".review-form-pros-area"))
+			reviews = append(reviews, review)
+		}
 	})
 	return reviews
 }
@@ -100,6 +155,7 @@ func getSellingPriceService(ctx ninjacrawler.CrawlerContext) string {
 func getAttributeService(ctx ninjacrawler.CrawlerContext) []ninjacrawler.AttributeItem {
 	attributes := []ninjacrawler.AttributeItem{}
 
+	attributes = append(attributes, ninjacrawler.AttributeItem{Key: "selling_price_tax", Value: "1"})
 	getColorAttributeService(ctx, &attributes)
 	getProductDetailsAttributeService(ctx, &attributes)
 

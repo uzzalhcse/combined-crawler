@@ -232,6 +232,7 @@ func getDefaultEngine() Engine {
 		ErrorCodes: []int{
 			403,
 		},
+		IgnoreRetryOnValidation: Bool(false),
 	}
 }
 
@@ -387,6 +388,10 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	}
 	if eng.ErrorCodes != nil && len(eng.ErrorCodes) > 0 {
 		defaultEngine.ErrorCodes = eng.ErrorCodes
+
+	}
+	if eng.IgnoreRetryOnValidation != nil {
+		defaultEngine.IgnoreRetryOnValidation = eng.IgnoreRetryOnValidation
 
 	}
 }

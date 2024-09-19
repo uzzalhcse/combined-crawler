@@ -242,7 +242,12 @@ func (app *Crawler) handleProductDetail(res *ProductDetail, processorConfig Proc
 			html = app.getHtmlFromPage(v.Page)
 		}
 		app.Logger.Html(html, v.UrlCollection.Url, msg, "validation")
-		err := app.MarkAsMaxErrorAttempt(v.UrlCollection.Url, processorConfig.OriginCollection, msg)
+		var err error
+		if *app.engine.IgnoreRetryOnValidation {
+			err = app.MarkAsMaxErrorAttempt(v.UrlCollection.Url, processorConfig.OriginCollection, msg)
+		} else {
+			err = app.MarkAsError(v.UrlCollection.Url, processorConfig.OriginCollection, msg)
+		}
 		if err != nil {
 			return err
 		}
