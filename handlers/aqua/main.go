@@ -11,14 +11,14 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			DevCrawlLimit:          300,
 			ConcurrentLimit:        1,
 			ForceInstallPlaywright: true,
-			ProxyStrategy:          ninjacrawler.ProxyStrategyRotation,
-			ProxyServers: []ninjacrawler.Proxy{
-				{
-					Server:   "http://5.59.251.78:6117",
-					Username: "lnvmpyru",
-					Password: "5un1tb1azapa",
-				},
-			},
+			//ProxyStrategy:          ninjacrawler.ProxyStrategyRotation,
+			//ProxyServers: []ninjacrawler.Proxy{
+			//	{
+			//		Server:   "http://5.59.251.78:6117",
+			//		Username: "lnvmpyru",
+			//		Password: "5un1tb1azapa",
+			//	},
+			//},
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
