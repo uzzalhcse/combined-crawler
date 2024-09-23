@@ -23,7 +23,7 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			return fullUrl, nil
 		},
 	}
-	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
+	crawler.Crawl([]ninjacrawler.ProcessorConfig{
 		{
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),

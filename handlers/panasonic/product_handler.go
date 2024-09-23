@@ -45,7 +45,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 		SellingPrice:     "",
 		Attributes:       GetProductAttribute,
 	}
-	crawler.CrawlPageDetail([]ninjacrawler.ProcessorConfig{
+	crawler.Crawl([]ninjacrawler.ProcessorConfig{
 		{
 			Entity:           constant.ProductDetails,
 			OriginCollection: constant.Products,
