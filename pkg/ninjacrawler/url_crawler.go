@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+// Deprecated: CrawlUrls is deprecated and will be removed in a future version.
+// Use Crawl instead, which includes improvements for proxy rotation and error handling.
 func (app *Crawler) CrawlUrls(processorConfigs []ProcessorConfig) {
 	for _, processorConfig := range processorConfigs {
 		app.Logger.Summary("Starting :%s: Crawler", processorConfig.OriginCollection)

@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-// CrawlPageDetail initiates the crawling process for detailed page information from the specified collection.
-// It distributes the work among multiple goroutines and uses proxies if available.
+// Deprecated: CrawlPageDetail is deprecated and will be removed in a future version.
+// Use Crawl instead, which includes improvements for proxy rotation and error handling.
 func (app *Crawler) CrawlPageDetail(processorConfigs []ProcessorConfig) {
 	for _, processorConfig := range processorConfigs {
 		app.Logger.Summary("Starting :%s: Crawler", processorConfig.OriginCollection)
