@@ -13,12 +13,12 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 		FindSelector: "a",
 		Attr:         "href",
 	}
-	//productSelector := ninjacrawler.UrlSelector{
-	//	Selector:     "div.CategoryTop_Series_Item_Content_List",
-	//	SingleResult: false,
-	//	FindSelector: "a",
-	//	Attr:         "href",
-	//}
+	productSelector := ninjacrawler.UrlSelector{
+		Selector:     "div.thumbnail.product",
+		SingleResult: false,
+		FindSelector: "a",
+		Attr:         "href",
+	}
 
 	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
 		{
@@ -26,11 +26,11 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			OriginCollection: crawler.GetBaseCollection(),
 			Processor:        categorySelector,
 		},
-		//{
-		//	Entity:           constant.Products,
-		//	OriginCollection: constant.Categories,
-		//	Processor:        productSelector,
-		//},
+		{
+			Entity:           constant.Products,
+			OriginCollection: constant.Categories,
+			Processor:        productSelector,
+		},
 	})
 
 }
