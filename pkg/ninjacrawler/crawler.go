@@ -262,7 +262,7 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 					}
 
 					for _, collection := range collections {
-						res := crawlerCtx.handleProductDetail(collection)
+						res := crawlerCtx.scrapData(collection)
 						result := CrawlResult{
 							Results:       res,
 							UrlCollection: urlCollection,
@@ -293,7 +293,7 @@ func (app *Crawler) crawlWorker(ctx context.Context, processorConfig ProcessorCo
 					}
 				}
 			case ProductDetailSelector:
-				results = crawlerCtx.handleProductDetail(processorConfig.Processor)
+				results = crawlerCtx.scrapData(processorConfig.Processor)
 			case ProductDetailApi:
 				results = crawlerCtx.handleProductDetailApi(processorConfig.Processor)
 

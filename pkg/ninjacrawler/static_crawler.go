@@ -88,7 +88,7 @@ func (app *Crawler) getResponseBody(client *http.Client, urlString string, proxy
 		urlString = fmt.Sprintf("https://api.zenrows.com/v1/?apikey=%s&url=%s&%s", zenrowsApiKey, urlString, queryString)
 
 	} else {
-		if len(app.engine.ProxyServers) > 0 {
+		if len(app.engine.ProxyServers) > 0 && proxyServer.Server != "" {
 			proxyURL, err := url.Parse(proxyServer.Server)
 			if err != nil {
 				log.Fatalf("Failed to parse proxy URL: %v", err)

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"strings"
 	"time"
 )
@@ -16,6 +15,7 @@ var startTime time.Time
 
 const (
 	baseCollection = "sites"
+	dbFilterLimit  = 200
 )
 
 type Crawler struct {
@@ -70,9 +70,7 @@ func NewCrawler(name, url string, engines ...Engine) *Crawler {
 func (app *Crawler) Start() {
 	defer func() {
 		if r := recover(); r != nil {
-			app.Logger.Summary("Program crashed!: %v", r)
-			app.Logger.Debug("Panic caught: %v", r)
-			app.Logger.Debug("Stack trace:", string(debug.Stack()))
+			app.HandlePanic(r)
 		}
 	}()
 	startTime = time.Now()
@@ -106,9 +104,7 @@ func (app *Crawler) toggleClient() {
 func (app *Crawler) Stop() {
 	defer func() {
 		if r := recover(); r != nil {
-			app.Logger.Summary("Program crashed!: %v", r)
-			app.Logger.Debug("Panic caught: %v", r)
-			app.Logger.Debug("Stack trace:", string(debug.Stack()))
+			app.HandlePanic(r)
 		}
 	}()
 	if app.pw != nil {
@@ -129,6 +125,12 @@ func (app *Crawler) Stop() {
 	duration := time.Since(startTime)
 	app.Logger.Summary("Crawler completed!")
 	app.Logger.Summary("Crawling duration %v", duration)
+
+	// stop the crawler after successful crawl
+	err := app.StopCrawler()
+	if err != nil {
+		app.Logger.Debug("Crawler Stop Failed")
+	}
 }
 
 func (app *Crawler) UploadLogs() {

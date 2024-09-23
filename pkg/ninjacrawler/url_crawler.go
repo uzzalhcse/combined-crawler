@@ -95,6 +95,11 @@ func (app *Crawler) handleJob(urlCollections []UrlCollection, processorConfig Pr
 		innerWg.Add(1)
 		go func(proxy Proxy) {
 			defer innerWg.Done()
+			defer func() {
+				if r := recover(); r != nil {
+					app.HandlePanic(r)
+				}
+			}()
 			app.CurrentCollection = processorConfig.OriginCollection
 			app.crawlWorker(ctx, processorConfig, urlChan, resultChan, app.isLocalEnv, &counter, &currentProxyIndex)
 		}(proxy)

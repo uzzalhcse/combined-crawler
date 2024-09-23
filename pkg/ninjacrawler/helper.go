@@ -10,6 +10,7 @@ import (
 	"github.com/playwright-community/playwright-go"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -19,6 +20,7 @@ import (
 	"path/filepath"
 	"plugin"
 	"regexp"
+	"runtime/debug"
 	"strings"
 	"time"
 )
@@ -554,6 +556,45 @@ func (app *Crawler) SaveHtml(data interface{}, urlString string) error {
 	err = app.writeRawHtmlFile(htmlContent, urlString)
 	if err != nil {
 		return fmt.Errorf("Failed to write html content to file in SaveHtml %v", err.Error())
+	}
+	return nil
+}
+func (app *Crawler) HandlePanic(r any) {
+	if r != nil {
+		app.Logger.Summary("Program crashed!: %v", r)
+		app.Logger.Debug("Panic caught: %v", r)
+		app.Logger.Debug("Stack trace: %v", string(debug.Stack()))
+		os.Exit(1)
+	}
+}
+
+func (app *Crawler) StopCrawler() error {
+	if !metadata.OnGCE() {
+		return nil
+	}
+
+	instanceName, err := metadata.InstanceName()
+	if err != nil {
+		log.Fatalf("Failed to get instanceName: %v", err)
+	}
+
+	managerUrl := fmt.Sprintf("%s/api/stop-crawler/%s", app.Config.GetString("SERVER_IP"), instanceName)
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", managerUrl, nil)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+	response, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("connection Failed: %w", err)
+	}
+	defer response.Body.Close()
+
+	// Check for non-200 status codes
+	if response.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(response.Body)
+		return fmt.Errorf("api error status %d, body: %s", response.StatusCode, string(bodyBytes))
 	}
 	return nil
 }
