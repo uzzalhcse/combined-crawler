@@ -11,12 +11,10 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic:               ninjacrawler.Bool(false),
 			DevCrawlLimit:           200,
-			ConcurrentLimit:         100,
-			SleepAfter:              15,
-			SleepDuration:           60,
-			Timeout:                 30, // 30 seconds
+			ConcurrentLimit:         15,
+			SleepAfter:              20,
+			SleepDuration:           120,
 			ErrorCodes:              []int{403, 429},
-			RetrySleepDuration:      10,
 			IgnoreRetryOnValidation: ninjacrawler.Bool(true),
 			ProxyStrategy:           ninjacrawler.ProxyStrategyRotation,
 			ProxyServers: []ninjacrawler.Proxy{
