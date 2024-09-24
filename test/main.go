@@ -21,7 +21,7 @@ func main() {
 	dataset := "panasonic_dataset"
 	projectID := "lazuli-venturas-stg"
 	table := "project_panasonic"
-	if err := os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "gcp-file-upload-key.json"); err != nil {
+	if err := os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "test/gcp-file-upload-key.json"); err != nil {
 		fmt.Printf("Failed to set GOOGLE_APPLICATION_CREDENTIALS: %v\n", err)
 	}
 
