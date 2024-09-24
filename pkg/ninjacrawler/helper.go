@@ -538,7 +538,7 @@ func inArray[T comparableType](arr []T, val T) bool {
 	return false
 }
 
-func (app *Crawler) SaveHtml(data interface{}, urlString string) error {
+func (app *Crawler) GetHtml(data interface{}) (string, error) {
 	var htmlContent string
 	var err error
 
@@ -548,14 +548,32 @@ func (app *Crawler) SaveHtml(data interface{}, urlString string) error {
 	case *goquery.Document:
 		htmlContent, err = v.Html() // Fetch HTML from goquery document
 		if err != nil {
-			return fmt.Errorf("Failed to get content from goquery document in SaveHtml %v", err.Error())
+			return htmlContent, fmt.Errorf("Failed to get content from goquery document in SaveHtml %v", err.Error())
 		}
 	default:
 	}
-
+	return htmlContent, nil
+}
+func (app *Crawler) SaveHtml(data interface{}, urlString string) error {
+	htmlContent, err := app.GetHtml(data)
 	err = app.writeRawHtmlFile(htmlContent, urlString)
 	if err != nil {
 		return fmt.Errorf("Failed to write html content to file in SaveHtml %v", err.Error())
+	}
+	return nil
+}
+
+func (app *Crawler) SendHtmlToBigquery(data interface{}, urlString string) error {
+	htmlContent, err := app.GetHtml(data)
+	if err != nil {
+		return fmt.Errorf("Failed to send html content to bigquery %v", err.Error())
+	}
+
+	if metadata.OnGCE() {
+		bigqueryErr := app.sendHtmlToBigquery(htmlContent, urlString)
+		if bigqueryErr != nil {
+			return fmt.Errorf("failed to send html content to bigquery %v", bigqueryErr.Error())
+		}
 	}
 	return nil
 }

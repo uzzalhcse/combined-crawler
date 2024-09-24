@@ -141,6 +141,14 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 						return
 					}
 					app.extract(config, *ctx)
+
+					if app.engine.SendHtmlToBigquery != nil && *app.engine.SendHtmlToBigquery {
+						sendErr := app.SendHtmlToBigquery(ctx, urlCollection.Url)
+						if sendErr != nil {
+							app.Logger.Fatal("SendHtmlToBigquery Error: ", sendErr.Error())
+							return
+						}
+					}
 				}
 
 			}(url, proxy)

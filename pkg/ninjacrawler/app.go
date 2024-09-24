@@ -266,6 +266,7 @@ func getDefaultEngine() Engine {
 		},
 		IgnoreRetryOnValidation: Bool(false),
 		StoreHtml:               Bool(false),
+		SendHtmlToBigquery:      Bool(false),
 	}
 }
 
@@ -431,5 +432,8 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	}
 	if eng.StoreHtml != nil {
 		defaultEngine.StoreHtml = eng.StoreHtml
+	}
+	if eng.SendHtmlToBigquery != nil {
+		defaultEngine.SendHtmlToBigquery = eng.SendHtmlToBigquery
 	}
 }
