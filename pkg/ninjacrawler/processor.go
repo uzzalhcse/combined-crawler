@@ -142,7 +142,7 @@ func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config Process
 				// Rotate proxy if it's a retryable error
 				if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyRotation {
 					nextProxyIndex := (proxyIndex + 1) % len(proxies)
-					app.Logger.Summary("Error with proxy %s: %v. Retrying with a different proxy: %s", proxies[proxyIndex].Server, err.Error(), proxies[nextProxyIndex])
+					app.Logger.Summary("Error with proxy %s: %v. Retrying with a different proxy: %s", proxies[proxyIndex].Server, err.Error(), proxies[nextProxyIndex].Server)
 
 					// Check if we have exhausted all proxies
 					if attempt >= len(proxies) {

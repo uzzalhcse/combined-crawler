@@ -18,7 +18,7 @@ type PanasonicData struct {
 }
 
 func main() {
-	dataset := "panasonic_dataset"
+	dataset := "data_source"
 	projectID := "lazuli-venturas-stg"
 	table := "project_panasonic"
 	if err := os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "gcp-file-upload-key.json"); err != nil {
