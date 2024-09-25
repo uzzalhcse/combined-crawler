@@ -16,6 +16,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			SleepDuration:           60,
 			ErrorCodes:              []int{403, 429},
 			IgnoreRetryOnValidation: ninjacrawler.Bool(true),
+			SendHtmlToBigquery:      ninjacrawler.Bool(true),
 			ProxyStrategy:           ninjacrawler.ProxyStrategyRotation,
 			ProxyServers: []ninjacrawler.Proxy{
 				{

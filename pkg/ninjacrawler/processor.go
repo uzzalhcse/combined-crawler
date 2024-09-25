@@ -27,18 +27,17 @@ func (app *Crawler) Crawl(configs []ProcessorConfig) {
 
 			shouldContinue := app.processUrlsWithProxies(productList, config, &total, crawlLimit)
 
-			dataCount := total
-			app.Logger.Summary("[Total (%d) :%s: found from :%s:]", dataCount, config.Entity, config.OriginCollection)
-
-			if errCount := app.GetErrorDataCount(config.OriginCollection); errCount > 0 {
-				app.Logger.Summary("Error count: %d", errCount)
-			}
 			if !shouldContinue {
 				app.Logger.Debug("Crawl limit of %d reached, stopping...", crawlLimit)
 				break
 			}
 		}
+		dataCount := total
+		app.Logger.Summary("[Total (%d) :%s: found from :%s:]", dataCount, config.Entity, config.OriginCollection)
 
+		if errCount := app.GetErrorDataCount(config.OriginCollection); errCount > 0 {
+			app.Logger.Summary("Error count: %d", errCount)
+		}
 		// Consolidate similar cases in switch statement
 		switch config.Processor.(type) {
 		case ProductDetailSelector, ProductDetailApi, func(CrawlerContext, func([]ProductDetailSelector, string)) error:
