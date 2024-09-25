@@ -20,6 +20,7 @@ func (app *Crawler) sendHtmlToBigquery(html, url string) error {
 	dataset := app.Config.GetString("BIGQUERY_DATASET")
 	table := app.Config.GetString("BIGQUERY_TABLE")
 	projectID, err := metadata.ProjectID()
+	msgStr := fmt.Sprintf("dataset: %s, table: %s, projectID: %s", dataset, table, projectID)
 	if err != nil {
 		return fmt.Errorf("failed to get project ID: %v", err)
 	}
@@ -51,8 +52,8 @@ func (app *Crawler) sendHtmlToBigquery(html, url string) error {
 	}
 
 	// Insert data into the table
-	if err := inserter.Put(ctx, rows); err != nil {
-		return fmt.Errorf("failed to insert data: %v", err)
+	if inserterError := inserter.Put(ctx, rows); inserterError != nil {
+		return fmt.Errorf("failed to insert data: %v and data: %s", inserterError, msgStr)
 	}
 	return nil
 }

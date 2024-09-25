@@ -172,7 +172,7 @@ func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config Process
 		if app.engine.SendHtmlToBigquery != nil && *app.engine.SendHtmlToBigquery {
 			sendErr := app.SendHtmlToBigquery(ctx, urlCollection.Url)
 			if sendErr != nil {
-				app.Logger.Fatal("SendHtmlToBigquery Error: ", sendErr.Error())
+				app.Logger.Fatal("SendHtmlToBigquery Error: %s", sendErr.Error())
 			}
 		}
 		// Update last working proxy index on success

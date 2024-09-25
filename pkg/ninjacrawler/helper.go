@@ -566,13 +566,14 @@ func (app *Crawler) SaveHtml(data interface{}, urlString string) error {
 func (app *Crawler) SendHtmlToBigquery(data interface{}, urlString string) error {
 	htmlContent, err := app.GetHtml(data)
 	if err != nil {
-		return fmt.Errorf("Failed to send html content to bigquery %v", err.Error())
+		return fmt.Errorf("failed to get html %s", err.Error())
 	}
 
 	if metadata.OnGCE() {
 		bigqueryErr := app.sendHtmlToBigquery(htmlContent, urlString)
 		if bigqueryErr != nil {
-			return fmt.Errorf("failed to send html content to bigquery %v", bigqueryErr.Error())
+			return bigqueryErr
+
 		}
 	}
 	return nil
