@@ -170,7 +170,7 @@ func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config Process
 		// Process successful crawl
 		app.extract(config, *ctx)
 		if app.engine.SendHtmlToBigquery != nil && *app.engine.SendHtmlToBigquery {
-			sendErr := app.SendHtmlToBigquery(ctx, urlCollection.Url)
+			sendErr := app.SendHtmlToBigquery(*ctx, urlCollection.Url)
 			if sendErr != nil {
 				app.Logger.Fatal("SendHtmlToBigquery Error: %s", sendErr.Error())
 			}
