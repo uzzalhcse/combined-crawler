@@ -37,6 +37,7 @@ type Crawler struct {
 	CurrentCollection     string
 	CurrentUrlCollection  UrlCollection
 	CurrentUrl            string
+	lastWorkingProxyIndex int32
 }
 
 func NewCrawler(name, url string, engines ...Engine) *Crawler {
@@ -64,6 +65,7 @@ func NewCrawler(name, url string, engines ...Engine) *Crawler {
 	crawler.isLocalEnv = config.GetString("APP_ENV") == "local"
 	crawler.userAgent = config.GetString("USER_AGENT")
 	crawler.preference = &defaultPreference
+	crawler.lastWorkingProxyIndex = int32(0)
 	return crawler
 }
 
