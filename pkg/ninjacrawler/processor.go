@@ -155,6 +155,9 @@ func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config Process
 					}
 					return
 				}
+				if app.engine.RetrySleepDuration > 0 {
+					app.HandleThrottling(1, urlCollection.StatusCode)
+				}
 				if markErr := app.MarkAsError(urlCollection.Url, config.OriginCollection, err.Error()); markErr != nil {
 					app.Logger.Error("markErr: ", markErr.Error())
 					return
