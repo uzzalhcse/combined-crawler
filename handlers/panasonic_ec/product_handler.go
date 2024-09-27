@@ -40,10 +40,11 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Processor:        productDetailSelector,
 			StateHandler:     handleState,
 			Engine: ninjacrawler.Engine{
-				IsDynamic:       ninjacrawler.Bool(true),
-				WaitForSelector: ninjacrawler.String("script[type='application/ld+json']"),
+				IsDynamic: ninjacrawler.Bool(true),
+				//WaitForSelector: ninjacrawler.String("script[type='application/ld+json']"),
+				//WaitForDynamicRendering: true,
 			},
-			Preference: ninjacrawler.Preference{ValidationRules: []string{"PageTitle"}},
+			Preference: ninjacrawler.Preference{ValidationRules: []string{"PageTitle", "ProductName"}},
 		},
 	})
 }
