@@ -1,23 +1,33 @@
 package ninjacrawler
 
 import (
+	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/playwright-community/playwright-go"
 )
 
 func (app *Crawler) handleCrawlWorker(processorConfig ProcessorConfig, proxy Proxy, urlCollection UrlCollection) (*CrawlerContext, error) {
-	var page playwright.Page
-	var browser playwright.Browser
+	//var page playwright.Page
+	//var browser playwright.Browser
 	var err error
 	var doc *goquery.Document
 	var apiResponse map[string]interface{}
 	if *app.engine.IsDynamic {
-		browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, proxy)
-		if err != nil {
-			app.Logger.Fatal(err.Error())
+		if *app.engine.Adapter == PlayWrightEngine {
+			//browser, page, err = app.GetBrowserPage(app.pw, app.engine.BrowserType, proxy)
+			//if err != nil {
+			//	app.Logger.Fatal(err.Error())
+			//}
+			//defer browser.Close()
+			//defer page.Close()
+		} else {
+			if app.rodBrowser == nil {
+				fmt.Println("ROD BROWSER IS NIL")
+			}
+			if app.rodPage == nil {
+				fmt.Println("ROD PAGE IS NIL")
+			}
+
 		}
-		defer browser.Close()
-		defer page.Close()
 	}
 
 	crawlableUrl := urlCollection.Url
@@ -33,7 +43,11 @@ func (app *Crawler) handleCrawlWorker(processorConfig ProcessorConfig, proxy Pro
 		app.Logger.Info("Crawling :%s: %s", processorConfig.OriginCollection, crawlableUrl)
 	}
 	if *app.engine.IsDynamic {
-		doc, err = app.NavigateToURL(page, crawlableUrl)
+		if *app.engine.Adapter == PlayWrightEngine {
+			doc, err = app.NavigateToURL(app.page, crawlableUrl)
+		} else {
+			doc, err = app.NavigateRodURL(app.rodPage, crawlableUrl)
+		}
 	} else {
 		switch processorConfig.Processor.(type) {
 		case ProductDetailApi:
@@ -50,7 +64,8 @@ func (app *Crawler) handleCrawlWorker(processorConfig ProcessorConfig, proxy Pro
 		App:           app,
 		Document:      doc,
 		UrlCollection: urlCollection,
-		Page:          page,
+		Page:          app.page,
+		RodPage:       app.rodPage,
 		ApiResponse:   apiResponse,
 	}
 	return crawlerCtx, nil

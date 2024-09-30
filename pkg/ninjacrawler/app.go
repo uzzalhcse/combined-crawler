@@ -2,6 +2,7 @@ package ninjacrawler
 
 import (
 	"fmt"
+	"github.com/go-rod/rod"
 	"github.com/playwright-community/playwright-go"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
@@ -25,6 +26,11 @@ type Crawler struct {
 	Url                   string
 	BaseUrl               string
 	pw                    *playwright.Playwright
+	browser               playwright.BrowserContext
+	page                  playwright.Page
+	rodBrowser            *rod.Browser
+	rodPage               *rod.Page
+	controlUrl            string
 	UrlSelectors          []UrlSelector
 	ProductDetailSelector ProductDetailSelector
 	engine                *Engine
@@ -91,13 +97,16 @@ func (app *Crawler) Start() {
 
 func (app *Crawler) toggleClient() {
 	if *app.engine.IsDynamic {
-		pw, err := app.GetPlaywright()
-		if err != nil {
-			app.Logger.Debug("failed to initialize playwright: %v\n", err)
-			app.Logger.Fatal("failed to initialize playwright: %v\n", err)
-			return // exit if playwright initialization fails
+
+		if *app.engine.Adapter == PlayWrightEngine {
+			pw, err := app.GetPlaywright()
+			if err != nil {
+				app.Logger.Debug("failed to initialize playwright: %v\n", err)
+				app.Logger.Fatal("failed to initialize playwright: %v\n", err)
+				return // exit if playwright initialization fails
+			}
+			app.pw = pw
 		}
-		app.pw = pw
 	} else {
 		app.httpClient = app.GetHttpClient()
 	}
@@ -111,6 +120,9 @@ func (app *Crawler) Stop() {
 	}()
 	if app.pw != nil {
 		app.pw.Stop()
+	}
+	if app.rodBrowser != nil {
+		app.rodBrowser.MustClose()
 	}
 	if app.Client != nil {
 		app.closeClient()
@@ -269,6 +281,7 @@ func getDefaultEngine() Engine {
 		IgnoreRetryOnValidation: Bool(false),
 		StoreHtml:               Bool(false),
 		SendHtmlToBigquery:      Bool(false),
+		Adapter:                 String(PlayWrightEngine),
 	}
 }
 
@@ -437,5 +450,8 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	}
 	if eng.SendHtmlToBigquery != nil {
 		defaultEngine.SendHtmlToBigquery = eng.SendHtmlToBigquery
+	}
+	if eng.Adapter != nil {
+		defaultEngine.Adapter = eng.Adapter
 	}
 }

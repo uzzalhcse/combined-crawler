@@ -59,6 +59,35 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 	for batchIndex := 0; batchIndex < len(urls); batchIndex += app.engine.ConcurrentLimit {
 		batchCount++
 
+		// Determine the current proxy to use for the entire batch
+		proxyIndex := 0
+		if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyConcurrency {
+			// Use a new proxy for each request
+			proxyIndex = totalReqCount % len(proxies)
+		} else if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyRotation {
+			proxyIndex = int(atomic.LoadInt32(&app.lastWorkingProxyIndex))
+		}
+		proxy := Proxy{}
+		if len(proxies) > 0 {
+			proxy = proxies[proxyIndex]
+		}
+
+		if *app.engine.Adapter == PlayWrightEngine {
+			browser, bError := app.GetBrowser(proxy)
+			if bError != nil {
+				app.Logger.Fatal(bError.Error())
+			}
+			app.browser = browser
+			defer app.browser.Close()
+		} else {
+			rodBrowser, rodErr := app.GetRodBrowser(proxy)
+			if rodErr != nil {
+				app.Logger.Fatal(rodErr.Error())
+			}
+			app.rodBrowser = rodBrowser
+			defer app.rodBrowser.MustClose()
+		}
+
 		if !shouldContinue {
 			break
 		}
@@ -68,20 +97,8 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 				shouldContinue = false
 				break
 			}
-
-			// Determine the current proxy to use for the entire batch
-			proxyIndex := 0
-			if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyConcurrency {
-				// Use a new proxy for each request
-				proxyIndex = totalReqCount % len(proxies)
-			} else if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyRotation {
-				proxyIndex = int(atomic.LoadInt32(&app.lastWorkingProxyIndex))
-			}
-
-			totalReqCount++
 			url := urls[i]
 			wg.Add(1)
-
 			// Function for proxy rotation
 			go func(urlCollection UrlCollection, proxyIndex int) {
 				defer func() {
@@ -108,6 +125,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 			}(url, proxyIndex)
 		}
 
+		totalReqCount++
 		// Wait for all goroutines within a batch to finish
 		wg.Wait()
 	}
@@ -115,6 +133,24 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 	return shouldContinue
 }
 func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config ProcessorConfig, proxies []Proxy, proxyIndex, batchCount, attempt int) {
+
+	if *app.engine.Adapter == PlayWrightEngine {
+		page, pError := app.GetPage(app.browser)
+		if pError != nil {
+			app.Logger.Fatal(pError.Error())
+		}
+		app.page = page
+		defer app.page.Close()
+	} else {
+		rodPage, err := app.GetRodPage(app.rodBrowser)
+		if err != nil {
+			app.Logger.Fatal(err.Error())
+		}
+
+		app.rodPage = rodPage
+		defer app.rodPage.MustClose()
+	}
+
 	proxy := Proxy{}
 	if len(proxies) > 0 {
 		proxy = proxies[proxyIndex]

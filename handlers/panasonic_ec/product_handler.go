@@ -40,14 +40,40 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Processor:        productDetailSelector,
 			StateHandler:     handleState,
 			Engine: ninjacrawler.Engine{
-				ConcurrentLimit: 2,
+				Adapter:         ninjacrawler.String(ninjacrawler.PlayWrightEngine),
+				ConcurrentLimit: 15,
 				IsDynamic:       ninjacrawler.Bool(true),
-				BlockResources:  true,
-				//BlockedURLs: []string{
-				//	"https://sprocket-ping.s3.amazonaws.com/",
-				//},
+				//BlockResources:  true,
 				WaitForSelector: ninjacrawler.String("div.pd_c-price"),
 				//WaitForDynamicRendering: true,
+				//ProxyStrategy: ninjacrawler.ProxyStrategyRotation,
+				//ProxyServers: []ninjacrawler.Proxy{
+				//	{
+				//		Server:   "http://5.59.251.78:6117",
+				//		Username: "lnvmpyru",
+				//		Password: "5un1tb1azapa",
+				//	},
+				//	{
+				//		Server:   "http://5.59.251.19:6058",
+				//		Username: "lnvmpyru",
+				//		Password: "5un1tb1azapa",
+				//	},
+				//	{
+				//		Server:   "http://62.164.231.7:9319",
+				//		Username: "lnvmpyru",
+				//		Password: "5un1tb1azapa",
+				//	},
+				//	{
+				//		Server:   "http://192.46.190.170:6763",
+				//		Username: "lnvmpyru",
+				//		Password: "5un1tb1azapa",
+				//	},
+				//	{
+				//		Server:   "http://130.180.233.112:7683",
+				//		Username: "lnvmpyru",
+				//		Password: "5un1tb1azapa",
+				//	},
+				//},
 			},
 			Preference: ninjacrawler.Preference{ValidationRules: []string{"PageTitle", "ProductName"}},
 		},
