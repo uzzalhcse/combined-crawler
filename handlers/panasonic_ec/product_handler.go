@@ -40,8 +40,13 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Processor:        productDetailSelector,
 			StateHandler:     handleState,
 			Engine: ninjacrawler.Engine{
-				IsDynamic: ninjacrawler.Bool(true),
-				//WaitForSelector: ninjacrawler.String("script[type='application/ld+json']"),
+				ConcurrentLimit: 2,
+				IsDynamic:       ninjacrawler.Bool(true),
+				BlockResources:  true,
+				//BlockedURLs: []string{
+				//	"https://sprocket-ping.s3.amazonaws.com/",
+				//},
+				WaitForSelector: ninjacrawler.String("div.pd_c-price"),
 				//WaitForDynamicRendering: true,
 			},
 			Preference: ninjacrawler.Preference{ValidationRules: []string{"PageTitle", "ProductName"}},

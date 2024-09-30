@@ -4,17 +4,17 @@ import "combined-crawler/pkg/ninjacrawler"
 
 func Crawler() ninjacrawler.CrawlerConfig {
 	return ninjacrawler.CrawlerConfig{
-		Name: "panasonic_ec2",
+		Name: "panasonic_ec",
 		URL:  "https://ec-plus.panasonic.jp",
 		Engine: ninjacrawler.Engine{
 			DevCrawlLimit:   100,
 			ConcurrentLimit: 3,
 			SleepAfter:      100,
-			Timeout:         60,
-			BlockResources:  true,
+			Timeout:         120,
+			//BlockResources:  true,
 		},
 		Handler: ninjacrawler.Handler{
-			UrlHandler:     UrlHandler,
+			//UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
 		},
 	}
