@@ -14,7 +14,7 @@ import (
 // It returns a Rod browser instance if successful, otherwise returns an error.
 func (app *Crawler) GetRodBrowser(proxy Proxy) (*rod.Browser, error) {
 	// Setup the browser launcher with proxy if provided
-	l := launcher.New().Headless(!app.isLocalEnv).Devtools(app.isLocalEnv)
+	l := launcher.New().Headless(!app.isLocalEnv).Devtools(app.isLocalEnv).NoSandbox(!app.isLocalEnv)
 
 	if len(app.engine.ProxyServers) > 0 && proxy.Server != "" {
 		l = l.Set(flags.ProxyServer, proxy.Server)
