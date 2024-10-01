@@ -61,7 +61,7 @@ func main() {
 
 	// Launch a single browser instance
 	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(false), // Set to false to see the browser in action
+		Headless: playwright.Bool(true), // Set to false to see the browser in action
 		Devtools: playwright.Bool(true),
 	})
 	if err != nil {
