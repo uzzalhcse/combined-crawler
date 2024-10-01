@@ -73,7 +73,10 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 		}
 
 		if *app.engine.Adapter == PlayWrightEngine {
-			browser, bError := app.GetBrowser(proxy)
+			if app.pw == nil {
+				app.Logger.Fatal("Playwright browser is not initialized")
+			}
+			browser, bError := app.GetBrowser(app.pw, app.engine.BrowserType, proxy)
 			if bError != nil {
 				app.Logger.Fatal(bError.Error())
 			}

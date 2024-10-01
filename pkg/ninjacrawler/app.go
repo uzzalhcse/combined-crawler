@@ -96,20 +96,15 @@ func (app *Crawler) Start() {
 }
 
 func (app *Crawler) toggleClient() {
-	if *app.engine.IsDynamic {
 
-		if *app.engine.Adapter == PlayWrightEngine {
-			pw, err := app.GetPlaywright()
-			if err != nil {
-				app.Logger.Debug("failed to initialize playwright: %v\n", err)
-				app.Logger.Fatal("failed to initialize playwright: %v\n", err)
-				return // exit if playwright initialization fails
-			}
-			app.pw = pw
-		}
-	} else {
-		app.httpClient = app.GetHttpClient()
+	pw, err := app.GetPlaywright()
+	if err != nil {
+		app.Logger.Debug("failed to initialize playwright: %v\n", err)
+		app.Logger.Fatal("failed to initialize playwright: %v\n", err)
+		return // exit if playwright initialization fails
 	}
+	app.pw = pw
+	app.httpClient = app.GetHttpClient()
 }
 
 func (app *Crawler) Stop() {

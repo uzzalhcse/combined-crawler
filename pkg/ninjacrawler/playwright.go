@@ -89,7 +89,7 @@ func (app *Crawler) GetBrowserPage(pw *playwright.Playwright, browserType string
 
 	return browser, page, nil
 }
-func (app *Crawler) GetBrowser(proxy Proxy) (playwright.BrowserContext, error) {
+func (app *Crawler) GetBrowser(pw *playwright.Playwright, browserType string, proxy Proxy) (playwright.BrowserContext, error) {
 	var browser playwright.Browser
 	var err error
 
@@ -108,15 +108,15 @@ func (app *Crawler) GetBrowser(proxy Proxy) (playwright.BrowserContext, error) {
 			Password: playwright.String(proxy.Password),
 		}
 	}
-	switch app.engine.BrowserType {
+	switch browserType {
 	case "chromium":
-		browser, err = app.pw.Chromium.Launch(browserTypeLaunchOptions)
+		browser, err = pw.Chromium.Launch(browserTypeLaunchOptions)
 	case "firefox":
-		browser, err = app.pw.Firefox.Launch(browserTypeLaunchOptions)
+		browser, err = pw.Firefox.Launch(browserTypeLaunchOptions)
 	case "webkit":
-		browser, err = app.pw.WebKit.Launch(browserTypeLaunchOptions)
+		browser, err = pw.WebKit.Launch(browserTypeLaunchOptions)
 	default:
-		return nil, fmt.Errorf("unsupported browser type: %s", app.engine.BrowserType)
+		return nil, fmt.Errorf("unsupported browser type: %s", browserType)
 	}
 
 	if err != nil {
