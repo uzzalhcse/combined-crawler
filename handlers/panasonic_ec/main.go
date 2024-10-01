@@ -16,7 +16,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			//BlockResources:  true,
 		},
 		Handler: ninjacrawler.Handler{
-			UrlHandler:     UrlHandler,
+			//UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
 		},
 	}
