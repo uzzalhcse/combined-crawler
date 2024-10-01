@@ -9,14 +9,14 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			DevCrawlLimit:   100,
 			ConcurrentLimit: 20,
-			StgCrawlLimit:   450,
+			StgCrawlLimit:   400,
 			SleepAfter:      30,
 			SleepDuration:   60,
 			Timeout:         60,
 			//BlockResources:  true,
 		},
 		Handler: ninjacrawler.Handler{
-			//UrlHandler:     UrlHandler,
+			UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
 		},
 	}
