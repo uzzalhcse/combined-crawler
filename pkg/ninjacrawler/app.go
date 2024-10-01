@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/go-rod/rod"
 	"github.com/playwright-community/playwright-go"
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/mem"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
 	"os"
@@ -496,4 +498,32 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	if eng.Adapter != nil {
 		defaultEngine.Adapter = eng.Adapter
 	}
+}
+func (app *Crawler) isCpuUsageHigh() bool {
+	usage, err := cpu.Percent(0, false)
+	if err != nil {
+		app.Logger.Error("Error retrieving CPU usage: %v", err)
+		return false
+	}
+
+	// If CPU usage is over 90%, return true
+	if len(usage) > 0 && usage[0] > 90 {
+		return true
+	}
+	return false
+}
+
+// isRamUsageHigh checks if RAM usage exceeds 90%
+func (app *Crawler) isRamUsageHigh() bool {
+	v, err := mem.VirtualMemory()
+	if err != nil {
+		app.Logger.Error("Error retrieving RAM usage: %v", err)
+		return false
+	}
+
+	// If RAM usage is over 90%, return true
+	if v.UsedPercent > 90 {
+		return true
+	}
+	return false
 }
