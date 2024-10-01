@@ -62,21 +62,28 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Documen
 	if !Ok(e.Response.Status) {
 		return nil, fmt.Errorf("invalid status code: %d", e.Response.Status)
 	}
+	fmt.Println("1")
 
 	// Optionally wait for a specific selector
 	if app.engine.WaitForSelector != nil {
+		fmt.Println("2")
 		elm, navErr := page.Timeout(timeout).Element(*app.engine.WaitForSelector)
+		fmt.Println("3")
 		if navErr != nil {
+			fmt.Println("4")
 			return nil, fmt.Errorf("element not found: %s", navErr.Error())
 		}
 		if elm == nil {
+			fmt.Println("5")
 			//err = page.WaitStable(timeout)
 			//if err != nil {
 			//	return nil, fmt.Errorf("page did not stabilize: %w", err)
 			//}
 			return nil, fmt.Errorf("element not found: %s", url)
 		}
+		fmt.Println("6")
 	} else {
+		fmt.Println("7")
 		page.MustWaitLoad()
 	}
 	fmt.Println("Page loaded")
