@@ -158,11 +158,9 @@ func (app *Crawler) OpenBrowsers(proxy Proxy) {
 func (app *Crawler) CloseBrowsers() {
 	if app.pwBrowserCtx != nil {
 		app.pwBrowserCtx.Close()
-		fmt.Println("Closing Playwright Browser")
 	}
 	if app.rdBrowser != nil {
 		app.rdBrowser.Close()
-		fmt.Println("Closing Rod Browser")
 	}
 }
 
@@ -185,11 +183,9 @@ func (app *Crawler) OpenPages() {
 func (app *Crawler) ClosePages() {
 	if app.pwPage != nil {
 		app.pwPage.Close()
-		fmt.Println("Closing Playwright Page")
 	}
 	if app.rdPage != nil {
 		app.rdPage.Close()
-		fmt.Println("Closing Rod Page")
 	}
 }
 
