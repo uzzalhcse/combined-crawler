@@ -70,10 +70,10 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Documen
 			return nil, fmt.Errorf("element not found: %s", navErr.Error())
 		}
 		if elm == nil {
-			err = page.WaitStable(timeout)
-			if err != nil {
-				return nil, fmt.Errorf("page did not stabilize: %w", err)
-			}
+			//err = page.WaitStable(timeout)
+			//if err != nil {
+			//	return nil, fmt.Errorf("page did not stabilize: %w", err)
+			//}
 			return nil, fmt.Errorf("element not found: %s", url)
 		}
 	} else {
