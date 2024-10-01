@@ -120,7 +120,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 				}
 
 				app.OpenPages()
-				ctxTimeout := (app.engine.Timeout + 5) * time.Second
+				ctxTimeout := (app.engine.Timeout + 30) * time.Second
 				// Set a 30s timeout for each URL crawl
 				ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 				defer cancel()
