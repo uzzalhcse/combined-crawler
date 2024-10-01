@@ -95,16 +95,6 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 					app.ClosePages()
 				}()
 
-				// Live resource usage check inside goroutine
-				for {
-					if app.isCpuUsageHigh() || app.isRamUsageHigh() {
-						app.Logger.Warn("System usage exceeds threshold (CPU or RAM), slowing down...")
-						time.Sleep(10 * time.Second) // Pause goroutine to allow system to stabilize
-					} else {
-						break // Exit the loop and continue processing when system usage is under control
-					}
-				}
-
 				if crawlLimit > 0 && atomic.AddInt32(total, 1) > int32(crawlLimit) {
 					atomic.AddInt32(total, -1)
 					shouldContinue = false
