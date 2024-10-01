@@ -1,6 +1,7 @@
 package ninjacrawler
 
 import (
+	"context"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -63,6 +64,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 			break
 		}
 
+		// Determine the current proxy to use for the entire batch
 		proxyIndex := 0
 		proxy := Proxy{}
 		if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyConcurrency {
@@ -94,42 +96,49 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 					app.ClosePages()
 				}()
 
-				// Inside goroutine, monitor CPU and RAM usage periodically
-				ticker := time.NewTicker(2 * time.Second) // Check system usage every 2 seconds
-				defer ticker.Stop()
-
-				done := make(chan struct{})
-				go func() {
-					for {
-						select {
-						case <-ticker.C:
-							// Check system usage dynamically and take action if necessary
-							if app.isCpuUsageHigh() || app.isRamUsageHigh() {
-								app.Logger.Warn("CPU or RAM usage exceeds threshold, pausing execution...")
-								time.Sleep(5 * time.Second) // Pause for a short time
-							}
-						case <-done:
-							return
-						}
+				// Live resource usage check inside goroutine
+				for {
+					if app.isCpuUsageHigh() || app.isRamUsageHigh() {
+						app.Logger.Warn("System usage exceeds threshold (CPU or RAM), slowing down...")
+						time.Sleep(10 * time.Second) // Pause goroutine to allow system to stabilize
+					} else {
+						break // Exit the loop and continue processing when system usage is under control
 					}
-				}()
+				}
 
 				if crawlLimit > 0 && atomic.AddInt32(total, 1) > int32(crawlLimit) {
 					atomic.AddInt32(total, -1)
 					shouldContinue = false
-					close(done)
 					return
 				}
 				atomic.AddInt32(&reqCount, 1)
 
+				// Freeze all goroutines after n requests
 				if reqCount > 0 && atomic.LoadInt32(&reqCount)%int32(app.engine.SleepAfter) == 0 {
 					app.Logger.Info("Sleeping %d seconds after %d operations", app.engine.SleepDuration, app.engine.SleepAfter)
 					time.Sleep(time.Duration(app.engine.SleepDuration) * time.Second)
 				}
-				app.OpenPages()
-				app.crawlWithProxies(urlCollection, config, proxies, proxyIndex, batchCount, 0)
 
-				close(done) // Stop monitoring after the work is done
+				app.OpenPages()
+				ctxTimeout := (app.engine.Timeout + 5) * time.Second
+				// Set a 30s timeout for each URL crawl
+				ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
+				defer cancel()
+
+				done := make(chan struct{})
+				go func() {
+					app.crawlWithProxies(urlCollection, config, proxies, proxyIndex, batchCount, 0)
+					close(done)
+				}()
+
+				select {
+				case <-done:
+					// Crawl completed within time limit
+				case <-ctx.Done():
+					// Timeout exceeded
+					app.Logger.Warn("Crawling URL %s timed out after %v", urlCollection.Url, ctxTimeout)
+					// Handle timeout case (e.g., mark as error or retry)
+				}
 			}(url, proxyIndex)
 		}
 

@@ -48,7 +48,7 @@ func (app *Crawler) GetRodPage(browser *rod.Browser) (*rod.Page, error) {
 // NavigateRodURL navigates to a specified URL using the Rod page.
 // It waits until the page is fully loaded, handles cookie consent, and returns the page DOM.
 func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Document, error) {
-	timeout := time.Duration(app.engine.Timeout) * time.Second
+	timeout := app.engine.Timeout * time.Second
 
 	// Go to the URL with a timeout
 	err := page.Timeout(timeout).Navigate(url)
