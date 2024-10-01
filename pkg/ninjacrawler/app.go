@@ -2,6 +2,7 @@ package ninjacrawler
 
 import (
 	"fmt"
+	"github.com/go-rod/rod"
 	"github.com/playwright-community/playwright-go"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net/http"
@@ -25,6 +26,10 @@ type Crawler struct {
 	Url                   string
 	BaseUrl               string
 	pw                    *playwright.Playwright
+	pwBrowserCtx          playwright.BrowserContext
+	pwPage                playwright.Page
+	rdBrowser             *rod.Browser
+	rdPage                *rod.Page
 	UrlSelectors          []UrlSelector
 	ProductDetailSelector ProductDetailSelector
 	engine                *Engine
@@ -132,6 +137,57 @@ func (app *Crawler) Stop() {
 	err := app.StopCrawler()
 	if err != nil {
 		app.Logger.Debug("Crawler Stop Failed")
+	}
+}
+
+func (app *Crawler) OpenBrowsers(proxy Proxy) {
+	var err error
+	if *app.engine.IsDynamic {
+		if *app.engine.Adapter == PlayWrightEngine {
+			app.pwBrowserCtx, err = app.GetBrowser(app.pw, app.engine.BrowserType, proxy)
+		}
+		if *app.engine.Adapter == RodEngine {
+			app.rdBrowser, err = app.GetRodBrowser(proxy)
+		}
+	}
+	if err != nil {
+		app.Logger.Fatal(err.Error())
+	}
+
+}
+func (app *Crawler) CloseBrowsers() {
+	fmt.Println("Closing browsers...")
+	if app.pwBrowserCtx != nil {
+		app.pwBrowserCtx.Close()
+	}
+	if app.rdBrowser != nil {
+		app.rdBrowser.Close()
+	}
+}
+
+func (app *Crawler) OpenPages() {
+	var err error
+	if *app.engine.IsDynamic {
+		if *app.engine.Adapter == PlayWrightEngine {
+			app.pwPage, err = app.GetPage(app.pwBrowserCtx)
+		}
+		if *app.engine.Adapter == RodEngine {
+			app.rdPage, err = app.GetRodPage(app.rdBrowser)
+		}
+	}
+	if err != nil {
+		app.Logger.Fatal(err.Error())
+	}
+
+}
+
+func (app *Crawler) ClosePages() {
+	fmt.Println("Closing pages...")
+	if app.pwPage != nil {
+		app.pwPage.Close()
+	}
+	if app.rdPage != nil {
+		app.rdPage.Close()
 	}
 }
 
@@ -269,6 +325,7 @@ func getDefaultEngine() Engine {
 		IgnoreRetryOnValidation: Bool(false),
 		StoreHtml:               Bool(false),
 		SendHtmlToBigquery:      Bool(false),
+		Adapter:                 String(PlayWrightEngine),
 	}
 }
 
@@ -437,5 +494,8 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	}
 	if eng.SendHtmlToBigquery != nil {
 		defaultEngine.SendHtmlToBigquery = eng.SendHtmlToBigquery
+	}
+	if eng.Adapter != nil {
+		defaultEngine.Adapter = eng.Adapter
 	}
 }

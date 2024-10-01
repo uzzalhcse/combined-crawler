@@ -62,6 +62,19 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 		if !shouldContinue {
 			break
 		}
+		// Determine the current proxy to use for the entire batch
+		proxyIndex := 0
+		proxy := Proxy{}
+		if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyConcurrency {
+			// Use a new proxy for each request
+			proxyIndex = totalReqCount % len(proxies)
+			proxy = proxies[proxyIndex]
+		} else if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyRotation {
+			proxyIndex = int(atomic.LoadInt32(&app.lastWorkingProxyIndex))
+			proxy = proxies[proxyIndex]
+		}
+		app.OpenBrowsers(proxy)
+
 		for i := batchIndex; i < batchIndex+app.engine.ConcurrentLimit && i < len(urls); i++ {
 			// Use atomic load to check total in a thread-safe way
 			if crawlLimit > 0 && atomic.LoadInt32(total) >= int32(crawlLimit) {
@@ -69,16 +82,6 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 				break
 			}
 
-			// Determine the current proxy to use for the entire batch
-			proxyIndex := 0
-			if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyConcurrency {
-				// Use a new proxy for each request
-				proxyIndex = totalReqCount % len(proxies)
-			} else if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyRotation {
-				proxyIndex = int(atomic.LoadInt32(&app.lastWorkingProxyIndex))
-			}
-
-			totalReqCount++
 			url := urls[i]
 			wg.Add(1)
 
@@ -89,6 +92,9 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 						app.HandlePanic(r)
 					}
 					wg.Done() // Make sure Done is called only once per goroutine
+				}()
+				defer func() {
+					app.ClosePages()
 				}()
 
 				// Check crawl limit
@@ -104,12 +110,15 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 					app.Logger.Info("Sleeping %d seconds after %d operations", app.engine.SleepDuration, app.engine.SleepAfter)
 					time.Sleep(time.Duration(app.engine.SleepDuration) * time.Second)
 				}
+				app.OpenPages()
 				app.crawlWithProxies(urlCollection, config, proxies, proxyIndex, batchCount, 0)
 			}(url, proxyIndex)
 		}
 
 		// Wait for all goroutines within a batch to finish
 		wg.Wait()
+		app.CloseBrowsers()
+		totalReqCount++
 	}
 
 	return shouldContinue
