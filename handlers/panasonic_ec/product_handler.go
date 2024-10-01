@@ -40,7 +40,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Processor:        productDetailSelector,
 			StateHandler:     handleState,
 			Engine: ninjacrawler.Engine{
-				ConcurrentLimit: 15,
+				ConcurrentLimit: 1,
 				Adapter:         ninjacrawler.String(ninjacrawler.RodEngine),
 				IsDynamic:       ninjacrawler.Bool(true),
 				BlockResources:  true,

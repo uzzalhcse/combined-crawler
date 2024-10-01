@@ -79,6 +79,7 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Documen
 	} else {
 		page.MustWaitLoad()
 	}
+	fmt.Println("Page loaded")
 
 	// Handle cookie consent
 	err = app.HandleRodCookieConsent(page)
