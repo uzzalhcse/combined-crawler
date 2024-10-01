@@ -44,6 +44,7 @@ func (app *Crawler) handleCrawlWorker(processorConfig ProcessorConfig, proxy Pro
 		Document:      doc,
 		UrlCollection: urlCollection,
 		Page:          app.pwPage,
+		RodPage:       app.rdPage,
 		ApiResponse:   apiResponse,
 	}
 	return crawlerCtx, nil
