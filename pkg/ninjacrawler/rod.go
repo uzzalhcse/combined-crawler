@@ -49,11 +49,17 @@ func (app *Crawler) GetRodPage(browser *rod.Browser) (*rod.Page, error) {
 // It waits until the page is fully loaded, handles cookie consent, and returns the page DOM.
 func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Document, error) {
 	timeout := app.engine.Timeout * time.Second
-
+	e := proto.NetworkResponseReceived{}
+	wait := page.WaitEvent(&e)
 	// Go to the URL with a timeout
 	err := page.Timeout(timeout).Navigate(url)
 	if err != nil {
 		return nil, err
+	}
+	wait()
+
+	if !Ok(e.Response.Status) {
+		return nil, fmt.Errorf("invalid status code: %d", e.Response.Status)
 	}
 
 	// Optionally wait for a specific selector
@@ -98,8 +104,6 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Documen
 			app.Logger.Error(err.Error())
 		}
 	}
-
-	fmt.Println("Navigated to: " + url)
 	return document, nil
 }
 
@@ -125,4 +129,7 @@ func (app *Crawler) HandleRodCookieConsent(page *rod.Page) error {
 	}
 
 	return nil
+}
+func Ok(Status int) bool {
+	return Status == 0 || (Status >= 200 && Status <= 299)
 }
