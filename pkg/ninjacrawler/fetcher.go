@@ -30,23 +30,6 @@ func (app *Crawler) handleCrawlWorker(processorConfig ProcessorConfig, proxy Pro
 		}
 	}
 
-	if *app.engine.Adapter == PlayWrightEngine {
-		page, pError := app.GetPage(app.browser)
-		if pError != nil {
-			app.Logger.Fatal(pError.Error())
-		}
-		app.page = page
-		defer app.page.Close()
-	} else {
-		rodPage, err := app.GetRodPage(app.rodBrowser)
-		if err != nil {
-			app.Logger.Fatal(err.Error())
-		}
-
-		app.rodPage = rodPage
-		defer app.rodPage.MustClose()
-	}
-
 	crawlableUrl := urlCollection.Url
 	if urlCollection.ApiUrl != "" {
 		crawlableUrl = urlCollection.ApiUrl

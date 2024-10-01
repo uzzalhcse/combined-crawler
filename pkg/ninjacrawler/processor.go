@@ -106,6 +106,21 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 			}
 			url := urls[i]
 			wg.Add(1)
+
+			if *app.engine.Adapter == PlayWrightEngine {
+				page, pError := app.GetPage(app.browser)
+				if pError != nil {
+					app.Logger.Fatal(pError.Error())
+				}
+				app.page = page
+			} else {
+				rodPage, err := app.GetRodPage(app.rodBrowser)
+				if err != nil {
+					app.Logger.Fatal(err.Error())
+				}
+
+				app.rodPage = rodPage
+			}
 			// Function for proxy rotation
 			go func(urlCollection UrlCollection, proxyIndex int) {
 				defer func() {
@@ -113,6 +128,16 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 						app.HandlePanic(r)
 					}
 					wg.Done() // Make sure Done is called only once per goroutine
+				}()
+				defer func() {
+					if *app.engine.Adapter == PlayWrightEngine {
+						if app.page.IsClosed() {
+							app.page.Close()
+						}
+					} else {
+
+						app.rodPage.MustClose()
+					}
 				}()
 
 				// Check crawl limit
@@ -152,6 +177,7 @@ func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config Process
 	if len(proxies) > 0 {
 		proxy = proxies[proxyIndex]
 	}
+
 	app.CurrentCollection = config.OriginCollection
 	app.CurrentUrlCollection = urlCollection
 	app.CurrentProxy = proxy
