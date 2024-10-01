@@ -9,6 +9,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			DevCrawlLimit:   100,
 			ConcurrentLimit: 20,
+			StgCrawlLimit:   150,
 			SleepAfter:      100,
 			Timeout:         120,
 			//BlockResources:  true,
