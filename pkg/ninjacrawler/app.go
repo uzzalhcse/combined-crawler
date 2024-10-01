@@ -156,7 +156,6 @@ func (app *Crawler) OpenBrowsers(proxy Proxy) {
 
 }
 func (app *Crawler) CloseBrowsers() {
-	fmt.Println("Closing browsers...")
 	if app.pwBrowserCtx != nil {
 		app.pwBrowserCtx.Close()
 	}
@@ -182,7 +181,6 @@ func (app *Crawler) OpenPages() {
 }
 
 func (app *Crawler) ClosePages() {
-	fmt.Println("Closing pages...")
 	if app.pwPage != nil {
 		app.pwPage.Close()
 	}

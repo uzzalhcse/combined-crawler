@@ -8,13 +8,13 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		URL:  "https://ec-plus.panasonic.jp",
 		Engine: ninjacrawler.Engine{
 			DevCrawlLimit:   100,
-			ConcurrentLimit: 3,
+			ConcurrentLimit: 20,
 			SleepAfter:      100,
 			Timeout:         120,
 			//BlockResources:  true,
 		},
 		Handler: ninjacrawler.Handler{
-			//UrlHandler:     UrlHandler,
+			UrlHandler:     UrlHandler,
 			ProductHandler: ProductHandler,
 		},
 	}
