@@ -7,7 +7,6 @@ import (
 	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/launcher/flags"
 	"github.com/go-rod/rod/lib/proto"
-	"time"
 )
 
 // GetRodBrowser initializes and runs Rod browser.
@@ -48,45 +47,35 @@ func (app *Crawler) GetRodPage(browser *rod.Browser) (*rod.Page, error) {
 // NavigateRodURL navigates to a specified URL using the Rod page.
 // It waits until the page is fully loaded, handles cookie consent, and returns the page DOM.
 func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Document, error) {
-	timeout := app.engine.Timeout * time.Second
 	e := proto.NetworkResponseReceived{}
 	wait := page.WaitEvent(&e)
 	// Go to the URL with a timeout
-	err := page.Timeout(timeout).Navigate(url)
+	err := page.Timeout(app.engine.Timeout).Navigate(url)
 	if err != nil {
 		return nil, err
 	}
 	wait()
 
-	fmt.Println("e.Response.Status", e.Response.Status)
 	if !Ok(e.Response.Status) {
 		return nil, fmt.Errorf("invalid status code: %d", e.Response.Status)
 	}
-	fmt.Println("1")
 
 	// Optionally wait for a specific selector
 	if app.engine.WaitForSelector != nil {
-		fmt.Println("2")
 		elm, navErr := page.Timeout(app.engine.Timeout).Element(*app.engine.WaitForSelector)
-		fmt.Println("3")
 		if navErr != nil {
-			fmt.Println("4")
 			return nil, fmt.Errorf("element not found: %s", navErr.Error())
 		}
 		if elm == nil {
-			fmt.Println("5")
-			//err = page.WaitStable(timeout)
-			//if err != nil {
-			//	return nil, fmt.Errorf("page did not stabilize: %w", err)
-			//}
+			err = page.WaitStable(app.engine.Timeout)
+			if err != nil {
+				return nil, fmt.Errorf("page did not stabilize: %w", err)
+			}
 			return nil, fmt.Errorf("element not found: %s", url)
 		}
-		fmt.Println("6")
 	} else {
-		fmt.Println("7")
 		page.MustWaitLoad()
 	}
-	fmt.Println("Page loaded")
 
 	// Handle cookie consent
 	err = app.HandleRodCookieConsent(page)
