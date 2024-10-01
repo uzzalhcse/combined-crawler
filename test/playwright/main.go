@@ -4,17 +4,62 @@ import (
 	"fmt"
 	"github.com/playwright-community/playwright-go"
 	"log"
+	"sync"
 )
 
+func crawlURL(context playwright.BrowserContext, url string, wg *sync.WaitGroup, semaphore chan struct{}) {
+	defer wg.Done()
+
+	// Open a new tab (page) within the same browser context
+	page, err := context.NewPage()
+	if err != nil {
+		log.Printf("could not create new page for %s: %v", url, err)
+		<-semaphore
+		return
+	}
+	defer page.Close()
+
+	// Navigate to the target URL
+	_, err = page.Goto(url, playwright.PageGotoOptions{
+		Timeout: playwright.Float(60000), // 60-second timeout
+	})
+	if err != nil {
+		log.Printf("====could not navigate to page %s: %v", url, err)
+		<-semaphore
+		return
+	}
+
+	// Extract product name
+	productName, err := page.TextContent("h1.pd_c-headingLv1-01")
+	if err != nil {
+		log.Printf("could not extract product name from %s: %v", url, err)
+		<-semaphore
+		return
+	}
+	fmt.Printf("Product Name from %s: %s\n", url, productName)
+
+	// Extract price
+	price, err := page.TextContent("div.pd_c-price")
+	if err != nil {
+		log.Printf("could not extract product price from %s: %v", url, err)
+		<-semaphore
+		return
+	}
+	fmt.Printf("Price from %s: %s\n", url, price)
+
+	// Release the semaphore slot to allow other goroutines to proceed
+	<-semaphore
+}
+
 func main() {
-	// Start Playwright in non-headless mode for debugging
+	// Start Playwright
 	pw, err := playwright.Run()
 	if err != nil {
 		log.Fatalf("could not start Playwright: %v", err)
 	}
 	defer pw.Stop()
 
-	// Launch browser in headful mode for visual debugging
+	// Launch a single browser instance
 	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
 		Headless: playwright.Bool(false), // Set to false to see the browser in action
 		Devtools: playwright.Bool(true),
@@ -24,89 +69,39 @@ func main() {
 	}
 	defer browser.Close()
 
-	// Set the User-Agent
-	userAgent := "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
-
-	// Create a new browser context with the custom User-Agent
+	// Set User-Agent for the browser context
+	userAgent := "PostmanRuntime/7.37.3"
 	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
 		UserAgent: playwright.String(userAgent),
-		//JavaScriptEnabled: playwright.Bool(true),
 	})
 	if err != nil {
 		log.Fatalf("could not create new browser context: %v", err)
 	}
 	defer context.Close()
 
-	// Define the maximum resource loading time (30 seconds)
-	//maxResourceLoadTime := 60 * time.Second
-	//
-	//// Intercept and monitor network requests
-	//context.Route("**/*", func(route playwright.Route) {
-	//	startTime := time.Now()
-	//	request := route.Request()
-	//	// Allow request to continue and asynchronously check the response time
-	//	go func() {
-	//		// Wait for the resource to load or timeout
-	//		for {
-	//			if time.Since(startTime) > maxResourceLoadTime {
-	//				log.Printf("Request took too long: %s - Aborting it.", request.URL())
-	//				//route.Abort()
-	//				//return
-	//			}
-	//
-	//			// Check if the request has finished
-	//			if request.Timing().ResponseEnd > 0 {
-	//				break
-	//			}
-	//
-	//			// Sleep a little before checking again
-	//			time.Sleep(100 * time.Millisecond)
-	//		}
-	//		// Continue the request if it did not timeout
-	//		route.Continue()
-	//	}()
-	//})
-
-	// Open a new page with the modified context
-	page, err := context.NewPage()
-	if err != nil {
-		log.Fatalf("could not create new page: %v", err)
+	// Define the URLs to crawl
+	urls := []string{
+		"https://ec-plus.panasonic.jp/store/ap/storeaez/a2A/ProductDetail?HB=NI-U701-K",
+		"https://ec-plus.panasonic.jp/store/ap/storeaez/a2A/ProductDetail?HB=NI-A66-K",
+		"https://ec-plus.panasonic.jp/store/ap/storeaez/a2A/ProductDetail?HB=NI-FS70A-K",
+		"https://ec-plus.panasonic.jp/store/ap/storeaez/a2A/ProductDetail?HB=NA-LX129DR-W",
+		"https://ec-plus.panasonic.jp/store/ap/storeaez/a2A/ProductDetail?HB=NA-FA11K3-N",
+		"https://ec-plus.panasonic.jp/store/ap/storeaez/a2A/ProductDetail?HB=NA-FA12V3-W",
+		"https://ec-plus.panasonic.jp/store/ap/storeaez/a2A/ProductDetail?HB=NA-FA8H3-W",
+		"https://ec-plus.panasonic.jp/store/ap/storeaez/a2A/ProductDetail?HB=HH-CL1492A",
+		"https://ec-plus.panasonic.jp/store/ap/storeaez/a2A/ProductDetail?HB=SQ-LD440-W",
 	}
 
-	// Navigate to the target URL
-	url := "https://ec-plus.panasonic.jp/store/ap/storeaez/a2A/ProductDetail?HB=NI-U701-K"
-	_, err = page.Goto(url, playwright.PageGotoOptions{
-		Timeout: playwright.Float(60000), // Increase timeout to 60 seconds
-	})
-	if err != nil {
-		log.Fatalf("could not navigate to page: %v", err)
-	}
-	// Add delay for visual inspection (only for debugging)
-	//time.Sleep(10 * time.Second)
-	// Wait for product detail selector (increase timeout)
-	//_, err = page.WaitForSelector("h1.pd_c-headingLv1-01", playwright.PageWaitForSelectorOptions{
-	//	//Timeout: playwright.Float(60000), // Increase timeout for waiting on this selector
-	//})
-	//if err != nil {
-	//	log.Fatalf("could not find product detail section: %v", err)
-	//}
+	var wg sync.WaitGroup
+	semaphore := make(chan struct{}, 3) // Limit concurrency to 3 tabs at a time
 
-	// Extract some information from the page (e.g., product name)
-	productName, err := page.TextContent("h1.pd_c-headingLv1-01")
-	if err != nil {
-		log.Fatalf("could not extract product name: %v", err)
+	for _, url := range urls {
+		wg.Add(1)
+		semaphore <- struct{}{} // Acquire a semaphore slot
+		go crawlURL(context, url, &wg, semaphore)
 	}
-	fmt.Printf("Product Name: %s\n", productName)
 
-	// Example of extracting other data (e.g., price)
-	price, err := page.TextContent("div.pd_c-price")
-	if err != nil {
-		log.Fatalf("could not extract product price: %v", err)
-	}
-	fmt.Printf("Price: %s\n", price)
-
-	// Close the browser and cleanup
-	page.Close()
-	browser.Close()
-	pw.Stop()
+	// Wait for all goroutines to finish
+	wg.Wait()
+	fmt.Println("Crawling completed!")
 }
