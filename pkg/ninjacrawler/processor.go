@@ -1,7 +1,6 @@
 package ninjacrawler
 
 import (
-	"context"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -120,25 +119,8 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 				}
 
 				app.OpenPages()
-				ctxTimeout := (app.engine.Timeout) * time.Second
-				// Set a 30s timeout for each URL crawl
-				ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-				defer cancel()
 
-				done := make(chan struct{})
-				go func() {
-					app.crawlWithProxies(urlCollection, config, proxies, proxyIndex, batchCount, 0)
-					close(done)
-				}()
-
-				select {
-				case <-done:
-					// Crawl completed within time limit
-				case <-ctx.Done():
-					// Timeout exceeded
-					app.Logger.Warn("Crawling URL %s timed out after %v", urlCollection.Url, ctxTimeout)
-					// Handle timeout case (e.g., mark as error or retry)
-				}
+				app.crawlWithProxies(urlCollection, config, proxies, proxyIndex, batchCount, 0)
 			}(url, proxyIndex)
 		}
 
