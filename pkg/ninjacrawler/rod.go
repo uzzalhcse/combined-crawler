@@ -50,6 +50,7 @@ func (app *Crawler) GetRodPage(browser *rod.Browser) (*rod.Page, error) {
 func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Document, error) {
 	timeout := time.Duration(app.engine.Timeout) * time.Second
 
+	defer page.MustClose()
 	fmt.Println("Using Rod...")
 	// Go to the URL with a timeout
 	err := page.Timeout(timeout).Navigate(url)

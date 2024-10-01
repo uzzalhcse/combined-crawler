@@ -136,7 +136,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 						}
 					} else {
 
-						app.rodPage.MustClose()
+						//app.rodPage.MustClose()
 					}
 				}()
 
