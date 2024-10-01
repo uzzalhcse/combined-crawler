@@ -25,7 +25,7 @@ func main() {
 	}
 
 	// Create a launcher with headless mode (or disable headless mode by setting the flag to false)
-	url, _ := launcher.New().Headless(true).Launch()
+	url, _ := launcher.New().Headless(true).NoSandbox(true).Launch()
 
 	// Create a new browser instance with the launched URL
 	browser := rod.New().ControlURL(url).MustConnect()
