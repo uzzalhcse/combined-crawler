@@ -73,7 +73,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 			proxyIndex = int(atomic.LoadInt32(&app.lastWorkingProxyIndex))
 			proxy = proxies[proxyIndex]
 		}
-		app.OpenBrowsers(proxy)
+		app.openBrowsers(proxy)
 
 		for i := batchIndex; i < batchIndex+app.engine.ConcurrentLimit && i < len(urls); i++ {
 			if crawlLimit > 0 && atomic.LoadInt32(total) >= int32(crawlLimit) {
@@ -92,7 +92,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 					wg.Done()
 				}()
 				defer func() {
-					app.ClosePages()
+					app.closePages()
 				}()
 
 				atomic.AddInt32(&reqCount, 1)
@@ -103,7 +103,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 					time.Sleep(time.Duration(app.engine.SleepDuration) * time.Second)
 				}
 
-				app.OpenPages()
+				app.openPages()
 
 				ok := app.crawlWithProxies(urlCollection, config, proxies, proxyIndex, batchCount, 0)
 				if ok {
@@ -117,7 +117,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 		}
 
 		wg.Wait()
-		app.CloseBrowsers()
+		app.closeBrowsers()
 		totalReqCount++
 	}
 

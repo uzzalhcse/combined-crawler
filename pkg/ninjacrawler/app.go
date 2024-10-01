@@ -140,7 +140,7 @@ func (app *Crawler) Stop() {
 	}
 }
 
-func (app *Crawler) OpenBrowsers(proxy Proxy) {
+func (app *Crawler) openBrowsers(proxy Proxy) {
 	var err error
 	if *app.engine.IsDynamic {
 		if *app.engine.Adapter == PlayWrightEngine {
@@ -155,7 +155,7 @@ func (app *Crawler) OpenBrowsers(proxy Proxy) {
 	}
 
 }
-func (app *Crawler) CloseBrowsers() {
+func (app *Crawler) closeBrowsers() {
 	if app.pwBrowserCtx != nil {
 		app.pwBrowserCtx.Close()
 	}
@@ -164,7 +164,7 @@ func (app *Crawler) CloseBrowsers() {
 	}
 }
 
-func (app *Crawler) OpenPages() {
+func (app *Crawler) openPages() {
 	var err error
 	if *app.engine.IsDynamic {
 		if *app.engine.Adapter == PlayWrightEngine {
@@ -180,7 +180,7 @@ func (app *Crawler) OpenPages() {
 
 }
 
-func (app *Crawler) ClosePages() {
+func (app *Crawler) closePages() {
 	if app.pwPage != nil {
 		app.pwPage.Close()
 	}
