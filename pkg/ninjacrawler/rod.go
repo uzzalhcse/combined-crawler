@@ -99,6 +99,7 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Documen
 		}
 	}
 
+	fmt.Println("Navigated to: " + url)
 	return document, nil
 }
 
