@@ -59,24 +59,23 @@ func main() {
 	}
 	defer pw.Stop()
 
-	// Launch a single browser instance
+	// Launch the browser with the user agent for the selected device
 	browser, err := pw.Chromium.Launch(playwright.BrowserTypeLaunchOptions{
-		Headless: playwright.Bool(true), // Set to false to see the browser in action
-		Devtools: playwright.Bool(true),
+		Headless: playwright.Bool(false),
 	})
 	if err != nil {
 		log.Fatalf("could not launch browser: %v", err)
 	}
 	defer browser.Close()
 
-	// Set User-Agent for the browser context
-	userAgent := "PostmanRuntime/7.37.3"
+	// Use the device's settings to create a browser context
 	context, err := browser.NewContext(playwright.BrowserNewContextOptions{
-		UserAgent: playwright.String(userAgent),
+		UserAgent: playwright.String("PostmanRuntime/7.37.3"), // Set the mobile flag
 	})
 	if err != nil {
-		log.Fatalf("could not create new browser context: %v", err)
+		log.Fatalf("could not create browser context: %v", err)
 	}
+
 	defer context.Close()
 
 	// Define the URLs to crawl
