@@ -47,7 +47,6 @@ func (app *Crawler) Crawl(configs []ProcessorConfig) {
 		}
 	}
 }
-
 func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config ProcessorConfig, total *int32, crawlLimit int) bool {
 	var wg sync.WaitGroup
 	proxies := app.engine.ProxyServers
@@ -73,6 +72,12 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 		}
 
 		if *app.engine.Adapter == PlayWrightEngine {
+			pw, err := app.GetPlaywright()
+			if err != nil {
+				app.Logger.Debug("failed to initialize playwright: %v\n", err)
+				app.Logger.Fatal("failed to initialize playwright: %v\n", err)
+			}
+			app.pw = pw
 			if app.pw == nil {
 				app.Logger.Fatal("Playwright browser is not initialized")
 			}
@@ -81,16 +86,15 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 				app.Logger.Fatal(bError.Error())
 			}
 			app.browser = browser
-			defer app.browser.Close()
 		} else {
 			rodBrowser, rodErr := app.GetRodBrowser(proxy)
 			if rodErr != nil {
 				app.Logger.Fatal(rodErr.Error())
 			}
 			app.rodBrowser = rodBrowser
-			defer app.rodBrowser.MustClose()
 		}
 
+		// Process batch
 		if !shouldContinue {
 			break
 		}
@@ -100,23 +104,6 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 				shouldContinue = false
 				break
 			}
-
-			if *app.engine.Adapter == PlayWrightEngine {
-				page, pError := app.GetPage(app.browser)
-				if pError != nil {
-					app.Logger.Fatal(pError.Error())
-				}
-				app.page = page
-			} else {
-				rodPage, err := app.GetRodPage(app.rodBrowser)
-				if err != nil {
-					app.Logger.Fatal(err.Error())
-				}
-
-				app.rodPage = rodPage
-				app.rodPage.MustClose()
-			}
-
 			url := urls[i]
 			wg.Add(1)
 			// Function for proxy rotation
@@ -142,20 +129,25 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 					time.Sleep(time.Duration(app.engine.SleepDuration) * time.Second)
 				}
 				app.crawlWithProxies(urlCollection, config, proxies, proxyIndex, batchCount, 0)
-
-				app.page.Close()
 			}(url, proxyIndex)
 		}
 
 		totalReqCount++
 		// Wait for all goroutines within a batch to finish
 		wg.Wait()
+
+		// Close the browser after processing the batch
+		if *app.engine.Adapter == PlayWrightEngine {
+			app.browser.Close() // Close Playwright browser
+		} else {
+			app.rodBrowser.MustClose() // Close Rod browser
+		}
 	}
 
 	return shouldContinue
 }
-func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config ProcessorConfig, proxies []Proxy, proxyIndex, batchCount, attempt int) {
 
+func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config ProcessorConfig, proxies []Proxy, proxyIndex, batchCount, attempt int) {
 	proxy := Proxy{}
 	if len(proxies) > 0 {
 		proxy = proxies[proxyIndex]
