@@ -301,7 +301,7 @@ func getDefaultEngine() Engine {
 		BoostCrawling:          false,
 		ProxyServers:           []Proxy{},
 		CookieConsent:          nil,
-		Timeout:                30 * 1000, // 30 sec
+		Timeout:                time.Duration(30) * time.Second,
 		SleepAfter:             1000,
 		MaxRetryAttempts:       3,
 		ForceInstallPlaywright: false,
@@ -373,7 +373,7 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 		defaultEngine.CookieConsent = eng.CookieConsent
 	}
 	if eng.Timeout > 0 {
-		defaultEngine.Timeout = eng.Timeout * 1000
+		defaultEngine.Timeout = time.Duration(eng.Timeout) * time.Second
 	}
 	if eng.SleepAfter > 0 {
 		defaultEngine.SleepAfter = eng.SleepAfter
