@@ -100,6 +100,24 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 				shouldContinue = false
 				break
 			}
+
+			if *app.engine.Adapter == PlayWrightEngine {
+				page, pError := app.GetPage(app.browser)
+				if pError != nil {
+					app.Logger.Fatal(pError.Error())
+				}
+				app.page = page
+				defer app.page.Close()
+			} else {
+				rodPage, err := app.GetRodPage(app.rodBrowser)
+				if err != nil {
+					app.Logger.Fatal(err.Error())
+				}
+
+				app.rodPage = rodPage
+				defer app.rodPage.MustClose()
+			}
+
 			url := urls[i]
 			wg.Add(1)
 			// Function for proxy rotation
@@ -136,23 +154,6 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 	return shouldContinue
 }
 func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config ProcessorConfig, proxies []Proxy, proxyIndex, batchCount, attempt int) {
-
-	if *app.engine.Adapter == PlayWrightEngine {
-		page, pError := app.GetPage(app.browser)
-		if pError != nil {
-			app.Logger.Fatal(pError.Error())
-		}
-		app.page = page
-		defer app.page.Close()
-	} else {
-		rodPage, err := app.GetRodPage(app.rodBrowser)
-		if err != nil {
-			app.Logger.Fatal(err.Error())
-		}
-
-		app.rodPage = rodPage
-		defer app.rodPage.MustClose()
-	}
 
 	proxy := Proxy{}
 	if len(proxies) > 0 {

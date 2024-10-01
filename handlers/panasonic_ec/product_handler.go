@@ -42,7 +42,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Engine: ninjacrawler.Engine{
 				Adapter:         ninjacrawler.String(ninjacrawler.PlayWrightEngine),
 				ConcurrentLimit: 6,
-				IsDynamic:       ninjacrawler.Bool(false),
+				IsDynamic:       ninjacrawler.Bool(true),
 				//BlockResources:  true,
 				WaitForSelector: ninjacrawler.String("div.pd_c-price"),
 				//WaitForDynamicRendering: true,
