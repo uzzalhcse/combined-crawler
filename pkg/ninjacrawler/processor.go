@@ -107,7 +107,6 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 					app.Logger.Fatal(pError.Error())
 				}
 				app.page = page
-				defer app.page.Close()
 			} else {
 				rodPage, err := app.GetRodPage(app.rodBrowser)
 				if err != nil {
@@ -115,7 +114,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 				}
 
 				app.rodPage = rodPage
-				defer app.rodPage.MustClose()
+				app.rodPage.MustClose()
 			}
 
 			url := urls[i]
@@ -143,6 +142,8 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 					time.Sleep(time.Duration(app.engine.SleepDuration) * time.Second)
 				}
 				app.crawlWithProxies(urlCollection, config, proxies, proxyIndex, batchCount, 0)
+
+				app.page.Close()
 			}(url, proxyIndex)
 		}
 
