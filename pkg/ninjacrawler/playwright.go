@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/playwright-community/playwright-go"
-	"time"
 )
 
 // GetPlaywright initializes and runs the Playwright framework.
@@ -207,9 +206,8 @@ func (app *Crawler) HandleCookieConsent(page playwright.Page) error {
 // It waits until the page is fully loaded, handles cookie consent, and returns a goquery document representing the DOM.
 // If navigation or handling consent fails, it logs the page content to a file and returns an error.
 func (app *Crawler) NavigateToURL(page playwright.Page, url string) (*goquery.Document, error) {
-	timeOut := app.engine.Timeout / time.Second
 	pageGotoOptions := playwright.PageGotoOptions{
-		Timeout: playwright.Float(float64(timeOut)),
+		Timeout: playwright.Float(float64(app.engine.Timeout.Milliseconds())),
 	}
 	if app.engine.WaitForDynamicRendering && app.engine.WaitForSelector == nil {
 		pageGotoOptions.WaitUntil = playwright.WaitUntilStateNetworkidle
