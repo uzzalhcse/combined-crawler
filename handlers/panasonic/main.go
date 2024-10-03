@@ -10,13 +10,14 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		URL:  "https://panasonic.jp/products.html",
 		Engine: ninjacrawler.Engine{
 			IsDynamic:               ninjacrawler.Bool(false),
-			DevCrawlLimit:           200,
-			ConcurrentLimit:         40,
-			SleepAfter:              40,
+			ConcurrentLimit:         50,
+			SleepAfter:              60,
 			SleepDuration:           60,
+			StgCrawlLimit:           1000,
+			StoreHtml:               ninjacrawler.Bool(false),
+			SendHtmlToBigquery:      ninjacrawler.Bool(false),
 			ErrorCodes:              []int{403, 429},
 			IgnoreRetryOnValidation: ninjacrawler.Bool(true),
-			SendHtmlToBigquery:      ninjacrawler.Bool(true),
 			ProxyStrategy:           ninjacrawler.ProxyStrategyRotation,
 			ProxyServers: []ninjacrawler.Proxy{
 				{

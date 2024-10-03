@@ -30,13 +30,19 @@ type Engine struct {
 	MaxRetryAttempts        int
 	IgnoreRetryOnValidation *bool
 	Args                    []string
-	SleepDuration           int
-	RetrySleepDuration      int
-	ErrorCodes              []int
-	CrawlTimeout            int
-	WaitForSelector         *string
-	StoreHtml               *bool
-	SendHtmlToBigquery      *bool
+	/*
+		SleepDuration in seconds
+	*/
+	SleepDuration int
+	/*
+		RetrySleepDuration in minutes
+	*/
+	RetrySleepDuration int
+	ErrorCodes         []int
+	CrawlTimeout       int
+	WaitForSelector    *string
+	StoreHtml          *bool
+	SendHtmlToBigquery *bool
 }
 type ProviderQueryOption struct {
 	JsRender             bool
