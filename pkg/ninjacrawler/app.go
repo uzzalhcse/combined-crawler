@@ -40,6 +40,8 @@ type Crawler struct {
 	preference            *AppPreference
 	userAgent             string
 	CurrentProxy          Proxy
+	ReqCount              int32
+	CurrentProxyIndex     int
 	CurrentCollection     string
 	CurrentUrlCollection  UrlCollection
 	CurrentUrl            string
@@ -51,10 +53,12 @@ func NewCrawler(name, url string, engines ...Engine) *Crawler {
 	config := newConfig()
 
 	crawler := &Crawler{
-		Name:         name,
-		Url:          url,
-		Config:       config,
-		CurrentProxy: Proxy{},
+		Name:              name,
+		Url:               url,
+		Config:            config,
+		CurrentProxy:      Proxy{},
+		CurrentProxyIndex: 0,
+		ReqCount:          int32(0),
 	}
 
 	defaultPreference := getDefaultPreference()

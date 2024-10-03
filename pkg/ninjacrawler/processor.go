@@ -52,12 +52,9 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 	var wg sync.WaitGroup
 	proxies := app.engine.ProxyServers
 	shouldContinue := true
-	reqCount := int32(0)
-	totalReqCount := 0
 	batchCount := 0
 
 	for batchIndex := 0; batchIndex < len(urls); batchIndex += app.engine.ConcurrentLimit {
-		batchCount++
 
 		if !shouldContinue {
 			break
@@ -67,7 +64,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 		proxyIndex := 0
 		proxy := Proxy{}
 		if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyConcurrency {
-			proxyIndex = totalReqCount % len(proxies)
+			proxyIndex = batchCount % len(proxies)
 			proxy = proxies[proxyIndex]
 		} else if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyRotation {
 			proxyIndex = int(atomic.LoadInt32(&app.lastWorkingProxyIndex))
@@ -84,7 +81,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 			url := urls[i]
 			wg.Add(1)
 
-			go func(urlCollection UrlCollection, proxyIndex int) {
+			go func(urlCollection UrlCollection, proxy Proxy) {
 				defer func() {
 					if r := recover(); r != nil {
 						app.HandlePanic(r)
@@ -95,17 +92,21 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 					app.closePages()
 				}()
 
-				atomic.AddInt32(&reqCount, 1)
+				atomic.AddInt32(&app.ReqCount, 1)
 
 				// Freeze all goroutines after n requests
-				if reqCount > 0 && atomic.LoadInt32(&reqCount)%int32(app.engine.SleepAfter) == 0 {
+				if app.ReqCount > 0 && atomic.LoadInt32(&app.ReqCount)%int32(app.engine.SleepAfter) == 0 {
 					app.Logger.Info("Sleeping %d seconds after %d operations", app.engine.SleepDuration, app.engine.SleepAfter)
 					time.Sleep(time.Duration(app.engine.SleepDuration) * time.Second)
 				}
 
 				app.openPages()
 
-				ok := app.crawlWithProxies(urlCollection, config, proxies, proxyIndex, batchCount, 0)
+				app.CurrentCollection = config.OriginCollection
+				app.CurrentUrlCollection = urlCollection
+				app.CurrentProxy = proxy
+				app.CurrentProxyIndex = proxyIndex
+				ok := app.crawlWithProxies(urlCollection, config, 0)
 				if ok {
 					if crawlLimit > 0 && atomic.AddInt32(total, 1) > int32(crawlLimit) {
 						atomic.AddInt32(total, -1)
@@ -113,25 +114,18 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 						return
 					}
 				}
-			}(url, proxyIndex)
+			}(url, proxy)
 		}
 
 		wg.Wait()
 		app.closeBrowsers()
-		totalReqCount++
+		batchCount++
 	}
 
 	return shouldContinue
 }
 
-func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config ProcessorConfig, proxies []Proxy, proxyIndex, batchCount, attempt int) bool {
-	proxy := Proxy{}
-	if len(proxies) > 0 {
-		proxy = proxies[proxyIndex]
-	}
-	app.CurrentCollection = config.OriginCollection
-	app.CurrentUrlCollection = urlCollection
-	app.CurrentProxy = proxy
+func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config ProcessorConfig, attempt int) bool {
 	preHandlerError := false
 	if config.Preference.PreHandlers != nil {
 		for _, preHandler := range config.Preference.PreHandlers {
@@ -143,7 +137,7 @@ func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config Process
 	}
 	if !preHandlerError {
 		// Crawl worker execution
-		ctx, err := app.handleCrawlWorker(config, proxy, urlCollection)
+		ctx, err := app.handleCrawlWorker(config, urlCollection)
 		if err != nil {
 			if strings.Contains(err.Error(), "StatusCode:404") {
 				// Mark as max error and stop retrying
@@ -153,18 +147,24 @@ func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config Process
 				}
 			} else if strings.Contains(err.Error(), "isRetryable") {
 				// Rotate proxy if it's a retryable error
-				if len(proxies) > 0 && app.engine.ProxyStrategy == ProxyStrategyRotation {
-					nextProxyIndex := (proxyIndex + 1) % len(proxies)
-					app.Logger.Summary("Error with proxy %s: %v. Retrying with a different proxy: %s", proxy.Server, err.Error(), proxies[nextProxyIndex].Server)
+				if len(app.engine.ProxyServers) > 0 && app.engine.ProxyStrategy == ProxyStrategyRotation {
+					nextProxyIndex := (app.CurrentProxyIndex + 1) % len(app.engine.ProxyServers)
+					app.Logger.Summary("Error with proxy %s: %v. Retrying with a different proxy: %s", app.CurrentProxy.Server, err.Error(), app.engine.ProxyServers[nextProxyIndex].Server)
+
+					app.CurrentProxyIndex = nextProxyIndex
+					app.CurrentProxy = app.engine.ProxyServers[nextProxyIndex]
+
+					app.Logger.Info("Sleeping %d seconds before retrying", app.engine.SleepDuration)
+					time.Sleep(time.Duration(app.engine.SleepDuration) * time.Second)
 
 					// Check if we have exhausted all proxies
-					if attempt >= len(proxies) {
+					if attempt >= len(app.engine.ProxyServers) {
 						app.Logger.Info("All proxies exhausted.")
 						return true
 						//time.Sleep(1 * time.Hour)
 						//app.crawlWithProxies(urlCollection, config, proxies, 0, batchCount, 0) // Restart with the first proxy
 					} else {
-						app.crawlWithProxies(urlCollection, config, proxies, nextProxyIndex, batchCount, attempt+1) // Retry with the next proxy
+						app.crawlWithProxies(urlCollection, config, attempt+1) // Retry with the next proxy
 					}
 					return true
 				}
@@ -187,7 +187,7 @@ func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config Process
 		// Process successful crawl
 		app.extract(config, *ctx)
 		// Update last working proxy index on success
-		atomic.StoreInt32(&app.lastWorkingProxyIndex, int32(proxyIndex))
+		atomic.StoreInt32(&app.lastWorkingProxyIndex, int32(app.CurrentProxyIndex))
 		return true
 
 	}
