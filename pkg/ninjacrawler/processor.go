@@ -72,7 +72,6 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 
 			go func(urlCollection UrlCollection, proxy Proxy) {
 				defer wg.Done()
-				defer app.closePages()
 				defer func() {
 					if r := recover(); r != nil {
 						app.HandlePanic(r)
@@ -86,6 +85,7 @@ func (app *Crawler) processUrlsWithProxies(urls []UrlCollection, config Processo
 				app.CurrentUrlCollection = urlCollection
 				app.assignProxy(proxy, &proxyLock)
 
+				app.openPages()
 				ok := app.crawlWithProxies(urlCollection, config, 0)
 				if ok && crawlLimit > 0 && atomic.AddInt32(total, 1) > int32(crawlLimit) {
 					atomic.AddInt32(total, -1)
@@ -144,6 +144,8 @@ func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config Process
 		app.processCrawlSuccess(ctx, config)
 		return true
 	}
+
+	defer app.closePages()
 	return false
 }
 

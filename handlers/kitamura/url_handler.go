@@ -22,16 +22,13 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			return fullUrl, nil
 		},
 	}
-	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
+	crawler.Crawl([]ninjacrawler.ProcessorConfig{
 		{
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),
 			Processor:        categorySelector,
 			Engine: ninjacrawler.Engine{
 				WaitForSelector: ninjacrawler.String(".category-item"),
-				ProviderOption: ninjacrawler.ProviderQueryOption{
-					WaitFor: ".category-item",
-				},
 			},
 		},
 		{
@@ -39,10 +36,7 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			OriginCollection: constant.Categories,
 			Processor:        productHandler,
 			Engine: ninjacrawler.Engine{
-				WaitForSelector: ninjacrawler.String("div#product-list-area .product"),
-				ProviderOption: ninjacrawler.ProviderQueryOption{
-					WaitFor: "div#product-list-area>.product",
-				},
+				WaitForSelector: ninjacrawler.String("div#product-list-area>.product"),
 			},
 		},
 	})
@@ -66,7 +60,6 @@ func productHandler(ctx ninjacrawler.CrawlerContext, next func([]ninjacrawler.Ur
 	}
 
 	totalPageNumber := int(math.Ceil(float64(productCountInt) / 100))
-	fmt.Println("totalPageNumber:", totalPageNumber)
 
 	currentPage := 1
 	crawlableUrl := ctx.UrlCollection.Url
@@ -90,7 +83,6 @@ func productHandler(ctx ninjacrawler.CrawlerContext, next func([]ninjacrawler.Ur
 			return err
 		}
 	}
-	fmt.Println("currentPage:", currentPage)
 	productDiv := ctx.Document.Find("div#product-list-area").First()
 	productDiv.Find("a.product-link").Each(func(i int, s *goquery.Selection) {
 		href, ok := s.Attr("href")
