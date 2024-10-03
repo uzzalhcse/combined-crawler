@@ -7,7 +7,9 @@ import (
 )
 
 func (app *Crawler) Navigate(url string) (*NavigationContext, error) {
-	app.openBrowsers(app.CurrentProxy)
+
+	app.openBrowsers(app.CurrentProxy) // Use the current proxy
+
 	defer app.closeBrowsers()
 	app.openPages()
 	defer app.closePages()
@@ -28,11 +30,16 @@ func (app *Crawler) Navigate(url string) (*NavigationContext, error) {
 		} else if strings.Contains(err.Error(), "isRetryable") {
 			// Rotate proxy if it's a retryable error
 			if len(app.engine.ProxyServers) > 0 && app.engine.ProxyStrategy == ProxyStrategyRotation {
-				nextProxyIndex := (app.CurrentProxyIndex + 1) % len(app.engine.ProxyServers)
+				//app.proxyLock.Lock()
+
+				// Get the next proxy index and set it as the current one
+				nextProxyIndex := (atomic.LoadInt32(&app.CurrentProxyIndex) + 1) % int32(len(app.engine.ProxyServers))
 				app.Logger.Summary("Error with proxy %s: %v. Retrying with a different proxy: %s", app.CurrentProxy.Server, err.Error(), app.engine.ProxyServers[nextProxyIndex].Server)
 
 				app.CurrentProxyIndex = nextProxyIndex
 				app.CurrentProxy = app.engine.ProxyServers[nextProxyIndex]
+
+				//app.proxyLock.Unlock()
 
 				app.Logger.Info("Sleeping %d seconds before retrying", app.engine.SleepDuration)
 				time.Sleep(time.Duration(app.engine.SleepDuration) * time.Second)
@@ -50,5 +57,4 @@ func (app *Crawler) Navigate(url string) (*NavigationContext, error) {
 		}
 	}
 	return navigationContext, nil
-
 }

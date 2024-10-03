@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"time"
 )
 
 type Category struct {
@@ -16,17 +15,17 @@ type Category struct {
 
 func UrlHandler(crawler *ninjacrawler.Crawler) {
 
-	crawler.CrawlUrls([]ninjacrawler.ProcessorConfig{
-		//{
-		//	Entity:           constant.Categories,
-		//	OriginCollection: crawler.GetBaseCollection(),
-		//	Processor:        categoryHandler,
-		//},
-		//{
-		//	Entity:           constant.SubCategories,
-		//	OriginCollection: constant.Categories,
-		//	Processor:        subCategoryHandler,
-		//},
+	crawler.Crawl([]ninjacrawler.ProcessorConfig{
+		{
+			Entity:           constant.Categories,
+			OriginCollection: crawler.GetBaseCollection(),
+			Processor:        categoryHandler,
+		},
+		{
+			Entity:           constant.SubCategories,
+			OriginCollection: constant.Categories,
+			Processor:        subCategoryHandler,
+		},
 		{
 			Entity:           constant.Products,
 			OriginCollection: constant.SubCategories,
@@ -60,7 +59,6 @@ func categoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollecti
 func subCategoryHandler(ctx ninjacrawler.CrawlerContext) []ninjacrawler.UrlCollection {
 	subCatUrls := []ninjacrawler.UrlCollection{}
 	RecursiveSubCategoryCrawler(ctx, ctx.Document, &subCatUrls, ctx.UrlCollection.Url)
-	fmt.Println("total subCatUrls", len(subCatUrls))
 	return subCatUrls
 }
 func RecursiveSubCategoryCrawler(ctx ninjacrawler.CrawlerContext, doc *goquery.Document, subCatUrls *[]ninjacrawler.UrlCollection, urlStr string) {
@@ -70,29 +68,16 @@ func RecursiveSubCategoryCrawler(ctx ninjacrawler.CrawlerContext, doc *goquery.D
 			href, ok := s.Find("a").First().Attr("href")
 			if ok {
 				fullUrl := ctx.App.GetFullUrl(href)
-				httpClient := ctx.App.GetHttpClient()
-
 				var document *goquery.Document
-				var err error
 
-				maxAttempts := 3
-				for attempt := 1; attempt <= maxAttempts; attempt++ {
-					document, err = ctx.App.NavigateToStaticURL(httpClient, fullUrl, ctx.App.CurrentProxy)
-					if err == nil {
-						break // Successful navigation, exit retry loop
-					}
-
-					ctx.App.Logger.Warn("Attempt %d: Error navigating to sub-category page: %v", attempt, err)
-
-					if attempt == maxAttempts {
-						_ = ctx.App.MarkAsError(ctx.UrlCollection.Url, constant.Categories, err.Error(), 1)
-						ctx.App.Logger.Error("Error navigating to sub-category page after %d attempts: %v", maxAttempts, err)
-						return
-					}
-					time.Sleep(5 * time.Second)
+				navigationContext, err := ctx.App.Navigate(fullUrl)
+				if err != nil {
+					_ = ctx.App.MarkAsMaxErrorAttempt(ctx.UrlCollection.Url, constant.Categories, err.Error())
+					ctx.App.Logger.Error("Error navigating to sub-category page : %v", err)
 				}
+				document = navigationContext.Document
 
-				fmt.Println("fullUrl:", fullUrl)
+				//fmt.Println("fullUrl:", fullUrl)
 				RecursiveSubCategoryCrawler(ctx, document, subCatUrls, fullUrl) // Recursive call
 			}
 		})

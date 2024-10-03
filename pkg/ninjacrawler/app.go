@@ -41,7 +41,7 @@ type Crawler struct {
 	userAgent             string
 	CurrentProxy          Proxy
 	ReqCount              int32
-	CurrentProxyIndex     int
+	CurrentProxyIndex     int32
 	CurrentCollection     string
 	CurrentUrlCollection  UrlCollection
 	CurrentUrl            string
@@ -123,6 +123,9 @@ func (app *Crawler) Stop() {
 	if app.pw != nil {
 		app.pw.Stop()
 	}
+	if app.httpClient != nil {
+		app.httpClient.CloseIdleConnections()
+	}
 	if app.Client != nil {
 		app.closeClient()
 	}
@@ -155,6 +158,8 @@ func (app *Crawler) openBrowsers(proxy Proxy) {
 		if *app.engine.Adapter == RodEngine {
 			app.rdBrowser, err = app.GetRodBrowser(proxy)
 		}
+	} else {
+		app.httpClient = app.GetHttpClient()
 	}
 	if err != nil {
 		app.Logger.Fatal(err.Error())
@@ -162,12 +167,19 @@ func (app *Crawler) openBrowsers(proxy Proxy) {
 
 }
 func (app *Crawler) closeBrowsers() {
-	if app.pwBrowserCtx != nil {
-		app.pwBrowserCtx.Close()
+	if *app.engine.IsDynamic {
+		if app.pwBrowserCtx != nil {
+			app.pwBrowserCtx.Close()
+		}
+		if app.rdBrowser != nil {
+			app.rdBrowser.Close()
+		}
+	} else {
+		if app.httpClient != nil {
+			app.httpClient.CloseIdleConnections()
+		}
 	}
-	if app.rdBrowser != nil {
-		app.rdBrowser.Close()
-	}
+
 }
 
 func (app *Crawler) openPages() {
