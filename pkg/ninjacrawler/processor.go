@@ -189,6 +189,7 @@ func (app *Crawler) retryWithDifferentProxy(err error, urlCollection UrlCollecti
 	atomic.StoreInt32(&app.CurrentProxyIndex, nextProxyIndex)
 	app.CurrentProxy = app.engine.ProxyServers[nextProxyIndex]
 
+	atomic.StoreInt32(&app.lastWorkingProxyIndex, nextProxyIndex)
 	if app.engine.RetrySleepDuration > 0 {
 		app.Logger.Info("Sleeping %d seconds before retrying", app.engine.RetrySleepDuration)
 		time.Sleep(time.Duration(app.engine.RetrySleepDuration) * time.Second)
