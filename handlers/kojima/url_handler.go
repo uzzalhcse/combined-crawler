@@ -74,6 +74,7 @@ func RecursiveSubCategoryCrawler(ctx ninjacrawler.CrawlerContext, doc *goquery.D
 				if err != nil {
 					_ = ctx.App.MarkAsMaxErrorAttempt(ctx.UrlCollection.Url, constant.Categories, err.Error())
 					ctx.App.Logger.Error("Error navigating to sub-category page : %v", err)
+					return
 				}
 				document = navigationContext.Document
 
