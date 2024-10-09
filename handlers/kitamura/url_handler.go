@@ -102,7 +102,6 @@ func productHandler(ctx ninjacrawler.CrawlerContext, next func([]ninjacrawler.Ur
 		queryParams.Set("page", strconv.Itoa(currentPage+1))
 		parsedURL.RawQuery = queryParams.Encode()
 		nextPageUrl := parsedURL.String()
-		fmt.Println("nextPageUrl:", nextPageUrl)
 		next(productUrls, nextPageUrl)
 	} else {
 		next(productUrls, "")

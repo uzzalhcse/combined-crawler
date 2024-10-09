@@ -45,6 +45,8 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Processor:        productDetailSelector,
 			Preference:       ninjacrawler.Preference{ValidationRules: []string{"Images"}},
 			Engine: ninjacrawler.Engine{
+				DevCrawlLimit:   6000,
+				StgCrawlLimit:   6000,
 				WaitForSelector: ninjacrawler.String(".v-breadcrumbs__item"),
 			},
 		},
