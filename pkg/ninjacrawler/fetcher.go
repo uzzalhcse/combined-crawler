@@ -26,7 +26,7 @@ func (app *Crawler) handleCrawlWorker(processorConfig ProcessorConfig, urlCollec
 	}
 
 	// Add a timeout for the navigation process
-	ctx, cancel := context.WithTimeout(context.Background(), app.engine.Timeout/2)
+	ctx, cancel := context.WithTimeout(context.Background(), app.engine.Timeout*2)
 	defer cancel()
 
 	navigationContext, err := app.navigateTo(ctx, crawlableUrl, processorConfig.OriginCollection, navigateToApi)
