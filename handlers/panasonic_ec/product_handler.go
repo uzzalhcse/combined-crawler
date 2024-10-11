@@ -70,11 +70,16 @@ func getSpecificationData(ctx ninjacrawler.CrawlerContext, loadingCondition stri
 	if scriptElement.Length() > 0 {
 		scriptText = scriptElement.Text()
 	}
+	// Clean up the JSON string by removing newlines and trimming spaces
+	cleanedScriptText := strings.TrimSpace(scriptText)
+	cleanedScriptText = strings.ReplaceAll(cleanedScriptText, "\n", "")
+	cleanedScriptText = strings.ReplaceAll(cleanedScriptText, "\t", "")
 
+	// Attempt to unmarshal the cleaned JSON string
 	var jsonData ninjacrawler.Map
-	err := json.Unmarshal([]byte(scriptText), &jsonData)
+	err := json.Unmarshal([]byte(cleanedScriptText), &jsonData)
 	if err != nil {
-		ctx.App.Logger.Error(err.Error())
+		ctx.App.Logger.Error("Error parsing JSON: %v", err)
 	}
 
 	specificationData := make(map[string]string)
