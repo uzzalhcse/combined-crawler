@@ -139,11 +139,13 @@ func (app *Crawler) assignProxy(proxy Proxy, proxyLock *sync.Mutex) {
 		app.Logger.Fatal("No proxies available")
 		return
 	}
-	proxyLock.Lock()
-	app.CurrentProxy = proxy
-	atomic.StoreInt32(&app.CurrentProxyIndex, atomic.LoadInt32(&app.CurrentProxyIndex)%int32(len(app.engine.ProxyServers)))
+	if len(app.engine.ProxyServers) > 0 {
+		proxyLock.Lock()
+		app.CurrentProxy = proxy
+		atomic.StoreInt32(&app.CurrentProxyIndex, atomic.LoadInt32(&app.CurrentProxyIndex)%int32(len(app.engine.ProxyServers)))
 
-	proxyLock.Unlock()
+		proxyLock.Unlock()
+	}
 }
 
 func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config ProcessorConfig, attempt int) bool {
