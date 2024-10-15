@@ -1,7 +1,7 @@
 package main
 
 import (
-	"combined-crawler/handlers/kitamura"
+	"combined-crawler/handlers/rakuten"
 	"combined-crawler/pkg/ninjacrawler"
 )
 
@@ -26,8 +26,9 @@ func siteRegistry() {
 		//AddSite(markt.Crawler()).
 		//AddSite(as1.Crawler()).
 		//AddSite(sony.Crawler()).
-		AddSite(kitamura.Crawler()).
+		//AddSite(kitamura.Crawler()).
 		//AddSite(topvalu.Crawler()).
 		//AddSite(panasonic_ec.Crawler()).
+		AddSite(rakuten.Crawler()).
 		Start()
 }
