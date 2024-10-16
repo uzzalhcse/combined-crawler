@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -47,6 +48,7 @@ type Crawler struct {
 	CurrentUrlCollection  UrlCollection
 	CurrentUrl            string
 	lastWorkingProxyIndex int32
+	mu                    sync.Mutex
 }
 
 func NewCrawler(name, url string, engines ...Engine) *Crawler {
