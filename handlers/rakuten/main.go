@@ -13,7 +13,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			StgCrawlLimit:   0,
 			SleepAfter:      100,
 			SleepDuration:   60,
-			Timeout:         120,
+			Timeout:         300,
 			BlockResources:  true,
 			//StoreHtml: ninjacrawler.Bool(true),
 			ProxyStrategy: ninjacrawler.ProxyStrategyRotation,
