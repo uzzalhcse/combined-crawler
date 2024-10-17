@@ -221,7 +221,7 @@ func (app *Crawler) retryWithDifferentProxy(err error, attempt int) bool {
 		return false
 	}
 
-	app.Logger.Warn("Retrying with different proxy %s", err.Error())
+	app.Logger.Warn("Retrying after %d requests with different proxy %s", atomic.LoadInt32(&app.ReqCount), err.Error())
 	shouldRotateProxy = true
 
 	if app.engine.RetrySleepDuration > 0 {
