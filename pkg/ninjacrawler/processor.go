@@ -1,6 +1,7 @@
 package ninjacrawler
 
 import (
+	"math/rand"
 	"strconv"
 	"strings"
 	"sync"
@@ -144,6 +145,9 @@ func (app *Crawler) getProxy(batchCount int, proxies []Proxy, proxyLock *sync.Mu
 	return proxy
 }
 func (app *Crawler) applySleep() {
+	// Random sleep between 500ms and 1.5s
+	sleepDuration := time.Duration(rand.Intn(1001)+500) * time.Millisecond
+	time.Sleep(sleepDuration)
 	if atomic.LoadInt32(&app.ReqCount) > 0 && atomic.LoadInt32(&app.ReqCount)%int32(app.engine.SleepAfter) == 0 {
 		app.Logger.Info("Sleeping %d seconds after %d operations", app.engine.SleepDuration, app.engine.SleepAfter)
 		time.Sleep(time.Duration(app.engine.SleepDuration) * time.Second)
