@@ -9,14 +9,14 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       ninjacrawler.Bool(true),
 			DevCrawlLimit:   0,
-			ConcurrentLimit: 10,
-			StgCrawlLimit:   400,
-			SleepAfter:      500,
-			SleepDuration:   10,
+			ConcurrentLimit: 100,
+			StgCrawlLimit:   0,
+			SleepAfter:      100,
+			SleepDuration:   60,
 			Timeout:         120,
 			BlockResources:  true,
 			//StoreHtml: ninjacrawler.Bool(true),
-			//ProxyStrategy: ninjacrawler.ProxyStrategyRotation,
+			ProxyStrategy: ninjacrawler.ProxyStrategyRotation,
 
 			//Adapter: ninjacrawler.String(ninjacrawler.RodEngine),
 		},
@@ -50,4 +50,15 @@ need to exclude some coupons pages like
 https://books.rakuten.co.jp/event/coupon/?shop=kobo&l-id=header-subnavi-ebook-coupon
 
 found  some unknown domain so we need to filter those domains except rakuten
+
+count the total data
+https://books.rakuten.co.jp/json/genre/000
+https://books.rakuten.co.jp/json/genre/001
+https://books.rakuten.co.jp/json/genre/002
+https://books.rakuten.co.jp/json/genre/003
+https://books.rakuten.co.jp/json/genre/004
+https://books.rakuten.co.jp/json/genre/005
+https://books.rakuten.co.jp/json/genre/006
+https://books.rakuten.co.jp/json/genre/007
+https://books.rakuten.co.jp/json/genre/101
 */
