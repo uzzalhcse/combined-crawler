@@ -150,12 +150,9 @@ func (l *defaultLogger) Printf(format string, args ...interface{}) {
 
 func (l *defaultLogger) Html(html, url, msg string, dir ...string) {
 	if l.app.IsValidPage(url) {
-		// Check if file logging is enabled in the config.
-		if l.app.Config.GetBool("ENABLE_FILE_LOGGING") {
-			err := l.app.writePageContentToFile(html, url, msg, dir...)
-			if err != nil {
-				l.logger.Printf("⚛️ HTML: %v", err)
-			}
+		err := l.app.writePageContentToFile(html, url, msg, dir...)
+		if err != nil {
+			l.logger.Printf("⚛️ HTML: %v", err)
 		}
 	}
 }
