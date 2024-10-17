@@ -22,14 +22,16 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),
 			Processor:        categorySelector,
-			Engine:           ninjacrawler.Engine{},
+			Engine: ninjacrawler.Engine{
+				SimulateMouse: ninjacrawler.Bool(true),
+			},
 		},
 		{
 			Entity:           constant.Products,
 			OriginCollection: constant.Categories,
 			Processor:        handleProduct,
-			Engine:           ninjacrawler.Engine{
-				//IsDynamic: ninjacrawler.Bool(false),
+			Engine: ninjacrawler.Engine{
+				SimulateMouse: ninjacrawler.Bool(false),
 			},
 		},
 	})

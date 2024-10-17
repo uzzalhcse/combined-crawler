@@ -1,0 +1,1252 @@
+{
+  "array": [
+    {
+      "genreId": "001",
+      "genreName": "本",
+      "genreOrder": "1",
+      "url": "http://books.rakuten.co.jp/book/",
+      "count": 4051444,
+      "hasChild": true
+    },
+    {
+      "genreId": "101",
+      "genreName": "電子書籍",
+      "genreOrder": "1",
+      "url": "https://books.rakuten.co.jp/e-book/",
+      "count": 6524069,
+      "hasChild": true
+    },
+    {
+      "genreId": "007",
+      "genreName": "雑誌",
+      "genreOrder": "2",
+      "url": "http://books.rakuten.co.jp/magazine/",
+      "count": 208567,
+      "hasChild": true
+    },
+    {
+      "genreId": "003",
+      "genreName": "DVD",
+      "genreOrder": "3",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/",
+      "count": 529557,
+      "hasChild": true
+    },
+    {
+      "genreId": "002",
+      "genreName": "CD",
+      "genreOrder": "4",
+      "url": "http://books.rakuten.co.jp/cd/",
+      "count": 997260,
+      "hasChild": true
+    },
+    {
+      "genreId": "006",
+      "genreName": "ゲーム",
+      "genreOrder": "5",
+      "url": "http://books.rakuten.co.jp/game/",
+      "count": 88925,
+      "hasChild": true
+    },
+    {
+      "genreId": "004",
+      "genreName": "PCソフト・周辺機器",
+      "genreOrder": "6",
+      "url": "http://books.rakuten.co.jp/software/",
+      "count": 35092,
+      "hasChild": true
+    },
+    {
+      "genreId": "005",
+      "genreName": "洋書",
+      "genreOrder": "7",
+      "url": "http://books.rakuten.co.jp/foreign-book/",
+      "count": 2614163,
+      "hasChild": true
+    },
+    {
+      "genreId": "001004",
+      "genreName": "小説・エッセイ",
+      "genreOrder": "1",
+      "url": "http://books.rakuten.co.jp/book/literature/",
+      "count": 406677,
+      "hasChild": true
+    },
+    {
+      "genreId": "001014",
+      "genreName": "アダルト",
+      "genreOrder": "2",
+      "url": "http://books.rakuten.co.jp/adult/book/",
+      "count": 61232,
+      "hasChild": true
+    },
+    {
+      "genreId": "001017",
+      "genreName": "ライトノベル",
+      "genreOrder": "2",
+      "url": "http://books.rakuten.co.jp/book/lightnovel/",
+      "count": 47577,
+      "hasChild": true
+    },
+    {
+      "genreId": "001021",
+      "genreName": "ボーイズラブ（BL）",
+      "genreOrder": "3",
+      "url": "http://books.rakuten.co.jp/book/boys-love/",
+      "count": 29881,
+      "hasChild": true
+    },
+    {
+      "genreId": "001029",
+      "genreName": "ティーンズラブ（TL）",
+      "genreOrder": "4",
+      "url": "http://books.rakuten.co.jp/book/teens-love/",
+      "count": 8989,
+      "hasChild": true
+    },
+    {
+      "genreId": "001019",
+      "genreName": "文庫",
+      "genreOrder": "5",
+      "url": "http://books.rakuten.co.jp/book/pocket-book/",
+      "count": 229410,
+      "hasChild": true
+    },
+    {
+      "genreId": "001020",
+      "genreName": "新書",
+      "genreOrder": "6",
+      "url": "http://books.rakuten.co.jp/book/paperback-pocket-edition/",
+      "count": 124619,
+      "hasChild": true
+    },
+    {
+      "genreId": "001010",
+      "genreName": "美容・暮らし・健康・料理",
+      "genreOrder": "7",
+      "url": "http://books.rakuten.co.jp/book/lifestyle/",
+      "count": 288879,
+      "hasChild": true
+    },
+    {
+      "genreId": "001003",
+      "genreName": "絵本・児童書・図鑑",
+      "genreOrder": "8",
+      "url": "http://books.rakuten.co.jp/book/child/",
+      "count": 261537,
+      "hasChild": true
+    },
+    {
+      "genreId": "001009",
+      "genreName": "ホビー・スポーツ・美術",
+      "genreOrder": "9",
+      "url": "http://books.rakuten.co.jp/book/hobby-sports-art/",
+      "count": 204664,
+      "hasChild": true
+    },
+    {
+      "genreId": "001007",
+      "genreName": "旅行・留学・アウトドア",
+      "genreOrder": "10",
+      "url": "http://books.rakuten.co.jp/book/travel/",
+      "count": 134329,
+      "hasChild": true
+    },
+    {
+      "genreId": "001006",
+      "genreName": "ビジネス・経済・就職",
+      "genreOrder": "11",
+      "url": "http://books.rakuten.co.jp/book/business/",
+      "count": 332915,
+      "hasChild": true
+    },
+    {
+      "genreId": "001002",
+      "genreName": "語学・学習参考書",
+      "genreOrder": "12",
+      "url": "http://books.rakuten.co.jp/book/study/",
+      "count": 270728,
+      "hasChild": true
+    },
+    {
+      "genreId": "001016",
+      "genreName": "資格・検定",
+      "genreOrder": "13",
+      "url": "http://books.rakuten.co.jp/book/qualification/",
+      "count": 87291,
+      "hasChild": true
+    },
+    {
+      "genreId": "001012",
+      "genreName": "科学・技術",
+      "genreOrder": "14",
+      "url": "http://books.rakuten.co.jp/book/science/",
+      "count": 280449,
+      "hasChild": true
+    },
+    {
+      "genreId": "001028",
+      "genreName": "医学・薬学・看護学・歯科学",
+      "genreOrder": "15",
+      "url": "http://books.rakuten.co.jp/book/medicine/",
+      "count": 132595,
+      "hasChild": true
+    },
+    {
+      "genreId": "001005",
+      "genreName": "パソコン・システム開発",
+      "genreOrder": "16",
+      "url": "http://books.rakuten.co.jp/book/computer/",
+      "count": 83532,
+      "hasChild": true
+    },
+    {
+      "genreId": "001008",
+      "genreName": "人文・思想・社会",
+      "genreOrder": "17",
+      "url": "http://books.rakuten.co.jp/book/culture/",
+      "count": 926335,
+      "hasChild": true
+    },
+    {
+      "genreId": "001001",
+      "genreName": "漫画（コミック）",
+      "genreOrder": "18",
+      "url": "http://books.rakuten.co.jp/book/comic/",
+      "count": 355906,
+      "hasChild": true
+    },
+    {
+      "genreId": "001013",
+      "genreName": "写真集・タレント",
+      "genreOrder": "19",
+      "url": "http://books.rakuten.co.jp/book/photo/",
+      "count": 29649,
+      "hasChild": true
+    },
+    {
+      "genreId": "001011",
+      "genreName": "エンタメ・ゲーム",
+      "genreOrder": "20",
+      "url": "http://books.rakuten.co.jp/book/entertainment/",
+      "count": 179301,
+      "hasChild": true
+    },
+    {
+      "genreId": "001018",
+      "genreName": "楽譜",
+      "genreOrder": "21",
+      "url": "http://books.rakuten.co.jp/book/sheet-of-music/",
+      "count": 227632,
+      "hasChild": true
+    },
+    {
+      "genreId": "001022",
+      "genreName": "付録付き",
+      "genreOrder": "22",
+      "url": "http://books.rakuten.co.jp/book/appendix/",
+      "count": 4372,
+      "hasChild": true
+    },
+    {
+      "genreId": "001023",
+      "genreName": "バーゲン本",
+      "genreOrder": "23",
+      "url": "http://books.rakuten.co.jp/book/bargain/",
+      "count": 55772,
+      "hasChild": true
+    },
+    {
+      "genreId": "001025",
+      "genreName": "セット本",
+      "genreOrder": "24",
+      "url": "http://books.rakuten.co.jp/book/comicset/",
+      "count": 38202,
+      "hasChild": true
+    },
+    {
+      "genreId": "001026",
+      "genreName": "カレンダー・手帳・家計簿",
+      "genreOrder": "25",
+      "url": "http://books.rakuten.co.jp/book/calendar/",
+      "count": 74481,
+      "hasChild": true
+    },
+    {
+      "genreId": "001027",
+      "genreName": "文具・雑貨",
+      "genreOrder": "26",
+      "url": "http://books.rakuten.co.jp/book/fancy/",
+      "count": 20904,
+      "hasChild": true
+    },
+    {
+      "genreId": "002101",
+      "genreName": "J-POP",
+      "genreOrder": "1",
+      "url": "http://books.rakuten.co.jp/cd/japanese-pop-music/",
+      "count": 258065,
+      "hasChild": true
+    },
+    {
+      "genreId": "002115",
+      "genreName": "韓国（K-POP）・アジア",
+      "genreOrder": "2",
+      "url": "http://books.rakuten.co.jp/cd/asia-kpop/",
+      "count": 9471,
+      "hasChild": true
+    },
+    {
+      "genreId": "002102",
+      "genreName": "ロック・ポップス",
+      "genreOrder": "3",
+      "url": "http://books.rakuten.co.jp/cd/rock-pop-music/",
+      "count": 204237,
+      "hasChild": true
+    },
+    {
+      "genreId": "002103",
+      "genreName": "ダンス・ソウル",
+      "genreOrder": "4",
+      "url": "http://books.rakuten.co.jp/cd/dance-soul/",
+      "count": 68629,
+      "hasChild": true
+    },
+    {
+      "genreId": "002104",
+      "genreName": "クラシック",
+      "genreOrder": "5",
+      "url": "http://books.rakuten.co.jp/cd/classic/",
+      "count": 132841,
+      "hasChild": true
+    },
+    {
+      "genreId": "002105",
+      "genreName": "ジャズ",
+      "genreOrder": "6",
+      "url": "http://books.rakuten.co.jp/cd/jazz/",
+      "count": 91049,
+      "hasChild": true
+    },
+    {
+      "genreId": "002113",
+      "genreName": "ワールドミュージック",
+      "genreOrder": "7",
+      "url": "http://books.rakuten.co.jp/cd/world-music/",
+      "count": 28682,
+      "hasChild": true
+    },
+    {
+      "genreId": "002111",
+      "genreName": "サウンドトラック",
+      "genreOrder": "8",
+      "url": "http://books.rakuten.co.jp/cd/sound-track/",
+      "count": 18460,
+      "hasChild": true
+    },
+    {
+      "genreId": "002108",
+      "genreName": "アニメ",
+      "genreOrder": "9",
+      "url": "http://books.rakuten.co.jp/cd/animation/",
+      "count": 51031,
+      "hasChild": true
+    },
+    {
+      "genreId": "002114",
+      "genreName": "キッズ・ファミリー",
+      "genreOrder": "10",
+      "url": "http://books.rakuten.co.jp/cd/kids-family/",
+      "count": 9819,
+      "hasChild": true
+    },
+    {
+      "genreId": "002107",
+      "genreName": "演歌・純邦楽・落語",
+      "genreOrder": "11",
+      "url": "http://books.rakuten.co.jp/cd/melodramatic-japanese-popular/",
+      "count": 65415,
+      "hasChild": true
+    },
+    {
+      "genreId": "002106",
+      "genreName": "イージーリスニング",
+      "genreOrder": "12",
+      "url": "http://books.rakuten.co.jp/cd/easy-listening-music/",
+      "count": 17509,
+      "hasChild": true
+    },
+    {
+      "genreId": "002116",
+      "genreName": "輸入盤",
+      "genreOrder": "99",
+      "url": "http://books.rakuten.co.jp/search/dt/g002116/",
+      "count": 235505,
+      "hasChild": false
+    },
+    {
+      "genreId": "002117",
+      "genreName": "DVD・ブルーレイ付",
+      "genreOrder": "99",
+      "url": "http://books.rakuten.co.jp/search/dt/g002117/",
+      "count": 47317,
+      "hasChild": false
+    },
+    {
+      "genreId": "003215",
+      "genreName": "ブルーレイ",
+      "genreOrder": "1",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/blu-ray/",
+      "count": 67310,
+      "hasChild": true
+    },
+    {
+      "genreId": "003217",
+      "genreName": "アダルト",
+      "genreOrder": "1",
+      "url": "http://books.rakuten.co.jp/adult/dvd/",
+      "count": 201156,
+      "hasChild": true
+    },
+    {
+      "genreId": "003201",
+      "genreName": "洋画",
+      "genreOrder": "2",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/american-film/",
+      "count": 64836,
+      "hasChild": true
+    },
+    {
+      "genreId": "003202",
+      "genreName": "邦画",
+      "genreOrder": "3",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/japanese-film/",
+      "count": 17802,
+      "hasChild": true
+    },
+    {
+      "genreId": "003206",
+      "genreName": "アニメ",
+      "genreOrder": "4",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/animation/",
+      "count": 67304,
+      "hasChild": true
+    },
+    {
+      "genreId": "003207",
+      "genreName": "ミュージック・ライブ映像",
+      "genreOrder": "5",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/music/",
+      "count": 41045,
+      "hasChild": true
+    },
+    {
+      "genreId": "003203",
+      "genreName": "テレビドラマ",
+      "genreOrder": "6",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/teleplay/",
+      "count": 24526,
+      "hasChild": true
+    },
+    {
+      "genreId": "003208",
+      "genreName": "お笑い・バラエティ",
+      "genreOrder": "7",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/variety/",
+      "count": 6687,
+      "hasChild": true
+    },
+    {
+      "genreId": "003218",
+      "genreName": "アジア・韓国",
+      "genreOrder": "8",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/asia/",
+      "count": 7319,
+      "hasChild": true
+    },
+    {
+      "genreId": "003213",
+      "genreName": "キッズ・ファミリー",
+      "genreOrder": "10",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/kids-family/",
+      "count": 14742,
+      "hasChild": true
+    },
+    {
+      "genreId": "003212",
+      "genreName": "アイドル",
+      "genreOrder": "11",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/idol/",
+      "count": 11333,
+      "hasChild": false
+    },
+    {
+      "genreId": "003204",
+      "genreName": "ドキュメンタリー",
+      "genreOrder": "12",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/documentary/",
+      "count": 18284,
+      "hasChild": true
+    },
+    {
+      "genreId": "003209",
+      "genreName": "スポーツ",
+      "genreOrder": "13",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/sports/",
+      "count": 9516,
+      "hasChild": true
+    },
+    {
+      "genreId": "003210",
+      "genreName": "趣味・実用",
+      "genreOrder": "14",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/hobby/",
+      "count": 4664,
+      "hasChild": true
+    },
+    {
+      "genreId": "003211",
+      "genreName": "舞台・ミュージカル",
+      "genreOrder": "15",
+      "url": "http://books.rakuten.co.jp/dvd-blu-ray/stage/",
+      "count": 4831,
+      "hasChild": true
+    },
+    {
+      "genreId": "003219",
+      "genreName": "輸入盤",
+      "genreOrder": "99",
+      "url": "http://books.rakuten.co.jp/search/dt/g003219/",
+      "count": 7673,
+      "hasChild": false
+    },
+    {
+      "genreId": "004318",
+      "genreName": "アダルト",
+      "genreOrder": "1",
+      "url": "http://books.rakuten.co.jp/adult/software/",
+      "count": 5340,
+      "hasChild": true
+    },
+    {
+      "genreId": "004319",
+      "genreName": "PCソフト",
+      "genreOrder": "1",
+      "url": "http://books.rakuten.co.jp/software/pcsoft/",
+      "count": 3226,
+      "hasChild": true
+    },
+    {
+      "genreId": "004320",
+      "genreName": "Kobo（電子書籍）",
+      "genreOrder": "2",
+      "url": "http://books.rakuten.co.jp/software/kobo/",
+      "count": 87,
+      "hasChild": true
+    },
+    {
+      "genreId": "004321",
+      "genreName": "タブレット・ノート",
+      "genreOrder": "3",
+      "url": "http://books.rakuten.co.jp/software/tablets/",
+      "count": 192,
+      "hasChild": true
+    },
+    {
+      "genreId": "004317",
+      "genreName": "PC周辺機器",
+      "genreOrder": "4",
+      "url": "http://books.rakuten.co.jp/software/accessories/",
+      "count": 3048,
+      "hasChild": true
+    },
+    {
+      "genreId": "004322",
+      "genreName": "マウス・キーボード",
+      "genreOrder": "5",
+      "url": "http://books.rakuten.co.jp/software/mouse-keyboards/",
+      "count": 499,
+      "hasChild": true
+    },
+    {
+      "genreId": "004323",
+      "genreName": "ディスプレイ",
+      "genreOrder": "6",
+      "url": "http://books.rakuten.co.jp/software/display/",
+      "count": 559,
+      "hasChild": false
+    },
+    {
+      "genreId": "004324",
+      "genreName": "プリンタ",
+      "genreOrder": "7",
+      "url": "http://books.rakuten.co.jp/software/printer-fax/",
+      "count": 341,
+      "hasChild": true
+    },
+    {
+      "genreId": "004325",
+      "genreName": "PCサプライ",
+      "genreOrder": "8",
+      "url": "http://books.rakuten.co.jp/software/pcsupply/",
+      "count": 2413,
+      "hasChild": true
+    },
+    {
+      "genreId": "004326",
+      "genreName": "ネットワーク通信",
+      "genreOrder": "9",
+      "url": "http://books.rakuten.co.jp/software/network/",
+      "count": 479,
+      "hasChild": true
+    },
+    {
+      "genreId": "004327",
+      "genreName": "カメラ",
+      "genreOrder": "10",
+      "url": "http://books.rakuten.co.jp/software/camera/",
+      "count": 365,
+      "hasChild": true
+    },
+    {
+      "genreId": "004328",
+      "genreName": "電子辞書",
+      "genreOrder": "11",
+      "url": "http://books.rakuten.co.jp/software/ic-dictionary/",
+      "count": 14,
+      "hasChild": true
+    },
+    {
+      "genreId": "004329",
+      "genreName": "スマートフォン関連",
+      "genreOrder": "12",
+      "url": "http://books.rakuten.co.jp/software/smartphone/",
+      "count": 9425,
+      "hasChild": true
+    },
+    {
+      "genreId": "004330",
+      "genreName": "TV・レコーダー・オーディオ",
+      "genreOrder": "13",
+      "url": "http://books.rakuten.co.jp/software/audio/",
+      "count": 3004,
+      "hasChild": true
+    },
+    {
+      "genreId": "004331",
+      "genreName": "家電",
+      "genreOrder": "14",
+      "url": "http://books.rakuten.co.jp/software/appliance/",
+      "count": 1668,
+      "hasChild": true
+    },
+    {
+      "genreId": "004332",
+      "genreName": "ホビー",
+      "genreOrder": "15",
+      "url": "http://books.rakuten.co.jp/software/goods/",
+      "count": 1533,
+      "hasChild": true
+    },
+    {
+      "genreId": "005401",
+      "genreName": "Art & Entertainment（芸術＆エンターテインメント）",
+      "genreOrder": "1",
+      "url": "http://books.rakuten.co.jp/search/dt/g005401/",
+      "count": 192638,
+      "hasChild": true
+    },
+    {
+      "genreId": "005402",
+      "genreName": "Fiction & Literature（小説＆文芸）",
+      "genreOrder": "2",
+      "url": "http://books.rakuten.co.jp/search/dt/g005402/",
+      "count": 564059,
+      "hasChild": true
+    },
+    {
+      "genreId": "005403",
+      "genreName": "Business & Self-Culture（ビジネス）",
+      "genreOrder": "3",
+      "url": "http://books.rakuten.co.jp/search/dt/g005403/",
+      "count": 112600,
+      "hasChild": true
+    },
+    {
+      "genreId": "005407",
+      "genreName": "Books for kids（児童書）",
+      "genreOrder": "3",
+      "url": "http://books.rakuten.co.jp/search/dt/g005407/",
+      "count": 469439,
+      "hasChild": true
+    },
+    {
+      "genreId": "005404",
+      "genreName": "Family life & Comics（生活＆コミック）",
+      "genreOrder": "4",
+      "url": "http://books.rakuten.co.jp/search/dt/g005404/",
+      "count": 262759,
+      "hasChild": true
+    },
+    {
+      "genreId": "005409",
+      "genreName": "Travel（旅行）",
+      "genreOrder": "5",
+      "url": "http://books.rakuten.co.jp/search/dt/g005409/",
+      "count": 53984,
+      "hasChild": true
+    },
+    {
+      "genreId": "005406",
+      "genreName": "Social Science（社会科学）",
+      "genreOrder": "7",
+      "url": "http://books.rakuten.co.jp/search/dt/g005406/",
+      "count": 586150,
+      "hasChild": true
+    },
+    {
+      "genreId": "005408",
+      "genreName": "Reference & Language（辞典＆語学）",
+      "genreOrder": "8",
+      "url": "http://books.rakuten.co.jp/search/dt/g005408/",
+      "count": 38317,
+      "hasChild": true
+    },
+    {
+      "genreId": "005405",
+      "genreName": "Computers & Science（コンピューター＆科学）",
+      "genreOrder": "9",
+      "url": "http://books.rakuten.co.jp/search/dt/g005405/",
+      "count": 233660,
+      "hasChild": true
+    },
+    {
+      "genreId": "005410",
+      "genreName": "Non-Classifiable（その他）",
+      "genreOrder": "99",
+      "url": "http://books.rakuten.co.jp/search/dt/g005410/",
+      "count": 101034,
+      "hasChild": false
+    },
+    {
+      "genreId": "006514",
+      "genreName": "Nintendo Switch",
+      "genreOrder": "1",
+      "url": "http://books.rakuten.co.jp/game/switch/",
+      "count": 5599,
+      "hasChild": true
+    },
+    {
+      "genreId": "006511",
+      "genreName": "Wii U",
+      "genreOrder": "2",
+      "url": "http://books.rakuten.co.jp/game/wiiu/",
+      "count": 415,
+      "hasChild": true
+    },
+    {
+      "genreId": "006503",
+      "genreName": "Wii",
+      "genreOrder": "3",
+      "url": "http://books.rakuten.co.jp/game/wii/",
+      "count": 345,
+      "hasChild": true
+    },
+    {
+      "genreId": "006508",
+      "genreName": "ニンテンドー3DS",
+      "genreOrder": "4",
+      "url": "http://books.rakuten.co.jp/game/3ds/",
+      "count": 2361,
+      "hasChild": true
+    },
+    {
+      "genreId": "006504",
+      "genreName": "ニンテンドーDS",
+      "genreOrder": "5",
+      "url": "http://books.rakuten.co.jp/game/ds/",
+      "count": 1002,
+      "hasChild": true
+    },
+    {
+      "genreId": "006515",
+      "genreName": "PS5",
+      "genreOrder": "6",
+      "url": "http://books.rakuten.co.jp/game/ps5/",
+      "count": 1097,
+      "hasChild": true
+    },
+    {
+      "genreId": "006513",
+      "genreName": "PS4",
+      "genreOrder": "7",
+      "url": "http://books.rakuten.co.jp/game/ps4/",
+      "count": 3100,
+      "hasChild": true
+    },
+    {
+      "genreId": "006501",
+      "genreName": "PS3",
+      "genreOrder": "8",
+      "url": "http://books.rakuten.co.jp/game/ps3/",
+      "count": 1678,
+      "hasChild": true
+    },
+    {
+      "genreId": "006506",
+      "genreName": "PS2",
+      "genreOrder": "9",
+      "url": "http://books.rakuten.co.jp/game/ps2/",
+      "count": 568,
+      "hasChild": true
+    },
+    {
+      "genreId": "006509",
+      "genreName": "PS Vita",
+      "genreOrder": "10",
+      "url": "http://books.rakuten.co.jp/game/psvita/",
+      "count": 1710,
+      "hasChild": true
+    },
+    {
+      "genreId": "006502",
+      "genreName": "PSP",
+      "genreOrder": "11",
+      "url": "http://books.rakuten.co.jp/game/psp/",
+      "count": 2144,
+      "hasChild": true
+    },
+    {
+      "genreId": "006516",
+      "genreName": "Xbox Series X",
+      "genreOrder": "12",
+      "url": "http://books.rakuten.co.jp/game/xboxseriesx/",
+      "count": 101,
+      "hasChild": true
+    },
+    {
+      "genreId": "006512",
+      "genreName": "Xbox One",
+      "genreOrder": "13",
+      "url": "http://books.rakuten.co.jp/game/xboxone/",
+      "count": 295,
+      "hasChild": true
+    },
+    {
+      "genreId": "006507",
+      "genreName": "Xbox 360",
+      "genreOrder": "14",
+      "url": "http://books.rakuten.co.jp/game/xbox360/",
+      "count": 973,
+      "hasChild": true
+    },
+    {
+      "genreId": "006510",
+      "genreName": "おもちゃ",
+      "genreOrder": "15",
+      "url": "http://books.rakuten.co.jp/game/toys/",
+      "count": 65609,
+      "hasChild": true
+    },
+    {
+      "genreId": "006518",
+      "genreName": "アダルト",
+      "genreOrder": "18",
+      "url": "http://books.rakuten.co.jp/adult/game/",
+      "count": 285,
+      "hasChild": true
+    },
+    {
+      "genreId": "006505",
+      "genreName": "その他",
+      "genreOrder": "99",
+      "url": "http://books.rakuten.co.jp/search/dt/g006505/",
+      "count": 1762,
+      "hasChild": false
+    },
+    {
+      "genreId": "007626",
+      "genreName": "付録付き雑誌",
+      "genreOrder": "1",
+      "url": "http://books.rakuten.co.jp/magazine/appendix/",
+      "count": 55687,
+      "hasChild": true
+    },
+    {
+      "genreId": "007601",
+      "genreName": "総合誌",
+      "genreOrder": "2",
+      "url": "http://books.rakuten.co.jp/magazine/general/",
+      "count": 24702,
+      "hasChild": true
+    },
+    {
+      "genreId": "007602",
+      "genreName": "文芸",
+      "genreOrder": "3",
+      "url": "http://books.rakuten.co.jp/magazine/literature/",
+      "count": 2911,
+      "hasChild": true
+    },
+    {
+      "genreId": "007607",
+      "genreName": "男性誌",
+      "genreOrder": "4",
+      "url": "http://books.rakuten.co.jp/magazine/man/",
+      "count": 4906,
+      "hasChild": true
+    },
+    {
+      "genreId": "007606",
+      "genreName": "女性誌",
+      "genreOrder": "5",
+      "url": "http://books.rakuten.co.jp/magazine/woman/",
+      "count": 10388,
+      "hasChild": true
+    },
+    {
+      "genreId": "007625",
+      "genreName": "ティーンズ",
+      "genreOrder": "6",
+      "url": "http://books.rakuten.co.jp/magazine/teens/",
+      "count": 93,
+      "hasChild": false
+    },
+    {
+      "genreId": "007608",
+      "genreName": "生活・健康",
+      "genreOrder": "7",
+      "url": "http://books.rakuten.co.jp/magazine/lifestyle/",
+      "count": 4917,
+      "hasChild": true
+    },
+    {
+      "genreId": "007610",
+      "genreName": "結婚・出産・子育て",
+      "genreOrder": "8",
+      "url": "http://books.rakuten.co.jp/magazine/marriage-baby/",
+      "count": 3094,
+      "hasChild": true
+    },
+    {
+      "genreId": "007616",
+      "genreName": "幼児・児童・絵本",
+      "genreOrder": "9",
+      "url": "http://books.rakuten.co.jp/magazine/child/",
+      "count": 2133,
+      "hasChild": true
+    },
+    {
+      "genreId": "007612",
+      "genreName": "料理・グルメ情報",
+      "genreOrder": "10",
+      "url": "http://books.rakuten.co.jp/magazine/cooking/",
+      "count": 1493,
+      "hasChild": true
+    },
+    {
+      "genreId": "007613",
+      "genreName": "手芸・編物",
+      "genreOrder": "11",
+      "url": "http://books.rakuten.co.jp/magazine/handicraft/",
+      "count": 616,
+      "hasChild": true
+    },
+    {
+      "genreId": "007604",
+      "genreName": "ビジネス・投資",
+      "genreOrder": "12",
+      "url": "http://books.rakuten.co.jp/magazine/business/",
+      "count": 10850,
+      "hasChild": true
+    },
+    {
+      "genreId": "007603",
+      "genreName": "専門誌",
+      "genreOrder": "13",
+      "url": "http://books.rakuten.co.jp/magazine/specialty/",
+      "count": 30230,
+      "hasChild": true
+    },
+    {
+      "genreId": "007627",
+      "genreName": "資格・求人・キャリア",
+      "genreOrder": "14",
+      "url": "http://books.rakuten.co.jp/magazine/qualification/",
+      "count": 380,
+      "hasChild": false
+    },
+    {
+      "genreId": "007615",
+      "genreName": "テキスト",
+      "genreOrder": "15",
+      "url": "http://books.rakuten.co.jp/magazine/text/",
+      "count": 5332,
+      "hasChild": true
+    },
+    {
+      "genreId": "007609",
+      "genreName": "情報誌",
+      "genreOrder": "16",
+      "url": "http://books.rakuten.co.jp/magazine/information/",
+      "count": 2043,
+      "hasChild": true
+    },
+    {
+      "genreId": "007621",
+      "genreName": "趣味",
+      "genreOrder": "17",
+      "url": "http://books.rakuten.co.jp/magazine/hobby/",
+      "count": 29946,
+      "hasChild": true
+    },
+    {
+      "genreId": "007611",
+      "genreName": "旅行・アウトドア",
+      "genreOrder": "18",
+      "url": "http://books.rakuten.co.jp/magazine/travel/",
+      "count": 2803,
+      "hasChild": true
+    },
+    {
+      "genreId": "007620",
+      "genreName": "車・バイク",
+      "genreOrder": "19",
+      "url": "http://books.rakuten.co.jp/magazine/auto/",
+      "count": 8026,
+      "hasChild": true
+    },
+    {
+      "genreId": "007614",
+      "genreName": "スポーツ誌",
+      "genreOrder": "20",
+      "url": "http://books.rakuten.co.jp/magazine/sports/",
+      "count": 9893,
+      "hasChild": true
+    },
+    {
+      "genreId": "007617",
+      "genreName": "音楽・芸能",
+      "genreOrder": "21",
+      "url": "http://books.rakuten.co.jp/magazine/music/",
+      "count": 17061,
+      "hasChild": true
+    },
+    {
+      "genreId": "007618",
+      "genreName": "コミック・アニメ",
+      "genreOrder": "22",
+      "url": "http://books.rakuten.co.jp/magazine/comic/",
+      "count": 15019,
+      "hasChild": true
+    },
+    {
+      "genreId": "007629",
+      "genreName": "ボーイズラブ（BL）",
+      "genreOrder": "23",
+      "url": "http://books.rakuten.co.jp/magazine/boys-love/",
+      "count": 1136,
+      "hasChild": false
+    },
+    {
+      "genreId": "007619",
+      "genreName": "ゲーム",
+      "genreOrder": "24",
+      "url": "http://books.rakuten.co.jp/magazine/game/",
+      "count": 1470,
+      "hasChild": true
+    },
+    {
+      "genreId": "007605",
+      "genreName": "コンピューター誌",
+      "genreOrder": "25",
+      "url": "http://books.rakuten.co.jp/magazine/computer/",
+      "count": 1258,
+      "hasChild": true
+    },
+    {
+      "genreId": "007628",
+      "genreName": "携帯電話・スマートフォン・アプリ",
+      "genreOrder": "26",
+      "url": "http://books.rakuten.co.jp/magazine/mobile/",
+      "count": 19,
+      "hasChild": false
+    },
+    {
+      "genreId": "007624",
+      "genreName": "アダルト",
+      "genreOrder": "28",
+      "url": "http://books.rakuten.co.jp/adult/magazine/",
+      "count": 8975,
+      "hasChild": true
+    },
+    {
+      "genreId": "007623",
+      "genreName": "その他",
+      "genreOrder": "99",
+      "url": "http://books.rakuten.co.jp/search/dt/g007623/",
+      "count": 8855,
+      "hasChild": false
+    },
+    {
+      "genreId": "101904",
+      "genreName": "漫画（コミック）",
+      "genreOrder": "1",
+      "url": "https://books.rakuten.co.jp/e-book/comic/",
+      "count": 541348,
+      "hasChild": true
+    },
+    {
+      "genreId": "101901",
+      "genreName": "小説・エッセイ",
+      "genreOrder": "2",
+      "url": "https://books.rakuten.co.jp/e-book/literature/",
+      "count": 144026,
+      "hasChild": true
+    },
+    {
+      "genreId": "101902",
+      "genreName": "ミステリー・サスペンス",
+      "genreOrder": "3",
+      "url": "https://books.rakuten.co.jp/e-book/mystery/",
+      "count": 22747,
+      "hasChild": false
+    },
+    {
+      "genreId": "101903",
+      "genreName": "ライトノベル",
+      "genreOrder": "4",
+      "url": "https://books.rakuten.co.jp/e-book/lightnovel/",
+      "count": 56674,
+      "hasChild": true
+    },
+    {
+      "genreId": "101905",
+      "genreName": "ビジネス・経済・就職",
+      "genreOrder": "5",
+      "url": "https://books.rakuten.co.jp/e-book/business/",
+      "count": 56498,
+      "hasChild": true
+    },
+    {
+      "genreId": "101907",
+      "genreName": "人文・思想・社会",
+      "genreOrder": "6",
+      "url": "https://books.rakuten.co.jp/e-book/culture/",
+      "count": 100787,
+      "hasChild": true
+    },
+    {
+      "genreId": "101914",
+      "genreName": "ノンフィクション",
+      "genreOrder": "7",
+      "url": "https://books.rakuten.co.jp/e-book/non-fiction/",
+      "count": 27598,
+      "hasChild": false
+    },
+    {
+      "genreId": "101906",
+      "genreName": "語学・学習参考書・資格",
+      "genreOrder": "8",
+      "url": "https://books.rakuten.co.jp/e-book/study/",
+      "count": 26383,
+      "hasChild": true
+    },
+    {
+      "genreId": "101908",
+      "genreName": "科学・医学・技術",
+      "genreOrder": "9",
+      "url": "https://books.rakuten.co.jp/e-book/science/",
+      "count": 26364,
+      "hasChild": true
+    },
+    {
+      "genreId": "101912",
+      "genreName": "PC・システム開発",
+      "genreOrder": "10",
+      "url": "https://books.rakuten.co.jp/e-book/computer/",
+      "count": 14729,
+      "hasChild": true
+    },
+    {
+      "genreId": "101909",
+      "genreName": "美容・暮らし・健康・料理",
+      "genreOrder": "11",
+      "url": "https://books.rakuten.co.jp/e-book/lifestyle/",
+      "count": 49537,
+      "hasChild": true
+    },
+    {
+      "genreId": "101910",
+      "genreName": "ホビー・スポーツ・美術",
+      "genreOrder": "12",
+      "url": "https://books.rakuten.co.jp/e-book/hobby-sports-art/",
+      "count": 48311,
+      "hasChild": true
+    },
+    {
+      "genreId": "101911",
+      "genreName": "旅行・留学・アウトドア",
+      "genreOrder": "13",
+      "url": "https://books.rakuten.co.jp/e-book/travel/",
+      "count": 8394,
+      "hasChild": true
+    },
+    {
+      "genreId": "101916",
+      "genreName": "絵本・児童書",
+      "genreOrder": "14",
+      "url": "https://books.rakuten.co.jp/e-book/child/",
+      "count": 20831,
+      "hasChild": false
+    },
+    {
+      "genreId": "101913",
+      "genreName": "エンターテインメント",
+      "genreOrder": "15",
+      "url": "https://books.rakuten.co.jp/e-book/entertainment/",
+      "count": 17897,
+      "hasChild": true
+    },
+    {
+      "genreId": "101915",
+      "genreName": "写真集",
+      "genreOrder": "16",
+      "url": "https://books.rakuten.co.jp/e-book/photo/",
+      "count": 31381,
+      "hasChild": false
+    },
+    {
+      "genreId": "101940",
+      "genreName": "BL・TL",
+      "genreOrder": "17",
+      "url": "https://books.rakuten.co.jp/e-book/boys-love/",
+      "count": 127314,
+      "hasChild": true
+    },
+    {
+      "genreId": "101950",
+      "genreName": "雑誌",
+      "genreOrder": "18",
+      "url": "https://books.rakuten.co.jp/e-book/magazine/",
+      "count": 61341,
+      "hasChild": true
+    },
+    {
+      "genreId": "101970",
+      "genreName": "洋書",
+      "genreOrder": "19",
+      "url": "https://books.rakuten.co.jp/e-book/foreign-book/",
+      "count": 5079427,
+      "hasChild": true
+    },
+    {
+      "genreId": "101941",
+      "genreName": "アダルト",
+      "genreOrder": "20",
+      "url": "https://books.rakuten.co.jp/adult/e-book/",
+      "count": 263316,
+      "hasChild": true
+    }
+  ]
+}

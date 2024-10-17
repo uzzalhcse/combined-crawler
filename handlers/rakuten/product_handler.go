@@ -42,7 +42,10 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.ProductDetails,
 			OriginCollection: constant.Products,
 			Processor:        productDetailSelector,
-			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle"}},
+			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle|blacklists:楽天ブックス"}},
+			Engine: ninjacrawler.Engine{
+				SimulateMouse: ninjacrawler.Bool(false),
+			},
 		},
 	})
 }
