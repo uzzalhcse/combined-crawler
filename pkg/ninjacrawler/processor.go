@@ -173,7 +173,14 @@ func (app *Crawler) crawlWithProxies(urlCollection UrlCollection, config Process
 		if err != nil {
 			return app.handleCrawlError(err, urlCollection, config, attempt)
 		}
-		app.processCrawlSuccess(ctx, config)
+		errExtract := app.extract(config, *ctx)
+		if errExtract != nil {
+			if strings.Contains(errExtract.Error(), "isRetryable") {
+				return app.retryWithDifferentProxy(attempt)
+			}
+			app.Logger.Error(errExtract.Error())
+			return false
+		}
 		return true
 	}
 	return false
@@ -199,7 +206,7 @@ func (app *Crawler) handleCrawlError(err error, urlCollection UrlCollection, con
 	}
 
 	if strings.Contains(err.Error(), "isRetryable") {
-		return app.retryWithDifferentProxy(err, urlCollection, config, attempt)
+		return app.retryWithDifferentProxy(attempt)
 	}
 
 	if markErr := app.MarkAsError(urlCollection.Url, config.OriginCollection, err.Error()); markErr != nil {
@@ -209,18 +216,12 @@ func (app *Crawler) handleCrawlError(err error, urlCollection UrlCollection, con
 	return false
 }
 
-func (app *Crawler) retryWithDifferentProxy(err error, urlCollection UrlCollection, config ProcessorConfig, attempt int) bool {
+func (app *Crawler) retryWithDifferentProxy(attempt int) bool {
 	if len(app.engine.ProxyServers) == 0 || app.engine.ProxyStrategy != ProxyStrategyRotation {
 		return false
 	}
 
 	shouldRotateProxy = true
-	//nextProxyIndex := (atomic.LoadInt32(&app.lastWorkingProxyIndex) + 1) % int32(len(app.engine.ProxyServers))
-	//app.Logger.Summary("Error with proxy %s: %v. Retrying with proxy: %s", app.engine.ProxyServers[atomic.LoadInt32(&app.lastWorkingProxyIndex)].Server, err.Error(), app.engine.ProxyServers[nextProxyIndex].Server)
-
-	//atomic.StoreInt32(&app.CurrentProxyIndex, nextProxyIndex)
-	//app.CurrentProxy = app.engine.ProxyServers[nextProxyIndex]
-	//atomic.StoreInt32(&app.lastWorkingProxyIndex, nextProxyIndex)
 
 	if app.engine.RetrySleepDuration > 0 {
 		app.Logger.Info("Sleeping %d seconds before retrying", app.engine.RetrySleepDuration)
@@ -233,11 +234,6 @@ func (app *Crawler) retryWithDifferentProxy(err error, urlCollection UrlCollecti
 	}
 
 	return false
-}
-
-func (app *Crawler) processCrawlSuccess(ctx *CrawlerContext, config ProcessorConfig) {
-	app.extract(config, *ctx)
-	//atomic.StoreInt32(&app.lastWorkingProxyIndex, app.CurrentProxyIndex)
 }
 
 func (app *Crawler) logSummary(config ProcessorConfig) {
