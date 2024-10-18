@@ -18,6 +18,7 @@ func (app *Crawler) GetRodBrowser(proxy Proxy) (*rod.Browser, error) {
 	if len(app.engine.ProxyServers) > 0 && proxy.Server != "" {
 		l = l.Set(flags.ProxyServer, proxy.Server)
 	}
+	l.Set("--disable-dev-shm-usage")
 
 	url, err := l.Launch()
 	if err != nil {
