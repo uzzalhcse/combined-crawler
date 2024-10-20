@@ -74,7 +74,7 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*rod.Page, *goqu
 		return nil, nil, app.handleHttpError(e.Response.Status, e.Response.StatusText, url, page)
 	}
 
-	// Optionally wait for a specific selector
+	// Wait for selector if applicable
 	if app.engine.WaitForSelector != nil {
 		elm, navErr := page.Timeout(app.engine.Timeout).Element(*app.engine.WaitForSelector)
 		if navErr != nil {
@@ -95,15 +95,13 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*rod.Page, *goqu
 			return nil, nil, fmt.Errorf("element not found: %s", url)
 		}
 	} else {
-		errLoad := page.WaitLoad()
-		if errLoad != nil {
+		if errLoad := page.WaitLoad(); errLoad != nil {
 			return nil, nil, errLoad
 		}
 	}
 
 	// Handle cookie consent
-	err = app.HandleRodCookieConsent(page)
-	if err != nil {
+	if err = handleCookieConsent(page, app.engine.CookieConsent); err != nil {
 		html, _ := app.GetHtml(page)
 		app.Logger.Html(html, url, err.Error())
 		return nil, nil, err
@@ -128,30 +126,6 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*rod.Page, *goqu
 		}
 	}
 	return page, document, nil
-}
-
-// HandleRodCookieConsent handles cookie consent dialogs on the page.
-func (app *Crawler) HandleRodCookieConsent(page *rod.Page) error {
-	action := app.engine.CookieConsent
-	if action == nil {
-		return nil
-	}
-
-	// Fill input fields if specified
-	for _, field := range action.Fields {
-		el := page.MustElement(fmt.Sprintf("input[name='%s']", field.Key))
-		el.MustInput(field.Val)
-	}
-
-	// Click the consent button
-	if action.ButtonText != "" {
-		button := page.MustElementR("button", action.ButtonText)
-		button.MustClick()
-
-		page.MustWaitLoad()
-	}
-
-	return nil
 }
 func Ok(Status int) bool {
 	return Status == 0 || (Status >= 200 && Status <= 299)

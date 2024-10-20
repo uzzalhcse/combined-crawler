@@ -159,49 +159,6 @@ func (app *Crawler) GetPage(context playwright.BrowserContext) (playwright.Page,
 	return page, nil
 }
 
-// HandleCookieConsent attempts to fill form fields and click the specified cookie consent button on a cookie consent dialog.
-// It logs an error if the button cannot be found or clicked.
-func (app *Crawler) HandleCookieConsent(page playwright.Page) error {
-	action := app.engine.CookieConsent
-	if action == nil {
-		return nil
-	}
-	// Check and fill form fields if any
-	if len(action.Fields) > 0 {
-		for _, field := range action.Fields {
-			inputSelector := fmt.Sprintf("input[name='%s']", field.Key)
-			input, err := page.QuerySelector(inputSelector)
-			if err != nil {
-				return fmt.Errorf("failed to find input field with name '%s': %w", field.Key, err)
-			}
-			if input != nil {
-				err = input.Fill(field.Val)
-				if err != nil {
-					return fmt.Errorf("failed to fill input field with name '%s': %w", field.Key, err)
-				}
-			}
-		}
-
-	}
-	if action.ButtonText != "" {
-		// Construct the selector for the button
-		buttonSelector := fmt.Sprintf("button:has-text('%s')", action.ButtonText)
-		page.WaitForSelector(buttonSelector)
-		button, err := page.QuerySelector(buttonSelector)
-		if err == nil && button != nil {
-			err = button.Click()
-			if err != nil {
-				return fmt.Errorf("failed to click cookie consent button: %w", err)
-			}
-
-			page.WaitForSelector(action.MustHaveSelectorAfterAction)
-
-		}
-	}
-
-	return nil
-}
-
 // NavigateToURL navigates to a specified URL using the given Playwright page.
 // It waits until the page is fully loaded, handles cookie consent, and returns a goquery document representing the DOM.
 // If navigation or handling consent fails, it logs the page content to a file and returns an error.
@@ -221,31 +178,34 @@ func (app *Crawler) NavigateToURL(page playwright.Page, url string) (playwright.
 		return nil, nil, app.handleHttpError(res.Status(), res.StatusText(), url, page)
 	}
 
+	// Handle mouse simulation, if applicable
 	if app.engine.SimulateMouse != nil && *app.engine.SimulateMouse {
-		mError := autoMoveMouse(page)
-		if mError != nil {
+		if mError := autoMoveMouse(page); mError != nil {
 			app.Logger.Error("Mouse Simulate Error: %s", mError.Error())
 		}
 	}
+
+	// Wait for selector if applicable
 	if app.engine.WaitForSelector != nil {
 		_, err = page.WaitForSelector(*app.engine.WaitForSelector, playwright.PageWaitForSelectorOptions{
 			State:   playwright.WaitForSelectorStateAttached,
 			Timeout: playwright.Float(float64(app.engine.Timeout.Milliseconds())),
 		})
 		if err != nil {
-			app.Logger.Html(app.getHtmlFromPage(page), url, fmt.Sprintf("Failed to find %s: %s", app.engine.WaitForSelector, err.Error()))
+			app.Logger.Html(app.getHtmlFromPage(page), url, fmt.Sprintf("Failed to find %s: %s", *app.engine.WaitForSelector, err.Error()))
 			return nil, nil, fmt.Errorf("failed to find %s: %w", app.engine.WaitForSelector, err)
 		}
 	}
+
 	// Handle cookie consent
-	err = app.HandleCookieConsent(page)
-	if err != nil {
+	if err = handleCookieConsent(page, app.engine.CookieConsent); err != nil {
 		app.Logger.Html(app.getHtmlFromPage(page), url, err.Error())
 		return nil, nil, fmt.Errorf("failed to handle cookie consent: %w", err)
 	}
+
 	document, err := app.GetDocument(page)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get page dom: %w", err)
+		return nil, nil, fmt.Errorf("failed to get page DOM: %w", err)
 	}
 
 	if app.engine.SendHtmlToBigquery != nil && *app.engine.SendHtmlToBigquery {
