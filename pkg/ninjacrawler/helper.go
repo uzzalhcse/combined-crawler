@@ -767,3 +767,66 @@ func (app *Crawler) cleanUpTempFiles() error {
 	}
 	return nil
 }
+
+// Helper function to fill input fields based on cookie consent action
+func fillConsentFields(page interface{}, action *CookieAction) error {
+	if action == nil || len(action.Fields) == 0 {
+		return nil
+	}
+
+	for _, field := range action.Fields {
+		inputSelector := fmt.Sprintf("input[name='%s']", field.Key)
+
+		switch p := page.(type) {
+		case playwright.Page:
+			input, err := p.QuerySelector(inputSelector)
+			if err != nil {
+				return fmt.Errorf("failed to find input field with name '%s': %w", field.Key, err)
+			}
+			if input != nil {
+				err = input.Fill(field.Val)
+				if err != nil {
+					return fmt.Errorf("failed to fill input field with name '%s': %w", field.Key, err)
+				}
+			}
+		case *rod.Page:
+			el := p.MustElement(inputSelector)
+			el.MustInput(field.Val)
+		}
+	}
+	return nil
+}
+
+// Helper function to click the cookie consent button
+func clickConsentButton(page interface{}, action *CookieAction) error {
+	if action == nil || action.ButtonText == "" {
+		return nil
+	}
+
+	buttonSelector := fmt.Sprintf("button:has-text('%s')", action.ButtonText)
+	switch p := page.(type) {
+	case playwright.Page:
+		p.WaitForSelector(buttonSelector)
+		button, err := p.QuerySelector(buttonSelector)
+		if err == nil && button != nil {
+			err = button.Click()
+			if err != nil {
+				return fmt.Errorf("failed to click cookie consent button: %w", err)
+			}
+			p.WaitForSelector(action.MustHaveSelectorAfterAction)
+		}
+	case *rod.Page:
+		button := p.MustElementR("button", action.ButtonText)
+		button.MustClick()
+		p.MustWaitLoad()
+	}
+	return nil
+}
+
+// Common function to handle cookie consent logic
+func handleCookieConsent(page interface{}, action *CookieAction) error {
+	if err := fillConsentFields(page, action); err != nil {
+		return err
+	}
+	return clickConsentButton(page, action)
+}
