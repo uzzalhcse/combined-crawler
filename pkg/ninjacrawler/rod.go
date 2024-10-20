@@ -18,8 +18,7 @@ func (app *Crawler) GetRodBrowser(proxy Proxy) (*rod.Browser, error) {
 	if len(app.engine.ProxyServers) > 0 && proxy.Server != "" {
 		l = l.Set(flags.ProxyServer, proxy.Server)
 	}
-	l.Set("--disable-dev-shm-usage")
-
+	//fmt.Println(l.FormatArgs())
 	url, err := l.Launch()
 	if err != nil {
 		return nil, fmt.Errorf("error launching browser: %s", err.Error())
@@ -58,20 +57,21 @@ func (app *Crawler) GetRodPage(browser *rod.Browser) (*rod.Page, error) {
 
 // NavigateRodURL navigates to a specified URL using the Rod page.
 // It waits until the page is fully loaded, handles cookie consent, and returns the page DOM.
-func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Document, error) {
+func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*rod.Page, *goquery.Document, error) {
 	e := proto.NetworkResponseReceived{}
 	wait := page.WaitEvent(&e)
 	// Go to the URL with a timeout
 	err := page.Timeout(app.engine.Timeout).Navigate(url)
 	if err != nil {
-		return app.handleProxyError(err)
+		d, e := app.handleProxyError(err)
+		return nil, d, e
 	}
 	wait()
 	if e.Response == nil {
-		return nil, fmt.Errorf("no response received: %+v", e)
+		return nil, nil, fmt.Errorf("no response received: %+v", e)
 	}
 	if !Ok(e.Response.Status) {
-		return nil, app.handleHttpError(e.Response.Status, e.Response.StatusText, url, page)
+		return nil, nil, app.handleHttpError(e.Response.Status, e.Response.StatusText, url, page)
 	}
 
 	// Optionally wait for a specific selector
@@ -85,19 +85,19 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Documen
 				msg = fmt.Sprintf("Html Parse Failed: %s", htmlErr.Error())
 			}
 			app.Logger.Html(html, url, msg)
-			return nil, fmt.Errorf("element not found: %s", navErr.Error())
+			return nil, nil, fmt.Errorf("element not found: %s", navErr.Error())
 		}
 		if elm == nil {
 			err = page.WaitStable(app.engine.Timeout)
 			if err != nil {
-				return nil, fmt.Errorf("page did not stabilize: %w", err)
+				return nil, nil, fmt.Errorf("page did not stabilize: %w", err)
 			}
-			return nil, fmt.Errorf("element not found: %s", url)
+			return nil, nil, fmt.Errorf("element not found: %s", url)
 		}
 	} else {
 		errLoad := page.WaitLoad()
 		if errLoad != nil {
-			return nil, errLoad
+			return nil, nil, errLoad
 		}
 	}
 
@@ -106,13 +106,13 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Documen
 	if err != nil {
 		html, _ := app.GetHtml(page)
 		app.Logger.Html(html, url, err.Error())
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Get the page DOM
-	document, domErr := app.GetRodPageDom(page)
+	document, domErr := app.GetDocument(page)
 	if domErr != nil {
-		return nil, domErr
+		return nil, nil, domErr
 	}
 
 	// Optionally send HTML to BigQuery or store it
@@ -127,7 +127,7 @@ func (app *Crawler) NavigateRodURL(page *rod.Page, url string) (*goquery.Documen
 			app.Logger.Error(err.Error())
 		}
 	}
-	return document, nil
+	return page, document, nil
 }
 
 // HandleRodCookieConsent handles cookie consent dialogs on the page.

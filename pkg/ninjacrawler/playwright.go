@@ -95,9 +95,7 @@ func (app *Crawler) GetBrowser(pw *playwright.Playwright, browserType string, pr
 
 	var browserTypeLaunchOptions playwright.BrowserTypeLaunchOptions
 	browserTypeLaunchOptions.Headless = playwright.Bool(!app.isLocalEnv)
-	if app.isLocalEnv && *app.engine.OpenDevTools {
-		browserTypeLaunchOptions.Devtools = playwright.Bool(true)
-	}
+	browserTypeLaunchOptions.Devtools = playwright.Bool(app.isLocalEnv)
 	// Set additional launch arguments
 	if len(app.engine.Args) > 0 {
 		browserTypeLaunchOptions.Args = app.engine.Args
@@ -207,7 +205,7 @@ func (app *Crawler) HandleCookieConsent(page playwright.Page) error {
 // NavigateToURL navigates to a specified URL using the given Playwright page.
 // It waits until the page is fully loaded, handles cookie consent, and returns a goquery document representing the DOM.
 // If navigation or handling consent fails, it logs the page content to a file and returns an error.
-func (app *Crawler) NavigateToURL(page playwright.Page, url string) (*goquery.Document, error) {
+func (app *Crawler) NavigateToURL(page playwright.Page, url string) (playwright.Page, *goquery.Document, error) {
 	pageGotoOptions := playwright.PageGotoOptions{
 		Timeout: playwright.Float(float64(app.engine.Timeout.Milliseconds())),
 	}
@@ -216,10 +214,11 @@ func (app *Crawler) NavigateToURL(page playwright.Page, url string) (*goquery.Do
 	}
 	res, err := page.Goto(url, pageGotoOptions)
 	if err != nil {
-		return app.handleProxyError(err)
+		d, e := app.handleProxyError(err)
+		return nil, d, e
 	}
 	if !res.Ok() {
-		return nil, app.handleHttpError(res.Status(), res.StatusText(), url, page)
+		return nil, nil, app.handleHttpError(res.Status(), res.StatusText(), url, page)
 	}
 
 	if app.engine.SimulateMouse != nil && *app.engine.SimulateMouse {
@@ -235,18 +234,18 @@ func (app *Crawler) NavigateToURL(page playwright.Page, url string) (*goquery.Do
 		})
 		if err != nil {
 			app.Logger.Html(app.getHtmlFromPage(page), url, fmt.Sprintf("Failed to find %s: %s", app.engine.WaitForSelector, err.Error()))
-			return nil, fmt.Errorf("failed to find %s: %w", app.engine.WaitForSelector, err)
+			return nil, nil, fmt.Errorf("failed to find %s: %w", app.engine.WaitForSelector, err)
 		}
 	}
 	// Handle cookie consent
 	err = app.HandleCookieConsent(page)
 	if err != nil {
 		app.Logger.Html(app.getHtmlFromPage(page), url, err.Error())
-		return nil, fmt.Errorf("failed to handle cookie consent: %w", err)
+		return nil, nil, fmt.Errorf("failed to handle cookie consent: %w", err)
 	}
-	document, err := app.GetPageDom(page)
+	document, err := app.GetDocument(page)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get page dom: %w", err)
+		return nil, nil, fmt.Errorf("failed to get page dom: %w", err)
 	}
 
 	if app.engine.SendHtmlToBigquery != nil && *app.engine.SendHtmlToBigquery {
@@ -260,5 +259,5 @@ func (app *Crawler) NavigateToURL(page playwright.Page, url string) (*goquery.Do
 			app.Logger.Error(StoreHtmlErr.Error())
 		}
 	}
-	return document, err
+	return page, document, err
 }

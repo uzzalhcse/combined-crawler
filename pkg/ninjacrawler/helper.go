@@ -87,6 +87,26 @@ func (app *Crawler) processSelection(selection *goquery.Selection, selector UrlS
 	return items
 }
 
+func (app *Crawler) GetDocument(data interface{}) (*goquery.Document, error) {
+	var document *goquery.Document
+	var err error
+
+	switch v := data.(type) {
+	case playwright.Page:
+		document, err = app.GetPageDom(v)
+		if err != nil {
+			return nil, err
+		}
+	case *rod.Page:
+		document, err = app.GetRodPageDom(v)
+		if err != nil {
+			return nil, err
+		}
+	default:
+	}
+	return document, nil
+}
+
 func (app *Crawler) GetPageDom(page playwright.Page) (*goquery.Document, error) {
 	html, err := page.Content()
 	if err != nil {
@@ -698,4 +718,52 @@ func (app *Crawler) getCurrentProxy() Proxy {
 		proxy = app.engine.ProxyServers[atomic.LoadInt32(&app.CurrentProxyIndex)]
 	}
 	return proxy
+}
+func (app *Crawler) cleanUpTempFiles() error {
+	rodTempDir := "/tmp/rod/user-data"
+
+	// Check if the directory exists before attempting to clean it
+	if _, err := os.Stat(rodTempDir); os.IsNotExist(err) {
+		// Directory doesn't exist, no need to clean
+		return nil
+	}
+
+	// Walk through the /tmp/rod directory and remove its contents recursively
+	err := filepath.Walk(rodTempDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			// If the file no longer exists, ignore the error
+			if os.IsNotExist(err) {
+				return nil
+			}
+			return err
+		}
+
+		// Remove files and directories
+		if !info.IsDir() {
+			// Attempt to remove the file
+			if err := os.Remove(path); err != nil {
+				if os.IsNotExist(err) {
+					return nil // Ignore the missing file and continue
+				}
+				return fmt.Errorf("failed to remove file %s: %w", path, err)
+			}
+		} else {
+			// Continue the walk and delete directories last
+			return nil
+		}
+		return nil
+	})
+
+	// Once all files are removed, attempt to remove the directories
+	if err == nil {
+		err = os.RemoveAll(rodTempDir)
+		if err != nil {
+			return fmt.Errorf("failed to remove directory %s: %w", rodTempDir, err)
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+	return nil
 }
