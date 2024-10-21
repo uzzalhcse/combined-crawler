@@ -9,15 +9,15 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       ninjacrawler.Bool(true),
 			DevCrawlLimit:   0,
-			ConcurrentLimit: 2,
+			ConcurrentLimit: 50,
 			StgCrawlLimit:   0,
-			SleepAfter:      50,
+			SleepAfter:      300,
 			SleepDuration:   30,
-			Timeout:         600,
-			//BlockResources:  true,
-			ProxyStrategy: ninjacrawler.ProxyStrategyRotation,
+			Timeout:         300,
+			BlockResources:  true,
+			ProxyStrategy:   ninjacrawler.ProxyStrategyRotation,
 
-			//Adapter: ninjacrawler.String(ninjacrawler.RodEngine),
+			Adapter: ninjacrawler.String(ninjacrawler.RodEngine),
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,
@@ -27,37 +27,12 @@ func Crawler() ninjacrawler.CrawlerConfig {
 }
 
 /*
-https://books.rakuten.co.jp/genrelist/e-book.html?l-id=header-subnavi-ebook-genrelist
-https://books.rakuten.co.jp/ranking/hourly/101/?l-id=header-subnavi-ebook-ranking#!/
-https://books.rakuten.co.jp/book/sheet-of-music/?l-id=header-subnavi-book-g001018
-https://books.rakuten.co.jp/book/author/?l-id=header-subnavi-book-author
-https://books.rakuten.co.jp/ranking/hourly/006/?l-id=header-subnavi-game-ranking#!/
-https://books.rakuten.co.jp/download/?l-id=header-subnavi-software-download
-https://books.rakuten.co.jp/info/special-price-sale/book/?l-id=header-subnavi-book-special-price-sale
-
-https://books.rakuten.co.jp/event/limited-item/?l-id=header-subnavi-book-limited-item
-https://books.rakuten.co.jp/event/book/?l-id=header-subnavi-book-campaign
-https://books.rakuten.co.jp/event/limited-item/?l-id=header-subnavi-book-limited-item
-https://books.rakuten.co.jp/event/e-book/camp-bestprice/?l-id=header-subnavi-ebook-bestprice
-https://books.rakuten.co.jp/event/e-book/free/?l-id=header-subnavi-ebook-free
-https://books.rakuten.co.jp/event/e-book/ereaders/?l-id=header-subnavi-ebook-ereaders
-https://books.rakuten.co.jp/event/magazine/?l-id=header-subnavi-magazine-campaign
-
-
-
-need to exclude some coupons pages like
-https://books.rakuten.co.jp/event/coupon/?shop=kobo&l-id=header-subnavi-ebook-coupon
-
-found  some unknown domain so we need to filter those domains except rakuten
-
-count the total data
-https://books.rakuten.co.jp/json/genre/000
-https://books.rakuten.co.jp/json/genre/001
-https://books.rakuten.co.jp/json/genre/002
-https://books.rakuten.co.jp/json/genre/003
-https://books.rakuten.co.jp/json/genre/004
-https://books.rakuten.co.jp/json/genre/005
-https://books.rakuten.co.jp/json/genre/006
-https://books.rakuten.co.jp/json/genre/007
-https://books.rakuten.co.jp/json/genre/101
+https://www.hmv.co.jp/books/
+https://www.hmv.co.jp/recordshop
+https://www.hmv.co.jp/toy/
+https://www.hmv.co.jp/kaitori
+https://www.hmv.co.jp/books/genre_%E6%96%87%E8%8A%B8__5_410_0/
+https://www.hmv.co.jp/books/genre_%E6%96%87%E8%8A%B8_%E5%9B%BD%E5%86%85%E5%B0%8F%E8%AA%AC_5_410_411/
+https://www.hmv.co.jp/select/vinyl/list/sort/recommended/?style=10909&theme=10909001
+https://www.hmv.co.jp/books/genre_%E6%96%87%E8%8A%B8_%E6%B5%B7%E5%A4%96%E5%B0%8F%E8%AA%AC_5_410_412/
 */
