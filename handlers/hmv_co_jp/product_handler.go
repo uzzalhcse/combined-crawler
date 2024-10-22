@@ -43,7 +43,9 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			OriginCollection: constant.Products,
 			Processor:        productDetailSelector,
 			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle", "SellingPrice", "ProductName"}},
-			Engine:           ninjacrawler.Engine{},
+			Engine: ninjacrawler.Engine{
+				WaitForSelector: ninjacrawler.String(".singlePriceBlock .price"),
+			},
 		},
 	})
 }
