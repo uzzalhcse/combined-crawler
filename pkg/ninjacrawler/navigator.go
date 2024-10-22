@@ -23,7 +23,12 @@ func (app *Crawler) Navigate(url string) (*NavigationContext, error) {
 	//app.openBrowsers(proxy) // Use the current proxy
 	//
 	//defer app.closeBrowsers()
-	//app.openPages()
+	app.openPages()
+	if app.pwPage.IsClosed() {
+		app.Logger.Info("Page is closed")
+	} else {
+		app.Logger.Info("Page is open")
+	}
 	//defer app.closePages()
 
 	atomic.AddInt32(&app.ReqCount, 1)
@@ -38,7 +43,7 @@ func (app *Crawler) Navigate(url string) (*NavigationContext, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), app.engine.Timeout*2)
 	defer cancel()
 	navigationContext, err := app.navigateTo(ctx, url, "DeepLink", false, proxy)
-
+	defer app.closePages(*app.getCrawlerCtx(navigationContext))
 	if err != nil {
 		if strings.Contains(err.Error(), "StatusCode:404") {
 			return nil, err
