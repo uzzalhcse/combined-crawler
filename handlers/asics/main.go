@@ -9,11 +9,12 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Name: Name,
 		URL:  Url,
 		Engine: ninjacrawler.Engine{
-			//IsDynamic:          ninjacrawler.Bool(false),
+			IsDynamic: ninjacrawler.Bool(true),
 			//DevCrawlLimit:   1000000,
-			//Timeout:         60,
-			ConcurrentLimit: 1,
-			Provider:        "zenrows",
+			Timeout:         120,
+			ConcurrentLimit: 5,
+			BlockResources:  true,
+			//Provider:        "zenrows",
 			ProviderOption: ninjacrawler.ProviderQueryOption{
 				//JsRender:       false,
 				//CustomHeaders:  true,
@@ -21,14 +22,16 @@ func Crawler() ninjacrawler.CrawlerConfig {
 				Wait: 2000,
 				//PremiumProxy: true,
 				//ProxyCountry: "jp",
+
 			},
 			//ErrorCodes: []int{403, 429, 422},
 			//MaxRetryAttempts: 5,
-			//ProxyStrategy: ninjacrawler.ProxyStrategyRotation,
+			ProxyStrategy: ninjacrawler.ProxyStrategyRotation,
+			//Adapter:       ninjacrawler.String(ninjacrawler.RodEngine),
 			//ProxyServers:  generateProxy(),
 		},
 		Handler: ninjacrawler.Handler{
-			//UrlHandler:     UrlHandler,
+			UrlHandler:     UrlHandler,
 			ProductHandler: ProductDetailsHandler,
 		},
 	}

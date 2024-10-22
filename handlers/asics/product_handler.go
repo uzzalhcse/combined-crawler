@@ -40,7 +40,7 @@ func ProductDetailsHandler(crawler *ninjacrawler.Crawler) {
 		Attributes:       productAttributesHandler,
 	}
 
-	crawler.CrawlPageDetail([]ninjacrawler.ProcessorConfig{
+	crawler.Crawl([]ninjacrawler.ProcessorConfig{
 		{
 			Entity:           ProductDetails,
 			OriginCollection: Products,

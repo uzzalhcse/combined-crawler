@@ -4,6 +4,7 @@ import (
 	"combined-crawler/pkg/ninjacrawler"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -55,48 +56,48 @@ func shouldSkipURL(href string) bool {
 }
 
 func ProductUrlHandler(ctx ninjacrawler.CrawlerContext, next func([]ninjacrawler.UrlCollection, string)) error {
-
-	fmt.Println("Product Url Handler")
 	productCountSelector := "#primary > div.search-result-options.search-result-multiple-filters > h1 > span"
-	//ctx.Page.WaitForSelector(productCountSelector)
 	productCount := ctx.Document.Find(productCountSelector).Text()
-	totalProductCount, _ := strconv.Atoi(ctx.App.ToNumericsString(productCount))
-
-	pages := totalProductCount / ProductUrlPerPage
-	if totalProductCount%ProductUrlPerPage != 0 {
-		pages += 1
-	}
-
 	productSelector := "[id=\"search-result-items\"] li.grid-tile .product-tile__link"
 
-	hasProducts := ctx.Document.Find(productSelector).Length()
-	for page := 1; page <= pages && hasProducts != 0; page++ {
-		var urls []ninjacrawler.UrlCollection
+	var urls []ninjacrawler.UrlCollection
 
-		ctx.Document.Find(productSelector).Each(func(i int, s *goquery.Selection) {
-			url, _ := s.Attr("href")
-			urls = append(urls, ninjacrawler.UrlCollection{
-				Url:    url,
-				Parent: Url,
-			})
+	ctx.Document.Find(productSelector).Each(func(i int, s *goquery.Selection) {
+		url, _ := s.Attr("href")
+		urls = append(urls, ninjacrawler.UrlCollection{
+			Url:    url,
+			Parent: Url,
 		})
+	})
+	currentPageStart := 0
+	totalProductCount, _ := strconv.Atoi(ctx.App.ToNumericsString(productCount))
+	crawlableUrl := ctx.UrlCollection.Url
+	if ctx.UrlCollection.CurrentPageUrl != "" {
+		crawlableUrl = ctx.UrlCollection.CurrentPageUrl
+	}
+	parsedURL, err := url.Parse(crawlableUrl)
+	if err != nil {
+		fmt.Println("Error parsing URL:", err)
+		return err
+	}
+	queryParams := parsedURL.Query()
+	currentPageStr := queryParams.Get("start")
+	if currentPageStr != "" {
+		currentPageStart, err = strconv.Atoi(currentPageStr)
+		if err != nil {
+			fmt.Println("Error converting page to int:", err)
+			return err
+		}
+	}
+	if currentPageStart < totalProductCount {
+		nextPageStart := currentPageStart + ProductUrlPerPage
+		queryParams.Set("start", strconv.Itoa(nextPageStart))
+		parsedURL.RawQuery = queryParams.Encode()
+		nextPageUrl := parsedURL.String()
+		next(urls, nextPageUrl)
+
+	} else {
 		next(urls, "")
-		break
-		//ctx.App.Logger.Info("Next Page -> ", page)
-		//nextPageUrl := ctx.Page.URL()
-		//if strings.Contains(nextPageUrl, "?start=") {
-		//	nextPageUrl = nextPageUrl[:strings.Index(nextPageUrl, "?start=")]
-		//}
-		//start := strconv.Itoa(page) + "00"
-		//nextPageUrl = nextPageUrl + "?start==" + start + "&sz=" + strconv.Itoa(ProductUrlPerPage)
-		//ctx.App.Logger.Info("Total Product Url's-> ", len(urls))
-		//ctx.App.Logger.Info("Next Page URL -> ", nextPageUrl)
-		//_, err := ctx.Page.Goto(nextPageUrl)
-		//if err != nil {
-		//	ctx.App.Logger.Error("Next page error.", err)
-		//}
-		////ctx.Page.WaitForSelector(productSelector)
-		//hasProducts, _ = ctx.Page.Locator(productSelector).Count()
 	}
 	return nil
 }
