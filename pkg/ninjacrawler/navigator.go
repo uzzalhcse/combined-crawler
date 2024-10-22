@@ -20,16 +20,7 @@ func (app *Crawler) Navigate(url string) (*NavigationContext, error) {
 		atomic.StoreInt32(&app.CurrentProxyIndex, int32(proxyIndex))
 		atomic.StoreInt32(&app.lastWorkingProxyIndex, int32(proxyIndex))
 	}
-	//app.openBrowsers(proxy) // Use the current proxy
-	//
-	//defer app.closeBrowsers()
 	app.openPages()
-	if app.pwPage.IsClosed() {
-		app.Logger.Info("Page is closed")
-	} else {
-		app.Logger.Info("Page is open")
-	}
-	//defer app.closePages()
 
 	atomic.AddInt32(&app.ReqCount, 1)
 

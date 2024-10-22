@@ -521,6 +521,9 @@ func (app *Crawler) overrideEngineDefaults(defaultEngine *Engine, eng *Engine) {
 	if eng.OpenDevTools != nil {
 		defaultEngine.OpenDevTools = eng.OpenDevTools
 	}
+	if eng.WaitForSelectorVisible != nil {
+		defaultEngine.WaitForSelectorVisible = eng.WaitForSelectorVisible
+	}
 }
 
 func (app *Crawler) getProxyServers() []Proxy {
