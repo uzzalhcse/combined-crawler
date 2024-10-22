@@ -42,7 +42,7 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.ProductDetails,
 			OriginCollection: constant.Products,
 			Processor:        productDetailSelector,
-			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle|required"}},
+			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle|required", "SellingPrice|required"}},
 			Engine:           ninjacrawler.Engine{},
 		},
 	})
