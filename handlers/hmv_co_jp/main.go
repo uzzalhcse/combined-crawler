@@ -9,7 +9,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 		Engine: ninjacrawler.Engine{
 			IsDynamic:       ninjacrawler.Bool(true),
 			DevCrawlLimit:   0,
-			ConcurrentLimit: 50,
+			ConcurrentLimit: 100,
 			StgCrawlLimit:   0,
 			SleepAfter:      300,
 			SleepDuration:   30,
@@ -17,7 +17,7 @@ func Crawler() ninjacrawler.CrawlerConfig {
 			BlockResources:  true,
 			ProxyStrategy:   ninjacrawler.ProxyStrategyRotation,
 
-			Adapter: ninjacrawler.String(ninjacrawler.RodEngine),
+			Adapter: ninjacrawler.String(ninjacrawler.PlayWrightEngine),
 		},
 		Handler: ninjacrawler.Handler{
 			UrlHandler:     UrlHandler,

@@ -26,16 +26,16 @@ func UrlHandler(crawler *ninjacrawler.Crawler) {
 			Entity:           constant.Categories,
 			OriginCollection: crawler.GetBaseCollection(),
 			Processor:        categoryHandler,
-			Engine: ninjacrawler.Engine{
-				IsDynamic: ninjacrawler.Bool(false),
+			Engine:           ninjacrawler.Engine{
+				//IsDynamic: ninjacrawler.Bool(false),
 			},
 		},
 		{
 			Entity:           constant.Products,
 			OriginCollection: constant.Categories,
 			Processor:        productHandler,
-			Engine: ninjacrawler.Engine{
-				IsDynamic: ninjacrawler.Bool(false),
+			Engine:           ninjacrawler.Engine{
+				//IsDynamic: ninjacrawler.Bool(false),
 			},
 		},
 	})
