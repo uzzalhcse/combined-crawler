@@ -64,7 +64,7 @@ func buildAndUpload() {
 	// Set the GCP credentials path
 	gcpCredentialsPath := filepath.Join(parentDir, "gcp-file-upload-key.json")
 	// Upload the built site to the GCP bucket
-	err = ninjacrawler.UploadToGCPBucket("crawler", gcpCredentialsPath, outputPath, "crawler")
+	err = ninjacrawler.UploadToGCPBucket("crawler", gcpCredentialsPath, "", outputPath, "crawler")
 	if err != nil {
 		log.Fatalf("Error uploading built site to bucket: %v", err)
 		return

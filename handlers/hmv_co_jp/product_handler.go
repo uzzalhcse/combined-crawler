@@ -44,6 +44,8 @@ func ProductHandler(crawler *ninjacrawler.Crawler) {
 			Processor:        productDetailSelector,
 			Preference:       ninjacrawler.Preference{ValidationRules: []string{"PageTitle", "SellingPrice", "ProductName"}},
 			Engine: ninjacrawler.Engine{
+				IsDynamic:       ninjacrawler.Bool(true),
+				ConcurrentLimit: 100,
 				WaitForSelector: ninjacrawler.String(".singlePriceBlock .price"),
 			},
 		},
