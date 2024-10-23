@@ -1,7 +1,7 @@
 package main
 
 import (
-	"combined-crawler/handlers/hmv_co_jp"
+	"combined-crawler/handlers/kitamura"
 	"combined-crawler/pkg/ninjacrawler"
 )
 
@@ -26,11 +26,11 @@ func siteRegistry() {
 		//AddSite(markt.Crawler()).
 		//AddSite(as1.Crawler()).
 		//AddSite(sony.Crawler()).
-		//AddSite(kitamura.Crawler()).
+		AddSite(kitamura.Crawler()).
 		//AddSite(topvalu.Crawler()).
 		//AddSite(panasonic_ec.Crawler()).
 		//AddSite(rakuten.Crawler()).
-		AddSite(hmv_co_jp.Crawler()).
+		//AddSite(hmv_co_jp.Crawler()).
 		//AddSite(asics.Crawler()).
 		Start()
 }
