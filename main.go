@@ -31,5 +31,6 @@ func siteRegistry() {
 		//AddSite(panasonic_ec.Crawler()).
 		//AddSite(rakuten.Crawler()).
 		AddSite(hmv_co_jp.Crawler()).
+		//AddSite(asics.Crawler()).
 		Start()
 }
