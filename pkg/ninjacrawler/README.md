@@ -32,7 +32,30 @@ To install the package, you need to have Go and Playwright set up. You can insta
 
     go get github.com/lazuli-inc/ninjacrawler
 
+## Sample Directory Structure
+```
+├── go.mod
+├── go.sum
+├── main.go
+├── src
+│   ├── constant.go
+│   ├── helper.go
+│   ├── product_handler.go
+│   └── url_handler.go
+└── storage
+    ├── data
+    │   └── site_name
+    │       ├── 2024_10_23.csv
+    │       └── validation
+    │           └── yyyy-mm-dd_url.html
+    └── logs
+        └── panasonic
+            ├── yyyy-mm-dd_application.log
+            └── html
+                └── yyyy-mm-dd_url.html
 
+
+```
 ## Usage
 
 ### Creating a Crawler
