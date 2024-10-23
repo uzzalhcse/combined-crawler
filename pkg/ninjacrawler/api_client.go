@@ -37,7 +37,11 @@ func (app *Crawler) submitProductData(productData *ProductDetail) error {
 	// Check for non-200 status codes
 	if response.StatusCode != http.StatusOK {
 		bodyBytes, _ := io.ReadAll(response.Body)
-		return fmt.Errorf("API error for %s: status %d, body: %s", productData.Url, response.StatusCode, string(bodyBytes))
+		// Log both the payload and the response body for debugging purposes
+		app.Logger.Debug("API error for %s: status %d, payload: %s, body: %s",
+			productData.Url, response.StatusCode, string(jsonPayload), string(bodyBytes))
+		return fmt.Errorf("API error for %s: status %d, body: %s",
+			productData.Url, response.StatusCode, string(bodyBytes))
 	}
 
 	return nil
