@@ -63,7 +63,6 @@ func getCategoryService(ctx ninjacrawler.CrawlerContext) string {
 func getDescriptionService(ctx ninjacrawler.CrawlerContext) string {
 	description := ""
 	descriptionDiv := ctx.Document.Find("#product-tabs-scroll").Find(".description-area-wide").Find("div").Eq(1)
-	// ctx.Document.Find("div[data-v-41f3baee]").First()
 
 	if descriptionDiv.Length() == 0 {
 		return ""
@@ -119,29 +118,32 @@ func getImagesFromJson(ctx ninjacrawler.CrawlerContext) []string {
 }
 
 func getReviewsService(ctx ninjacrawler.CrawlerContext) []string {
-	reviews := []string{}
-	reviewListMoreLink, exist := ctx.Document.Find("a.review-list-more-btn").Attr("href")
-	if !exist {
+	var reviews []string
+	reviewListMoreLink, exists := ctx.Document.Find("a.review-list-more-btn").Attr("href")
+	if !exists {
 		return reviews
 	}
 	reviewListMoreLink = ctx.App.GetFullUrl(reviewListMoreLink)
-	document, err := ctx.App.NavigateToStaticURL(ctx.App.GetHttpClient(), reviewListMoreLink, ctx.App.CurrentProxy)
-	if err != nil {
-		ctx.App.Logger.Error("reviewListMoreLink: %v", err.Error())
+	navigationContext, navErr := ctx.App.Navigate(reviewListMoreLink)
+	if navErr != nil {
+		ctx.App.Logger.Error("Error navigating to review list: %v", navErr.Error())
 		return reviews
 	}
-	document.Find(".review-list-area a").Each(func(i int, s *goquery.Selection) {
-		reviewLink, ok := s.Attr("href")
-		reviewLink = ctx.App.GetFullUrl(reviewLink)
-		if ok {
-			reviewDocument, reviewErr := ctx.App.NavigateToStaticURL(ctx.App.GetHttpClient(), reviewLink, ctx.App.CurrentProxy)
+	// Iterate through review links and process each review page
+	navigationContext.Document.Find(".review-list-area a").Each(func(i int, s *goquery.Selection) {
+		if reviewLink, ok := s.Attr("href"); ok {
+			reviewLink = ctx.App.GetFullUrl(reviewLink)
+			reviewNavigationContext, reviewErr := ctx.App.Navigate(reviewLink)
 			if reviewErr != nil {
-				ctx.App.Logger.Error("reviewLink: %v", err.Error())
+				ctx.App.Logger.Error("Error navigating to review page: %v", reviewErr.Error())
+				return
 			}
-			review := GetDescriptionText(reviewDocument.Find(".review-form-pros-area"))
+			// Extract review text from the page and append to the reviews slice
+			review := GetDescriptionText(reviewNavigationContext.Document.Find(".review-form-pros-area"))
 			reviews = append(reviews, review)
 		}
 	})
+
 	return reviews
 }
 
